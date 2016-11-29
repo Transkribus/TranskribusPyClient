@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Tests of teh TranskribusPyClient command-line utilities
+# Tests of the TranskribusPyClient command-line utilities
+#
 # JL Meunier - Nov 29th 2016
 #
 # Copyright Xerox(C) 2016 H. Déjean, JL. Meunier
@@ -30,22 +31,19 @@
 login="jean-luc.meunier@xrce.xerox.com"
 passwd="my_password was here"
 
-#some existing collection with read access
+#some existing collection with read access for you
 coldId=3571
-#2 documents, forming a small range
+#2 existing documents, forming a small range
 docId_A=7749
 docId_B=7750
 
-
 PYTHON=python
-SRC=`dirname "$0"`/../src
-
-#some valid sandbox collection
-colId=3820
 
 # ------------------------------------------------------------------------------------------------------------------------
 # ---  GENERIC STUF BELOW
 # ------------------------------------------------------------------------------------------------------------------------
+
+SRC=`dirname "$0"`/../src
 
 tmp_col_name="toto_$$"
 
@@ -59,18 +57,19 @@ function error {
 # ------------------------------------------------------------------------------------------------------------------------
 
 #---------------------------------------------------
-#cleaning
+#cleaning any persistent login info
 echo
 echo "- logout"
 tmp_col_id=`$PYTHON $SRC/TranskribusCommands/do_logout.py --persist`
 echo "OK"
 
-#bad login
+#testing a bad login
 echo
 echo "- login"
 tmp_col_id=`$PYTHON $SRC/TranskribusCommands/do_login.py --persist -l "tilla" -p "miaouuuu"` && error "login should have failed"
 echo "OK"
 
+#making a login and persisting the session token
 echo
 echo "- login"
 tmp_col_id=`$PYTHON $SRC/TranskribusCommands/do_login.py --persist -l "$login" -p "$passwd"` || error "login error"
