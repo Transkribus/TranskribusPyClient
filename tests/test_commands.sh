@@ -28,7 +28,7 @@
 
 #transkribus valid login
 login="jean-luc.meunier@xrce.xerox.com"
-passwd="trnjluc"
+passwd="my_password was here"
 
 #some existing collection with read access
 coldId=3571
