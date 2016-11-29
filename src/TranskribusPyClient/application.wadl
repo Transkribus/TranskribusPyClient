@@ -1,0 +1,511 @@
+<?xml version="1.0"?>
+<application xmlns="http://wadl.dev.java.net/2009/02">
+  <doc xmlns:jersey="http://jersey.java.net/" jersey:generatedBy="Jersey: 2.22.2 2016-02-16 13:32:17"/>
+  <doc xmlns:jersey="http://jersey.java.net/" jersey:hint="This is simplified WADL with user and core resources only. To get full WADL with extended resources use the query parameter detail. Link: https://transkribus.eu/TrpServer/rest/application.wadl?detail=true"/>
+  <grammars>
+    <include href="application.wadl/xsd0.xsd">
+      <doc title="Generated" xml:lang="en"/>
+    </include>
+  </grammars>
+  <resources base="https://transkribus.eu/TrpServer/rest/">
+    <resource path="/LA">...</resource>
+    <resource path="/search">...</resource>
+    <resource path="/files">...</resource>
+    <resource path="/jobs">...</resource>
+    <resource path="/">...</resource>
+    <resource path="/auth">
+      <resource path="/oauth">
+        <method id="loginOAuth" name="POST">
+          <request>
+            <representation mediaType="application/x-www-form-urlencoded">
+              <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="code" style="query" type="xs:string"/>
+              <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="state" style="query" type="xs:string"/>
+              <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="type" style="query" type="xs:string"/>
+              <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="prov" style="query" type="xs:string"/>
+              <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="redirect_uri" style="query" type="xs:string"/>
+            </representation>
+          </request>
+          <response>
+            <representation mediaType="application/xml"/>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/loginlist">
+        <method id="listLogins" name="GET">
+          <response>
+            <ns2:representation xmlns:ns2="http://wadl.dev.java.net/2009/02" xmlns="" element="trpUserLogin" mediaType="application/xml"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/invalidate">
+        <method id="invalidate" name="POST">
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/refresh">
+        <method id="refresh" name="POST">
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/login">
+        <method id="login" name="POST">
+          <request>
+            <representation mediaType="application/x-www-form-urlencoded">
+              <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="user" style="query" type="xs:string"/>
+              <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="pw" style="query" type="xs:string"/>
+            </representation>
+          </request>
+          <response>
+            <representation mediaType="application/xml"/>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/logout">
+        <method id="logout" name="POST">
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+    </resource>
+    <resource path="/recognition">...</resource>
+    <resource path="/user">...</resource>
+    <resource path="/admin">...</resource>
+    <resource path="/actions">...</resource>
+    <resource path="/collections">
+      <resource path="/{collId}/addDocToCollection">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <method id="addDocumentToCollection" name="POST">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="query" type="xs:int"/>
+          </request>
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/removeDocFromCollection">...</resource>
+      <resource path="/{collId}/removeUserFromCollection">...</resource>
+      <resource path="/{collId}/canManage">...</resource>
+      <resource path="/{collId}/userlist">...</resource>
+      <resource path="/{collId}/userlist/count">...</resource>
+      <resource path="/list">...</resource>
+      <resource path="/listByName">...</resource>
+      <resource path="/count">...</resource>
+      <resource path="/list.xml">...</resource>
+      <resource path="/{collId}/storeEditDeclFeat">...</resource>
+      <resource path="/{collId}/deleteEditDeclFeat">...</resource>
+      <resource path="/{collId}/count">...</resource>
+      <resource path="/{collId}/storeEditDeclOption">...</resource>
+      <resource path="/{collId}/deleteEditDeclOption">...</resource>
+      <resource path="/{collId}/listEditDeclFeats">...</resource>
+      <resource path="/{collId}/list">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <method id="listDocsByCollectionId" name="GET">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="index" style="query" type="xs:int" default="0"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="nValues" style="query" type="xs:int" default="0"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="sortColumn" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="sortDirection" style="query" type="xs:string"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/list.xml">...</resource>
+      <resource path="/{collId}/{id}/fulldoc">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <method id="getDocById" name="GET">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="nrOfTranscripts" style="query" type="xs:int" default="-1"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/{id}/fulldoc.xml">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <method id="getDocByIdAsXml" name="GET">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="nrOfTranscripts" style="query" type="xs:int" default="-1"/>
+          </request>
+          <response>
+            <representation mediaType="application/xml"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/{id}/list">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <method id="getDocMdById" name="GET">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+        <method id="updateDocMd" name="POST">
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/{id}/editorialDeclaration">...</resource>
+      <resource path="/{collId}/{id}/mets">...</resource>
+      <resource path="/{collId}/{id}">...</resource>
+      <resource path="/{collId}/upload">...</resource>
+      <resource path="/{collId}/{id}/duplicate">...</resource>
+      <resource path="/{collId}/{id}/{page}">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="page" style="template" type="xs:int"/>
+        <method id="deletePage" name="DELETE">
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+        <method id="movePage" name="POST">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="moveTo" style="query" type="xs:int"/>
+          </request>
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+        <method id="getPage" name="GET">
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/{id}/{page}/replacePage">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="page" style="template" type="xs:int"/>
+        <method id="replacePageImage" name="POST">
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/recent">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <method id="getRecentPages" name="GET">
+          <response>
+            <representation mediaType="application/xml"/>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/{id}/{page}/wordgraphs">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="page" style="template" type="xs:int"/>
+        <method id="getWordgraphs" name="GET">
+          <response>
+            <representation mediaType="application/xml"/>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/{id}/{page}/curr">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="page" style="template" type="xs:int"/>
+        <method id="getCurrTranscriptMd" name="GET">
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/{id}/{page}/list">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="page" style="template" type="xs:int"/>
+        <method id="getTranscriptMdList" name="GET">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="index" style="query" type="xs:int" default="0"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="nValues" style="query" type="xs:int" default="0"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="sortColumn" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="sortDirection" style="query" type="xs:string"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/{id}/{page}/count">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="page" style="template" type="xs:int"/>
+        <method id="countTranscriptMdList" name="GET">
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/{id}/{page}/lock">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="page" style="template" type="xs:int"/>
+        <method id="lockPage" name="POST">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="type" style="query" type="xs:boolean" default="false"/>
+          </request>
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/{id}/{page}/listLocks">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="page" style="template" type="xs:int"/>
+        <method id="listPageLocks" name="GET">
+          <response>
+            <representation mediaType="application/xml"/>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/{id}/{page}/isLocked">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="opts" style="template" type="xs:boolean" default="true"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="page" style="template" type="xs:int"/>
+        <method id="isPageLocked" name="GET">
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/{id}/{page}/transcriptId">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="transcriptId" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="page" style="template" type="xs:int"/>
+        <method id="postPageTranscript" name="POST">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="status" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="note" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="nrIsPageId" style="query" type="xs:boolean" default="false"/>
+          </request>
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/{id}/{page}/text">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="page" style="template" type="xs:int"/>
+        <method id="postPageTranscript" name="POST">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="status" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="overwrite" style="query" type="xs:boolean" default="false"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="note" style="query" type="xs:string" default=""/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="parent" style="query" type="xs:int" default="-1"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="nrIsPageId" style="query" type="xs:boolean" default="false"/>
+          </request>
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/{id}/{page}/delete">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="page" style="template" type="xs:int"/>
+        <method id="deletePageTranscript" name="POST">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="key" style="query" type="xs:string"/>
+          </request>
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/uploadFromFtp">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <method id="createDocumentFromFtp" name="POST">
+          <request>
+            <representation mediaType="text/plain"/>
+          </request>
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/ingest">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <method id="createDocumentFromPrivateFtp" name="POST">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="fileName" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="checkForDuplicateTitle" style="query" type="xs:boolean" default="true"/>
+          </request>
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/uploadMultipart">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <method id="createDocumentMultipart" name="POST">
+          <request>
+            <representation mediaType="multipart/form-data"/>
+          </request>
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/kwsSearch">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <method id="doKwsSearch" name="GET">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="text" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="confidence" style="query" type="xs:int" default="0"/>
+          </request>
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/{id}/kwsSearch">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="template" type="xs:int"/>
+        <method id="doKwsSearch" name="GET">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="text" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="confidence" style="query" type="xs:int" default="0"/>
+          </request>
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/createDocFromMetsUrl">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <method id="createDocumentFromMetsUrl" name="POST">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="fileName" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="query" type="xs:string"/>
+          </request>
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/createDocFromMets">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <method id="createDocumentFromMets" name="POST">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="query" type="xs:string"/>
+            <representation mediaType="multipart/form-data"/>
+          </request>
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/createCollection">
+        <method id="createCollection" name="POST">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collName" style="query" type="xs:string"/>
+          </request>
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/findDocuments">
+        <method id="findDocuments" name="GET">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="title" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="descr" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="author" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="writer" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="query" type="xs:int"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="query" type="xs:int"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="exactMatch" style="query" type="xs:boolean" default="true"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="caseSensitive" style="query" type="xs:boolean" default="false"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="index" style="query" type="xs:int" default="0"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="nValues" style="query" type="xs:int" default="0"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="sortColumn" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="sortDirection" style="query" type="xs:string"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/countFindDocuments">
+        <method id="countFindDocuments" name="GET">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="title" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="descr" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="author" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="writer" style="query" type="xs:string"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="query" type="xs:int"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="id" style="query" type="xs:int"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="exactMatch" style="query" type="xs:boolean" default="true"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="caseSensitive" style="query" type="xs:boolean" default="false"/>
+          </request>
+          <response>
+            <representation mediaType="application/json"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/modifyCollection">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <method id="modifyCollection" name="POST">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collName" style="query" type="xs:string"/>
+          </request>
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <method id="deleteCollection" name="DELETE">
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/deleteEmptyCollection">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <method id="deleteEmptyCollection" name="POST">
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+      <resource path="/{collId}/addOrModifyUserInCollection">
+        <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="collId" style="template" type="xs:int"/>
+        <method id="addOrModifyUserInCollection" name="POST">
+          <request>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="userid" style="query" type="xs:int"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="role" style="query" type="xs:string" default="Transcriber"/>
+            <param xmlns:xs="http://www.w3.org/2001/XMLSchema" name="sendMail" style="query" type="xs:boolean" default="true"/>
+          </request>
+          <response>
+            <representation mediaType="*/*"/>
+          </response>
+        </method>
+      </resource>
+    </resource>
+    <resource path="/structure">...</resource>
+    <resource path="/system">...</resource>
+  </resources>
+</application>
