@@ -97,7 +97,7 @@ class TranskribusDownloader(TranskribusClient):
 
         return col_max_ts, colDir
     
-    def generateCollectionMultiPageXml(self, colDir):
+    def generateCollectionMultiPageXml(self, colDir, bStrict):
         """
         We concatenate all pages into a "multi-page PageXml" for each document of the collection
         return the list of XML filenames
@@ -117,7 +117,11 @@ class TranskribusDownloader(TranskribusClient):
             lsXmlFilename.append(sXmlFilename)
 
             trace("\t\t- validating the MultiPageXml ...")
-            if not PageXml.MultiPageXml.validate(doc): raise ValueError("Invalid XML generated in '%s'"%sXmlFilename)
+            if not PageXml.MultiPageXml.validate(doc): 
+                if bStrict:
+                    raise ValueError("Invalid XML generated in '%s'"%sXmlFilename)
+                else:
+                    traceln("   *** WARNING: XML file is invalid against the schema: '%s'"%sXmlFilename)
             traceln(" Ok!")
                 
             if DEBUG>1:
@@ -167,7 +171,8 @@ if __name__ == '__main__':
     #"-s", "--server",  "-l", "--login" ,   "-p", "--pwd",   "--https_proxy"    OPTIONS
     __Trnskrbs_basic_options(parser, TranskribusDownloader.sDefaultServerUrl)
         
-    parser.add_option("-f", "--force"   , dest='force' ,  action="store_true", default=False, help="Force rewrite if disk data is obsolete")    
+    parser.add_option("-f", "--force"   , dest='bForce' ,  action="store_true", default=False, help="Force rewrite if disk data is obsolete")    
+    parser.add_option("--strict"        , dest='bStrict',  action="store_true", default=False, help="Failed schema validation stops the processus.")    
 
     # --- 
     #parse the command line
@@ -189,13 +194,13 @@ if __name__ == '__main__':
     trnkbs2ds = TranskribusDownloader(options.server, proxies, loggingLevel=logging.INFO)
     __Trnskrbs_do_login_stuff(trnkbs2ds, options, trace=trace, traceln=traceln)
     
-    traceln("- Downloading collection %s to folder %s"%(colid, destDir))
-    col_ts, colDir = trnkbs2ds.downloadCollection(colid, destDir, bForce=options.force)
+    traceln("- Downloading collection %s to folder %s"%(colid, os.path.abspath(destDir)))
+    col_ts, colDir = trnkbs2ds.downloadCollection(colid, destDir, bForce=options.bForce)
     traceln("- Done")
     
-    with open(os.path.join(colDir, "config.txt"), "w") as fd: fd.write("server=%s\nbForce=%s\n"%(options.server, options.force))
+    with open(os.path.join(colDir, "config.txt"), "w") as fd: fd.write("server=%s\nforce=%s\nstrict=%s\n"%(options.server, options.bForce, options.bStrict))
     
-    trnkbs2ds.generateCollectionMultiPageXml(os.path.join(colDir, "col"))
+    trnkbs2ds.generateCollectionMultiPageXml(os.path.join(colDir, "col"), options.bStrict)
     
     traceln('- Done, see in %s'%colDir)
     
