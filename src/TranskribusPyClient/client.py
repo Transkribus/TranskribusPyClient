@@ -342,7 +342,7 @@ class TranskribusClient():
         # requests.exceptions.HTTPError: 500 Server Error: Internal Server Error for url: https://transkribus.eu/TrpServer/rest/collections/3820/addDocToCollection?id=66666
         return True
         
-    def download_collection(self, colId, collDir, bForce=False):        
+    def download_collection(self, colId, collDir, bForce=False, bNoImage=False):        
         """
         Convenience method, not provided directly by the Transkribus API.
         
@@ -351,7 +351,8 @@ class TranskribusClient():
         Both the XML and images are fetched from the server. 
         
         The destination folder is created if required.
-        It also creates 1 sub-folder per document in the collection. If the folder exists, raise an exception, unless bForce is True in which case, the folder is removed and recreated.
+        It also creates 1 sub-folder per document in the collection. 
+        If the folder exists, raise an exception, unless bForce is True in which case, the folder is removed and recreated.
         
         Return the maximum timestamp over all pages of the collection.
         """
@@ -377,7 +378,7 @@ class TranskribusClient():
             else:
                 stored_doc_ts = None    
                             
-            doc_max_ts = self.download_document(colId, docId, docDir, min_ts=stored_doc_ts, bForce=bForce)
+            doc_max_ts = self.download_document(colId, docId, docDir, min_ts=stored_doc_ts, bForce=bForce, bNoImage=bNoImage)
             
             assert doc_max_ts >= stored_doc_ts, "Server side data older than disk data???"
             if doc_max_ts == stored_doc_ts:
@@ -392,7 +393,7 @@ class TranskribusClient():
         return coll_max_ts
         
 
-    def download_document(self, colId, docId, docDir, min_ts=None, bForce=False):        
+    def download_document(self, colId, docId, docDir, min_ts=None, bForce=False, bNoImage=False):        
         """
         Convenience method, not provided directly by the Transkribus API.
         
@@ -442,12 +443,13 @@ class TranskribusClient():
             urlXml = dicTranscript0['url']
             
             #Now store the image and pageXml
-            destImgFilename = docDir + os.sep + imgFileName
-            logging.info("\t\t\t%s"%destImgFilename)
-            resp = self.GET(urlImage, stream=True)
-            with open(destImgFilename, 'wb') as fd:
-                for chunk in resp.iter_content(10240):
-                    fd.write(chunk)                
+            if not bNoImage:
+                destImgFilename = docDir + os.sep + imgFileName
+                logging.info("\t\t\t%s"%destImgFilename)
+                resp = self.GET(urlImage, stream=True)
+                with open(destImgFilename, 'wb') as fd:
+                    for chunk in resp.iter_content(10240):
+                        fd.write(chunk)                
             sBaseName, _ = os.path.splitext(imgFileName)
             destXmlFilename = docDir + os.sep + sBaseName + ".pxml"
             logging.info("\t\t\t%s"%destXmlFilename)

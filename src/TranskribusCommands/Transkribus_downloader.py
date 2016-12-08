@@ -67,11 +67,12 @@ class TranskribusDownloader(TranskribusClient):
         TranskribusClient.__init__(self, sServerUrl=trnkbsServerUrl, proxies=sHttpProxy, loggingLevel=loggingLevel)
         
 
-    def downloadCollection(self, colId, destDir, bForce=False):
+    def downloadCollection(self, colId, destDir, bForce=False, bNoImage=False):
         """
         Here, we create the appropriate structure and fetch either the whole collection or one document and convert this to DS XML
-        
-        The input parameter is useless. (this is not a proper 'Component'
+
+        if bForce==True, data on disk is overwritten, otherwise raise an exception is some data is there already
+        if bNoImage==True, do not download the images
         """
         if not( os.path.exists(destDir) and os.path.isdir(destDir) ):
             raise ValueError("Non-existing destination folder"%destDir)
@@ -92,7 +93,7 @@ class TranskribusDownloader(TranskribusClient):
             else:
                 os.mkdir(sDir)
 
-        col_max_ts = self.download_collection(colId, os.path.join(colDir,"col"), bForce)
+        col_max_ts = self.download_collection(colId, os.path.join(colDir,"col"), bForce, bNoImage)
         with open(destDir+os.sep+"col"+TranskribusClient.POSTFIX_MAX_TX, "w") as fd: fd.write("%s"%col_max_ts) #"col_max.ts" file
 
         return col_max_ts, colDir
@@ -173,6 +174,7 @@ if __name__ == '__main__':
         
     parser.add_option("-f", "--force"   , dest='bForce' ,  action="store_true", default=False, help="Force rewrite if disk data is obsolete")    
     parser.add_option("--strict"        , dest='bStrict',  action="store_true", default=False, help="Failed schema validation stops the processus.")    
+    parser.add_option("--noimage"       , dest='bNoImage', action="store_true", default=False, help="Do not download images.")    
 
     # --- 
     #parse the command line
@@ -195,7 +197,7 @@ if __name__ == '__main__':
     __Trnskrbs_do_login_stuff(trnkbs2ds, options, trace=trace, traceln=traceln)
     
     traceln("- Downloading collection %s to folder %s"%(colid, os.path.abspath(destDir)))
-    col_ts, colDir = trnkbs2ds.downloadCollection(colid, destDir, bForce=options.bForce)
+    col_ts, colDir = trnkbs2ds.downloadCollection(colid, destDir, bForce=options.bForce, bNoImage=options.bNoImage)
     traceln("- Done")
     
     with open(os.path.join(colDir, "config.txt"), "w") as fd: fd.write("server=%s\nforce=%s\nstrict=%s\n"%(options.server, options.bForce, options.bStrict))
