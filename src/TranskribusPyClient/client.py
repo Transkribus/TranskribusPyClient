@@ -135,6 +135,7 @@ class TranskribusClient():
         self.sREQ_collection_createCollection       = sServerUrl + '/rest/collections/createCollection'
         self.sREQ_collection_fulldoc                = sServerUrl + '/rest/collections/%s/%s/fulldoc'
         self.sREQ_collection_fulldoc_xml            = sServerUrl + '/rest/collections/%s/%s/fulldoc.xml'
+        self.sREQ_collections_postPageTranscript    = sServerUrl + '/rest/collections/%s/%s/%s/text'
         self.sREQ_collections_addDocToCollection    = sServerUrl + '/rest/collections/%s/addDocToCollection'
         self.sREQ_collections_duplicate             = sServerUrl + '/rest/collections/%s/%s/duplicate'
 #         self.sREQ_GetPAGEXML        = sServerUrl + '/rest/collections/%s/%s/%s'
@@ -276,7 +277,7 @@ class TranskribusClient():
         """
         self._assertLoggedIn()
         myReq = self.sREQ_collection_fulldoc_xml % (colId,docId)
-        params = self._buidlParamsDic(nrOfTranscripts=None)
+        params = self._buidlParamsDic(nrOfTranscripts=nrOfTranscripts)
         resp = self.GET(myReq, params=params)
         resp.raise_for_status()
        
@@ -286,6 +287,32 @@ class TranskribusClient():
         else:     
             return resp.text
 
+    def collections_postPageTranscript(self, colId, docId, pnum, sStatus, sXMlTranscript
+                                       , bOverwrite=None
+                                       , sNote=None
+                                       , parentId=None
+                                       , bPnumIsPageId=None):
+        """
+        Post a new transcript for a page
+        
+    public Response postPageTranscript(@PathParam(RESTConst.COLLECTION_ID_PARAM) int colId, 
+            @PathParam(RESTConst.DOC_ID_PARAM) int docId,
+            @PathParam(RESTConst.PAGE_NR_PARAM) int pageNr, 
+            PcGtsType page,
+            @QueryParam(RESTConst.STATUS_PARAM) String statusParam, 
+            @DefaultValue("false") @QueryParam(RESTConst.OVERWRITE_PARAM) boolean overwrite, 
+            @DefaultValue("") @QueryParam(RESTConst.NOTE_PARAM) String noteParam,
+            @DefaultValue("-1") @QueryParam(RESTConst.PARENT_ID_PARAM) int parentParam,
+            @DefaultValue("false")@QueryParam("nrIsPageId") boolean nrIsPageId,
+            @Context HttpServletRequest req) {
+        """
+        self._assertLoggedIn()
+        myReq = self.sREQ_collections_postPageTranscript % (colId,docId,pnum)
+        params = self._buidlParamsDic(status=sStatus, overwrite=bOverwrite, note=sNote, parent=parentId, nrIsPageId=bPnumIsPageId)
+        resp = self.POST(myReq, params=params, data=sXMlTranscript)
+        resp.raise_for_status()
+        return resp.text
+    
     def collections_addDocToCollection(self, colId, docId):
         """
         Add document docId to collection colId   (this is not a copy!!)
