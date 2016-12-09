@@ -32,18 +32,18 @@ DEBUG = 0
 
 import sys, os, logging
 
+from optparse import OptionParser
+import glob
+
 try: #to ease the use without proper Python installation
     import TranskribusPyClient_version
 except ImportError:
     sys.path.append( os.path.dirname(os.path.dirname( os.path.abspath(sys.argv[0]) )) )
     import TranskribusPyClient_version
 
-from optparse import OptionParser
-import glob
-
 from common.trace import traceln, trace
 
-from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit
+from TranskribusCommands import sCOL, sMPXMLExtension, _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit
 from TranskribusPyClient.client import TranskribusClient
 
 try:
@@ -86,15 +86,15 @@ class TranskribusDownloader(TranskribusClient):
             traceln('- creating folder: %s'%colDir)
             os.mkdir(colDir)
 
-        for sSubDir in ["col", "xml", "ref", "run", "out"]:
+        for sSubDir in [sCOL, "xml", "ref", "run", "out"]:
             sDir = os.path.join(colDir, sSubDir)
             if os.path.exists(sDir):
                 if not os.path.isdir(sDir): raise ValueError("%s exists and is not a folder."%sDir)
             else:
                 os.mkdir(sDir)
 
-        col_max_ts = self.download_collection(colId, os.path.join(colDir,"col"), bForce, bNoImage)
-        with open(destDir+os.sep+"col"+TranskribusClient.POSTFIX_MAX_TX, "w") as fd: fd.write("%s"%col_max_ts) #"col_max.ts" file
+        col_max_ts = self.download_collection(colId, os.path.join(colDir,sCOL), bForce, bNoImage)
+        with open(destDir+os.sep+sCOL+TranskribusClient.POSTFIX_MAX_TX, "w") as fd: fd.write("%s"%col_max_ts) #"col_max.ts" file
 
         return col_max_ts, colDir
     
@@ -113,7 +113,7 @@ class TranskribusDownloader(TranskribusClient):
             
             doc = self.makeMultiPageXml(docDir)
 
-            sXmlFilename = docDir+".mpxml"
+            sXmlFilename = docDir+sMPXMLExtension
             self.writeDom(doc, sXmlFilename, True)
             lsXmlFilename.append(sXmlFilename)
 
@@ -202,7 +202,7 @@ if __name__ == '__main__':
     
     with open(os.path.join(colDir, "config.txt"), "w") as fd: fd.write("server=%s\nforce=%s\nstrict=%s\n"%(options.server, options.bForce, options.bStrict))
     
-    trnkbs2ds.generateCollectionMultiPageXml(os.path.join(colDir, "col"), options.bStrict)
+    trnkbs2ds.generateCollectionMultiPageXml(os.path.join(colDir, sCOL), options.bStrict)
     
     traceln('- Done, see in %s'%colDir)
     

@@ -297,7 +297,8 @@ class TranskribusClient():
                                        , bOverwrite=None
                                        , sNote=None
                                        , parentId=None
-                                       , bPnumIsPageId=None):
+                                       , bPnumIsPageId=None
+                                       , bEncoded=False):  #bEncoded is not part of official API, it is a convenience for Pythonic API
         """
         Post a new transcript for a page
         sXmlTranscript is a Python Unicode string
@@ -329,10 +330,13 @@ class TranskribusClient():
             </trpTranscriptMetadata>
         """
         self._assertLoggedIn()
-        self._assertUnicode(sXMlTranscript)
+        if not bEncoded: self._assertUnicode(sXMlTranscript)
         myReq = self.sREQ_collections_postPageTranscript % (colId,docId,pnum)
         params = self._buidlParamsDic(overwrite=bOverwrite, note=sNote, parent=parentId, nrIsPageId=bPnumIsPageId)
-        resp = self.POST(myReq, params=params, data=sXMlTranscript.encode(utf8))
+        if bEncoded:
+            resp = self.POST(myReq, params=params, data=sXMlTranscript)
+        else:
+            resp = self.POST(myReq, params=params, data=sXMlTranscript.encode(utf8))
         resp.raise_for_status()
         return resp.text
     
@@ -718,11 +722,13 @@ class TranskribusClient():
     def xmlFreeDoc(self, doc):
         return doc.freeDoc()
     
-    def xpathEval(self, domDoc, sXpathExpr):
+    def xpathEval(self, domDoc, sXpathExpr, dNS=None):
         """
         run some XPATH expression on the dom
         """
         ctxt = domDoc.xpathNewContext()
+        if dNS:
+            for ns, nsurl in dNS.items(): ctxt.xpathRegisterNs(ns, nsurl)
         ret = ctxt.xpathEval(sXpathExpr)
         ctxt.xpathFreeContext()
         return ret

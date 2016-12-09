@@ -20,6 +20,11 @@ _Trnskrbs_description = u"""Pass your login/password as options otherwise consid
  To use HTTP Basic Auth with your proxy, use the http://user:password@host/ syntax.
  """
 
+sCOL = "col"
+sMPXMLExtension = ".mpxml"
+
+NS_PAGE_XML         = "http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15"
+
 def __Trnskrbs_basic_options(parser, sDefaultServerUrl):
     """
     UTILITY
