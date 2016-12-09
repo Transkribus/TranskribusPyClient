@@ -140,7 +140,7 @@ Extract the page transcript from the MultiPageXml (not from the single page Page
         sColDSDir = os.path.abspath(os.path.join(sDSDir, sCOL))
     else:
         sColDSDir = os.path.abspath(sDSDir)
-    if not( os.path.exists(sColDSDir) and os.path.isdir(sDSDir) ):
+    if not( os.path.exists(sColDSDir) and os.path.isdir(sColDSDir) ):
         raise ValueError("Non-existing folder"%sColDSDir)
     traceln("- Transcript will be taken from %s file(s) from: %s"%(sTRANSCRIPT_EXTENSION, sColDSDir))    
         
