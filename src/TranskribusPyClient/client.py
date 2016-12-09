@@ -37,6 +37,7 @@ import cPickle
 
 import libxml2
 
+utf8="utf-8"
 
 def getStoredCredentials(bAsk=False):
     login, pwd = None, None
@@ -287,29 +288,51 @@ class TranskribusClient():
         else:     
             return resp.text
 
-    def collections_postPageTranscript(self, colId, docId, pnum, sStatus, sXMlTranscript
+#     def collections_postPageTranscript(self, colId, docId, pnum, sStatus, sXMlTranscript
+#     the status parameter when saving a transcript is becoming obsolete anyway (updating the status should be done with a separate call in the future: updatePageStatus).
+# You should be fine by setting it to null, i.e. completely omitting this parameter. If you want to use it, then try NEW, IN_PROGRESS, DONE, FINAL as values (cf.
+# https://github.com/Transkribus/TranskribusCore/blob/master/src/main/java/eu/transkribus/core/model/beans/enums/EditStatus.java)
+
+    def collections_postPageTranscript(self, colId, docId, pnum, sXMlTranscript
                                        , bOverwrite=None
                                        , sNote=None
                                        , parentId=None
                                        , bPnumIsPageId=None):
         """
         Post a new transcript for a page
+        sXmlTranscript is a Python Unicode string
         
-    public Response postPageTranscript(@PathParam(RESTConst.COLLECTION_ID_PARAM) int colId, 
-            @PathParam(RESTConst.DOC_ID_PARAM) int docId,
-            @PathParam(RESTConst.PAGE_NR_PARAM) int pageNr, 
-            PcGtsType page,
-            @QueryParam(RESTConst.STATUS_PARAM) String statusParam, 
-            @DefaultValue("false") @QueryParam(RESTConst.OVERWRITE_PARAM) boolean overwrite, 
-            @DefaultValue("") @QueryParam(RESTConst.NOTE_PARAM) String noteParam,
-            @DefaultValue("-1") @QueryParam(RESTConst.PARENT_ID_PARAM) int parentParam,
-            @DefaultValue("false")@QueryParam("nrIsPageId") boolean nrIsPageId,
-            @Context HttpServletRequest req) {
+        return a serialized XMl like:
+            <?xml version="1.0" encoding="UTF-8" standalone="yes"?><trpTranscriptMetadata><tsId>424778</tsId><parentTsId>-1</parentTsId><key>IXQDKIMHCKSJAAVUZLWMIKRV</key><pageId>252384</pageId><docId>8255</docId><pageNr>1</pageNr><url>https://dbis-thure.uibk.ac.at/f/Get?id=IXQDKIMHCKSJAAVUZLWMIKRV</url><status>IN_PROGRESS</status><userName>jean-luc.meunier@xrce.xerox.com</userName><userId>3556</userId><timestamp>1481281786096</timestamp><md5Sum></md5Sum><nrOfRegions>4</nrOfRegions><nrOfTranscribedRegions>3</nrOfTranscribedRegions><nrOfWordsInRegions>131</nrOfWordsInRegions><nrOfLines>41</nrOfLines><nrOfTranscribedLines>40</nrOfTranscribedLines><nrOfWordsInLines>168</nrOfWordsInLines><nrOfWords>0</nrOfWords><nrOfTranscribedWords>0</nrOfTranscribedWords></trpTranscriptMetadata>
+            
+            <trpTranscriptMetadata>
+                <tsId>424778</tsId>
+                <parentTsId>-1</parentTsId>
+                <key>IXQDKIMHCKSJAAVUZLWMIKRV</key>
+                <pageId>252384</pageId>
+                <docId>8255</docId>
+                <pageNr>1</pageNr>
+                <url>https://dbis-thure.uibk.ac.at/f/Get?id=IXQDKIMHCKSJAAVUZLWMIKRV</url>
+                <status>IN_PROGRESS</status>
+                <userName>jean-luc.meunier@xrce.xerox.com</userName>
+                <userId>3556</userId>
+                <timestamp>1481281786096</timestamp>
+                <md5Sum/>
+                <nrOfRegions>4</nrOfRegions>
+                <nrOfTranscribedRegions>3</nrOfTranscribedRegions>
+                <nrOfWordsInRegions>131</nrOfWordsInRegions>
+                <nrOfLines>41</nrOfLines>
+                <nrOfTranscribedLines>40</nrOfTranscribedLines>
+                <nrOfWordsInLines>168</nrOfWordsInLines>
+                <nrOfWords>0</nrOfWords>
+                <nrOfTranscribedWords>0</nrOfTranscribedWords>
+            </trpTranscriptMetadata>
         """
         self._assertLoggedIn()
+        self._assertUnicode(sXMlTranscript)
         myReq = self.sREQ_collections_postPageTranscript % (colId,docId,pnum)
-        params = self._buidlParamsDic(status=sStatus, overwrite=bOverwrite, note=sNote, parent=parentId, nrIsPageId=bPnumIsPageId)
-        resp = self.POST(myReq, params=params, data=sXMlTranscript)
+        params = self._buidlParamsDic(overwrite=bOverwrite, note=sNote, parent=parentId, nrIsPageId=bPnumIsPageId)
+        resp = self.POST(myReq, params=params, data=sXMlTranscript.encode(utf8))
         resp.raise_for_status()
         return resp.text
     
@@ -351,7 +374,7 @@ class TranskribusClient():
                     break
             if name == -1: raise Exception("Document '%d' is not in source collection '%d'"%(docId, colIdFrom))
         self._assertString(name, "name")            
-        resp = self.POST(myReq, {'name':name, 'collId':colIdTo} )
+        resp = self.POST(myReq, {'name':name.encode(utf8), 'collId':colIdTo} )
         """
     NO WAY TO GET THE CREATED ID???
         print resp.headers
@@ -690,7 +713,7 @@ class TranskribusClient():
         """
         Parse a serialized XML and return a DOM, which the caller must free later on!
         """
-        return libxml2.parseDoc(sXml.encode('utf-8'))
+        return libxml2.parseDoc(sXml.encode(utf8))
     
     def xmlFreeDoc(self, doc):
         return doc.freeDoc()
@@ -737,12 +760,16 @@ class TranskribusClient():
             self._raiseError(Exception, "Not logged in!")
     
     def _assertDict(self, obj, sObjName=""):
-        if not type(obj) == types.DictionaryType: 
+        if type(obj) != types.DictionaryType: 
             return self._raiseError(TypeError, "%s must be a dictionary."%sObjName)
         
     def _assertString(self, obj, sObjName=""):
         if type(obj) not in [types.StringType, types.UnicodeType]: 
-            return self._raiseError(TypeError, "%s must be a string. Got '%s'"%(sObjName,`obj`))
+            return self._raiseError(TypeError, "%s must be a string or Unicode string. Got '%s'"%(sObjName,`obj`))
+
+    def _assertUnicode(self, obj, sObjName=""):
+        if type(obj) != types.UnicodeType: 
+            return self._raiseError(TypeError, "%s must be a Unicode string. Got '%s'"%(sObjName,`obj`))
         
         
         

@@ -28,8 +28,7 @@ print sessionID
 #sessionID = conn.auth_login("jean-luc.meunier@xrce.xerox.com", "trnjluc", sHttpsProxyUrl='http://cornillon:8000')
 
 
-sXml = """
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+sXml = u"""<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15/pagecontent.xsd">
     <Metadata>
         <Creator>TRP</Creator>
@@ -397,10 +396,12 @@ seyn. Dieser Beschluß wird auch</Unicode>
 </PcGts>
 
 """
+import types
+assert type(sXml) == types.UnicodeType
 # ret = conn.getDocumentFromServer(colid, docid)
 #ret = conn.getDocumentFromServer("3571", "7750")
 #data = conn.collections_postPageTranscript(3989, 8255, 1, "New", sXml, sNote="test by JL")
-data = conn.collections_postPageTranscript(3989, 8255, 1, 0, sXml)
+data = conn.collections_postPageTranscript(3989, 8255, 1, sXml)
 print data
 
 
@@ -409,6 +410,30 @@ conn.setProxies({'https':'http://cornillon:8000'})
 print conn.auth_logout()
 
 """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><trpTranscriptMetadata><tsId>424778</tsId><parentTsId>-1</parentTsId><key>IXQDKIMHCKSJAAVUZLWMIKRV</key><pageId>252384</pageId><docId>8255</docId><pageNr>1</pageNr><url>https://dbis-thure.uibk.ac.at/f/Get?id=IXQDKIMHCKSJAAVUZLWMIKRV</url><status>IN_PROGRESS</status><userName>jean-luc.meunier@xrce.xerox.com</userName><userId>3556</userId><timestamp>1481281786096</timestamp><md5Sum></md5Sum><nrOfRegions>4</nrOfRegions><nrOfTranscribedRegions>3</nrOfTranscribedRegions><nrOfWordsInRegions>131</nrOfWordsInRegions><nrOfLines>41</nrOfLines><nrOfTranscribedLines>40</nrOfTranscribedLines><nrOfWordsInLines>168</nrOfWordsInLines><nrOfWords>0</nrOfWords><nrOfTranscribedWords>0</nrOfTranscribedWords></trpTranscriptMetadata>
+
+<trpTranscriptMetadata>
+    <tsId>424778</tsId>
+    <parentTsId>-1</parentTsId>
+    <key>IXQDKIMHCKSJAAVUZLWMIKRV</key>
+    <pageId>252384</pageId>
+    <docId>8255</docId>
+    <pageNr>1</pageNr>
+    <url>https://dbis-thure.uibk.ac.at/f/Get?id=IXQDKIMHCKSJAAVUZLWMIKRV</url>
+    <status>IN_PROGRESS</status>
+    <userName>jean-luc.meunier@xrce.xerox.com</userName>
+    <userId>3556</userId>
+    <timestamp>1481281786096</timestamp>
+    <md5Sum/>
+    <nrOfRegions>4</nrOfRegions>
+    <nrOfTranscribedRegions>3</nrOfTranscribedRegions>
+    <nrOfWordsInRegions>131</nrOfWordsInRegions>
+    <nrOfLines>41</nrOfLines>
+    <nrOfTranscribedLines>40</nrOfTranscribedLines>
+    <nrOfWordsInLines>168</nrOfWordsInLines>
+    <nrOfWords>0</nrOfWords>
+    <nrOfTranscribedWords>0</nrOfTranscribedWords>
+</trpTranscriptMetadata>
 """
 
 
