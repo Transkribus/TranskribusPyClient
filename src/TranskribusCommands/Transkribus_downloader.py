@@ -174,7 +174,7 @@ if __name__ == '__main__':
         
     parser.add_option("-f", "--force"   , dest='bForce' ,  action="store_true", default=False, help="Force rewrite if disk data is obsolete")    
     parser.add_option("--strict"        , dest='bStrict',  action="store_true", default=False, help="Failed schema validation stops the processus.")    
-    parser.add_option("--noimage"       , dest='bNoImage', action="store_true", default=False, help="Do not download images.")    
+    parser.add_option("--noimage", "--noImage", dest='bNoImage', action="store_true", default=False, help="Do not download images.")    
 
     # --- 
     #parse the command line
