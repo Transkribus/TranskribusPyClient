@@ -193,7 +193,7 @@ if __name__ == '__main__':
         destDir = "."
 
     # --- 
-    trnkbs2ds = TranskribusDownloader(options.server, proxies, loggingLevel=logging.INFO)
+    trnkbs2ds = TranskribusDownloader(options.server, proxies, loggingLevel=logging.WARN)
     __Trnskrbs_do_login_stuff(trnkbs2ds, options, trace=trace, traceln=traceln)
     
     traceln("- Downloading collection %s to folder %s"%(colid, os.path.abspath(destDir)))

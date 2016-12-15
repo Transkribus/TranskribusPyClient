@@ -42,7 +42,7 @@ except ImportError:
     sys.path.append( os.path.dirname(os.path.dirname( os.path.abspath(sys.argv[0]) )) )
     import TranskribusPyClient_version
 
-from common.trace import traceln, trace
+from common.trace import traceln, trace, flush
 
 from TranskribusCommands import NS_PAGE_XML, sCOL, sMPXMLExtension, _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit
 from TranskribusPyClient.client import TranskribusClient
@@ -100,10 +100,16 @@ class TranskribusTranscriptUploader(TranskribusClient):
         sDocFilename = os.path.join(sColDSDir, str(docid)+sTranscripExt)
         doc = libxml2.parseFile(sDocFilename)
 
-        for pnum, pageDoc in PageXml.MultiPageXml.iter_splitMultiPageXml(doc, bInPlace=True):
+        if iVerbose > 1: traceln("\t%6s %s"%(docid, sDocFilename))
+        for pnum, pageDoc in PageXml.MultiPageXml._iter_splitMultiPageXml(doc, bInPlace=True):
             #dump the new XML into a file in target folder
+            if iVerbose > 1:
+                if pnum%10 == 0: trace(" %d "%pnum) 
+                else: trace(".")
+                flush()
             sXMlTranscript = pageDoc.serialize("utf-8", True)
             self.collections_postPageTranscript(colid, docid, pnum, sXMlTranscript, bEncoded=True)
+        if iVerbose > 1: traceln("")
         
         doc.freeDoc()
         
@@ -126,13 +132,18 @@ Extract the page transcript from the MultiPageXml (not from the single page Page
     #"-s", "--server",  "-l", "--login" ,   "-p", "--pwd",   "--https_proxy"    OPTIONS
     __Trnskrbs_basic_options(parser, TranskribusTranscriptUploader.sDefaultServerUrl)
         
-    parser.add_option("--strict"        , dest='bStrict',  action="store_true", default=False, help="Failed schema validation stops the processus.")    
+    parser.add_option("--strict", dest='bStrict',  action="store_true", default=False, help="Failed schema validation stops the processus.")    
+    parser.add_option("--nodu"  , dest='bNoDU',  action="store_true", default=False, help="Upload the non-DU transcript (the .mpxml one)")    
+    parser.add_option("-q", "--quiet"  , dest='bQuiet',  action="store_true", default=False, help="Quiet mode")    
 
     # --- 
     #parse the command line
     (options, args) = parser.parse_args()
     proxies = {} if not options.https_proxy else {'https_proxy':options.https_proxy}
 
+    if options.bNoDU:
+        sTRANSCRIPT_EXTENSION = sMPXMLExtension
+    iVerbose = 0 if options.bQuiet else 2
     # --- 
     try:    sDSDir = args.pop(0)
     except: _exit(usage, 1)
@@ -151,13 +162,13 @@ Extract the page transcript from the MultiPageXml (not from the single page Page
     except: docid = None
     
     # --- 
-    doer = TranskribusTranscriptUploader(options.server, proxies, loggingLevel=logging.INFO)
+    doer = TranskribusTranscriptUploader(options.server, proxies, loggingLevel=logging.WARN)
     __Trnskrbs_do_login_stuff(doer, options, trace=trace, traceln=traceln)
     
     if docid == None:
-        doer.uploadCollectionTranscript(colid, sColDSDir, sTranscripExt=sTRANSCRIPT_EXTENSION, iVerbose=1)
+        doer.uploadCollectionTranscript(colid, sColDSDir, sTranscripExt=sTRANSCRIPT_EXTENSION, iVerbose=iVerbose)
     else:
-        doer.uploadDocumentTranscript(colid, docid, sColDSDir, sTranscripExt=sTRANSCRIPT_EXTENSION, iVerbose=1)
+        doer.uploadDocumentTranscript(colid, docid, sColDSDir, sTranscripExt=sTRANSCRIPT_EXTENSION, iVerbose=iVerbose)
         
     
     traceln('- DONE, all transcripts were uploaded. See in collection %s'%colid)
