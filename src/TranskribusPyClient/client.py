@@ -139,6 +139,11 @@ class TranskribusClient():
         self.sREQ_collections_postPageTranscript    = sServerUrl + '/rest/collections/%s/%s/%s/text'
         self.sREQ_collections_addDocToCollection    = sServerUrl + '/rest/collections/%s/addDocToCollection'
         self.sREQ_collections_duplicate             = sServerUrl + '/rest/collections/%s/%s/duplicate'
+
+        self.sREQ_recognition                       = sServerUrl + '/rest/recognition'
+        self.sREQ_recognition_htrModels             = sServerUrl + '/rest/recognition/htrModels'
+        self.sREQ_recognition_htr                   = sServerUrl + '/rest/recognition/htr'
+        
 #         self.sREQ_GetPAGEXML        = sServerUrl + '/rest/collections/%s/%s/%s'
 #         self.sREQ_PostPAGEXML       = sServerUrl + '/rest/collections/%s/%s/%s/text'
 
@@ -561,15 +566,28 @@ class TranskribusClient():
 #             savefile.write(res.text)
 # 
 #         
-
+    def recognition_htrModels(self):
+        """
+        List the HTR models
+        Return the Transkribus data structure (Pythonic data) 
+        or raise an exception
+        
+        Undocumented parameters, sorry.
+        """
+        self._assertLoggedIn()
+        myReq = self.sREQ_recognition_htrModels
+        resp = self.GET(myReq, accept="application/json")
+        resp.raise_for_status()
+        #we get some json serialized data
+        return json.loads(resp.text)
         
     # --- Session Utilities --- ----------------------------------------------------------------
+    @classmethod
     def getStoredCredentials(cls, bAsk=False):
         """
         alias for module function
         """
         return getStoredCredentials(bAsk)
-    getStoredCredentials = classmethod(getStoredCredentials)
     
     def getSessionId(self):
         """
@@ -687,7 +705,7 @@ class TranskribusClient():
         
     def POST(self, sRequest, params={}, data={}, bAppXml=True):
         dHeader = {'Cookie':'JSESSIONID=%s'%self._sessionID}
-        if bAppXml: dHeader['Content-type'] = 'application/xml'
+        if bAppXml: dHeader['Content-Type'] = 'application/xml'
             
         return requests.post(sRequest, params=params, headers=dHeader
                              , proxies=self._dProxies, data=data, verify=False)        
@@ -696,12 +714,12 @@ class TranskribusClient():
         return requests.delete(sRequest, params=params, headers={'Cookie':'JSESSIONID=%s'%self._sessionID}
                                , proxies=self._dProxies, data=data, verify=False)        
         
-    def GET(self, sRequest, params={}, stream=None):
+    def GET(self, sRequest, params={}, stream=None, accept="application/xml"):
         if stream == None: #not sure what is the default value...
-            return requests.get(sRequest, params=params, headers={'Cookie':'JSESSIONID=%s'%self._sessionID, 'Content-type':'application/xml'}
+            return requests.get(sRequest, params=params, headers={'Cookie':'JSESSIONID=%s'%self._sessionID, 'Accept':accept}
                                 , proxies=self._dProxies, verify=False)
         else:
-            return requests.get(sRequest, params=params, headers={'Cookie':'JSESSIONID=%s'%self._sessionID, 'Content-type':'application/xml'}
+            return requests.get(sRequest, params=params, headers={'Cookie':'JSESSIONID=%s'%self._sessionID, 'Accept':accept}
                                 , proxies=self._dProxies, verify=False, stream=stream)
             
 

@@ -79,3 +79,33 @@ def _exit(usage, status, exc=None):
     if usage: sys.stderr.write("ERROR: usage : %s\n"%usage)
     if exc != None: sys.stderr.write(str(exc))  #any exception?
     sys.exit(status)    
+    
+    
+def strTabularFormat(lDic, lsKey, sSortKey=None):
+    """
+    Format as a table a list of dictionary like:
+        [
+            {
+                "modelName": "Marine_Lives",
+                "nrOfTokens": 0,
+                "isUsableInTranskribus": 1,
+                "nrOfDictTokens": 0,
+                "nrOfLines": 0,
+                "modelId": 45
+            },
+         ...       
+    Show only keys listed in lsKey
+    if given, sSortKey is used to sort the lines of the table.
+    return a string
+    """
+    if sSortKey: lDic.sort(key=lambda x: x[sSortKey])
+    #computing column width
+    lWidth = [1] * len(lsKey)
+    for i, k in enumerate(lsKey): lWidth[i] = max(len(k), *[len(str(v[k])) for v in lDic])
+    sFmt = "|".join(["%%(%s)%ds"%(name,k) for name, k in zip(lsKey, lWidth)])  #something like "%(modelName)25s %(modelId)13s ..."
+    sFmt = sFmt + "\n"
+    sRet = sFmt%{k:k for k in lsKey}    #table header
+    sRet += sFmt % {s:("-"*n) for s,n in zip(lsKey, lWidth)}
+    for record in lDic: sRet += sFmt % record
+    return sRet
+ 
