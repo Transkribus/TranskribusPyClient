@@ -523,49 +523,7 @@ class TranskribusClient():
         return doc_max_ts
 
     # --------------------------------------------------------------------------------------------------------------
-
-#     def getDocumentFromServer(self, colid, docId):
-#         """
-#             get XML doc: 
-#                 then for each page:
-#                     get pagexml
-#                     get image?
-#                 
-#             generate structure a la Transkribus export
-#                 FOLDER
-#                     pages/ (pageXML file one per per)
-#                     Images (one per per)
-#         """
-#         import trpDoc
-#     
-#         print colid, docId
-# #         sessionID = self.RESTLogin()
-# #         print sessionID
-#     
-#         myReq = self.sREQ_collection_fulldoc % (colid,docId)
-# #         print myReq
-#         res = self.GET(myReq)
-#         print res
-#         print res.status_code
-#         print type(res.status_code)
-#         print  dir(res)
-# #         print res.text
-#         myJSONTrpDoc = trpDoc.getJSONPages(res.text)
-# #         return myJSONTrpDoc
-#     
-#         for docName,imgFileName,pagenum,url,lTx in myJSONTrpDoc:
-#             print (docName,imgFileName,pagenum,url,lTx)
-#             if not os.path.exists(docName):
-#                 os.mkdir(docName)
-#             if not os.path.exists("%s%s%s"%(docName,os.sep,'page')):
-#                 os.mkdir("%s%s%s"%(docName,os.sep,'page'))                
-#             res = self.GET(lTx[0][1])
-# #             print '%s%s%s%s%sxml'%(docName,os.sep,'page',os.sep,imgFileName[:-4])
-# #             print lTx[0][1]
-#             savefile=codecs.open('%s%s%s%s%s.xml'%(docName,os.sep,'page',os.sep,imgFileName[:-4]),'a','utf-8')
-#             savefile.write(res.text)
-# 
-#         
+    
     def recognition_htrModels(self):
         """
         List the HTR models
@@ -580,6 +538,22 @@ class TranskribusClient():
         resp.raise_for_status()
         #we get some json serialized data
         return json.loads(resp.text)
+        
+    def recognition_htrDecode(self, colId, sHtrModelName, docId, sPages):
+        """
+        Do the HTR using the given model.
+        - Maybe you can set sPages to None, or both docId and sPage to None ?? 
+        
+        Return the Transkribus server response (a job id)
+        or raise an exception
+        """
+        self._assertLoggedIn()
+        myReq = self.sREQ_recognition_htr
+        params = self._buidlParamsDic(collId=colId, modelName=sHtrModelName, id=docId, pages=sPages)
+        resp = self.POST(myReq, params=params)
+        resp.raise_for_status()
+        return resp.text
+
         
     # --- Session Utilities --- ----------------------------------------------------------------
     @classmethod
