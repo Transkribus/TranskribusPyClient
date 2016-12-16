@@ -152,7 +152,7 @@ Extract the page transcript from the MultiPageXml (not from the single page Page
     else:
         sColDSDir = os.path.abspath(sDSDir)
     if not( os.path.exists(sColDSDir) and os.path.isdir(sColDSDir) ):
-        raise ValueError("Non-existing folder"%sColDSDir)
+        raise ValueError("Non-existing folder: %s "%sColDSDir)
     traceln("- Transcript will be taken from %s file(s) from: %s"%(sTRANSCRIPT_EXTENSION, sColDSDir))    
         
     try:    colid = args.pop(0)
