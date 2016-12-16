@@ -68,7 +68,6 @@ class DoHtr(TranskribusClient):
     
     def run(self, sModelName, colId, docId, sPages):
         ret = self.recognition_htrDecode(colId, sModelName, docId, sPages)
-        print ret
         return ret
 
 if __name__ == '__main__':
@@ -102,7 +101,8 @@ if __name__ == '__main__':
 
     # --- 
     # do the job...
-    doer.run(sModelName, colId, docId, sPages)
+    jobid = doer.run(sModelName, colId, docId, sPages)
+    traceln(jobid)
         
     traceln()      
     traceln("- Done")
