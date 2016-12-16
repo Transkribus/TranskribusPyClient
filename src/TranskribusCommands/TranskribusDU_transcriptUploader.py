@@ -119,17 +119,16 @@ class TranskribusTranscriptUploader(TranskribusClient):
 
         
 if __name__ == '__main__':
-    usage = """%s <directory> <coldId> [<docId>]
-
-Upload the DU transcript(s) from the DS structure to Transkribus, either of all or one of its %s file(s) to the given collection. 
-The <directory> is the usual DS one and should contain the 'col' directory (the 'out', 'ref', 'run', 'xml' are not used).
-Extract the page transcript from the MultiPageXml (not from the single page PageXml files!) 
-   
-"""%(sys.argv[0], sTRANSCRIPT_EXTENSION) + _Trnskrbs_description
+    usage = "%s <directory> <coldId> [<docId>]"%sys.argv[0]
     version = "v.01"
+    description = """Upload the DU transcript(s) from the DS structure to Transkribus, either of all or one of its %s file(s) to the given collection. 
+The <directory> is the usual DS one and should contain the 'col' directory (the 'out', 'ref', 'run', 'xml' are not used).
+Extract the page transcript from the MultiPageXml (not from the single page PageXml files!)    
+"""%sTRANSCRIPT_EXTENSION + _Trnskrbs_description
 
     #prepare for the parsing of the command line
     parser = OptionParser(usage=usage, version=version)
+    parser.description = description
     
     #"-s", "--server",  "-l", "--login" ,   "-p", "--pwd",   "--https_proxy"    OPTIONS
     __Trnskrbs_basic_options(parser, TranskribusTranscriptUploader.sDefaultServerUrl)

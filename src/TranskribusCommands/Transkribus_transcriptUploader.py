@@ -128,6 +128,7 @@ Extract the page transcript from the MultiPageXml (not from the single page Page
 
     #prepare for the parsing of the command line
     parser = OptionParser(usage=usage, version=version)
+    parser.description = description
     
     #"-s", "--server",  "-l", "--login" ,   "-p", "--pwd",   "--https_proxy"    OPTIONS
     __Trnskrbs_basic_options(parser, TranskribusTranscriptUploader.sDefaultServerUrl)
