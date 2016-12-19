@@ -57,7 +57,7 @@ The syntax for specifying the page range is:
 
 """ + _Trnskrbs_description
 
-usage = """%s <model-name> <colId> <docId> <pages>
+usage = """%s <model-name> <colId> <docId> [<pages>]
 """%sys.argv[0]
 
 class DoHtr(TranskribusClient):
@@ -96,7 +96,7 @@ if __name__ == '__main__':
     try:                        docId   = int(args.pop(0))
     except Exception as e:      _exit(usage, 1, e)
     try:                        sPages = args.pop(0)
-    except Exception as e:      _exit(usage, 1, e)
+    except Exception as e:      sPages = None
     if args:                    _exit(usage, 2, Exception("Extra arguments to the command"))
 
     # --- 
