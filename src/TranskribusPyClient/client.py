@@ -143,6 +143,9 @@ class TranskribusClient():
         self.sREQ_recognition                       = sServerUrl + '/rest/recognition'
         self.sREQ_recognition_htrModels             = sServerUrl + '/rest/recognition/htrModels'
         self.sREQ_recognition_htr                   = sServerUrl + '/rest/recognition/htr'
+        self.sREQ_recognition_htrRnnModels          = sServerUrl + '/rest/recognition/nets'
+        self.sREQ_recognition_htrRnnDicts           = sServerUrl + '/rest/recognition/dicts'
+        self.sREQ_recognition_htrRnn                = sServerUrl + '/rest/recognition/rnn'
         
 #         self.sREQ_GetPAGEXML        = sServerUrl + '/rest/collections/%s/%s/%s'
 #         self.sREQ_PostPAGEXML       = sServerUrl + '/rest/collections/%s/%s/%s/text'
@@ -527,10 +530,19 @@ class TranskribusClient():
     def recognition_htrModels(self):
         """
         List the HTR models
-        Return the Transkribus data structure (Pythonic data) 
-        or raise an exception
+        Return a list of dictionaries, like:
+                    [
+                {
+                    "modelName": "Marine_Lives",
+                    "nrOfTokens": 0,
+                    "isUsableInTranskribus": 1,
+                    "nrOfDictTokens": 0,
+                    "nrOfLines": 0,
+                    "modelId": 45
+                },
+             ...       
         
-        Undocumented parameters, sorry.
+        or raise an exception
         """
         self._assertLoggedIn()
         myReq = self.sREQ_recognition_htrModels
@@ -554,7 +566,48 @@ class TranskribusClient():
         resp.raise_for_status()
         return resp.text
 
+    # ---
+    def recognition_htrRnnModels(self):
+        """
+        List the HTR RNN models
+        Return a textual list of dictionary names, one per line 
+        or raise an exception
+        """
+        self._assertLoggedIn()
+        myReq = self.sREQ_recognition_htrRnnModels
+        resp = self.GET(myReq, accept="text/plain")
+        resp.raise_for_status()
+        return resp.text
         
+    def recognition_htrRnnDicts(self):
+        """
+        List the HTR RNN dictionaries
+        Return a textual list of dictionary names, one per line 
+        or raise an exception
+        
+        Undocumented parameters, sorry.
+        """
+        self._assertLoggedIn()
+        myReq = self.sREQ_recognition_htrRnnDicts
+        resp = self.GET(myReq, accept="text/plain")
+        resp.raise_for_status()
+        return resp.text
+        
+    def recognition_htrRnnDecode(self, colId, sHtrModelName, sDictName, docId, sPages):
+        """
+        Do the HTR using the given RNN model and dictionary.
+        - Maybe you can set sPages to None, or both docId and sPage to None ?? 
+        
+        Return the Transkribus server response (a job id)
+        or raise an exception
+        """
+        self._assertLoggedIn()
+        myReq = self.sREQ_recognition_htrRnn
+        params = self._buidlParamsDic(collId=colId, modelName=sHtrModelName, dict=sDictName, id=docId, pages=sPages)
+        resp = self.POST(myReq, params=params)
+        resp.raise_for_status()
+        return resp.text
+
     # --- Session Utilities --- ----------------------------------------------------------------
     @classmethod
     def getStoredCredentials(cls, bAsk=False):
