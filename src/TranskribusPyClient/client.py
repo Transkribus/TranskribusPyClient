@@ -527,9 +527,9 @@ class TranskribusClient():
 
     # --------------------------------------------------------------------------------------------------------------
     
-    def LA_batch(self,colId, docId, sPages, bBlockSeg,bLineSeq):
+    def LA_batch(self,colId, docId, sPages, bBlockSeg, bLineSeq):
         """
-            apply Layout Analysis
+        apply Layout Analysis
         int colId, 
         int docId,
         String pages, 
@@ -538,8 +538,8 @@ class TranskribusClient():
         """
         self._assertLoggedIn()
         myReq = self.sREQ_LA_batch
-        params = self._buidlParamsDic(collId=colId,id=docId, pages=sPages,doBlockSeg=bBlockSeg,doLineSeq=bLineSeq)
-        resp = self.POST(myReq, params=params,bAppXml=False)
+        params = self._buidlParamsDic(collId=colId, id=docId, pages=sPages, doBlockSeg=bBlockSeg, doLineSeq=bLineSeq)
+        resp = self.POST(myReq, params=params, sContentType=None)
         resp.raise_for_status()
         return resp.text       
     
