@@ -844,9 +844,3 @@ class TranskribusClient():
         if type(obj) != types.UnicodeType: 
             return self._raiseError(TypeError, "%s must be a Unicode string. Got '%s'"%(sObjName,`obj`))
         
-        
-        
-        
-        
-        
-        
