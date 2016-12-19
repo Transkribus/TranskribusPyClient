@@ -82,7 +82,7 @@ if __name__ == '__main__':
     # --- 
     #source collection(s)
     try:
-        sColId = args[0]
+        colId = int(args[0])
     except Exception as e:
         _exit(usage, 1, e)
 
@@ -93,7 +93,7 @@ if __name__ == '__main__':
     # --- 
     # do the job...
     try:
-        resp = doer.collection_deleteCollection(sColId)
+        resp = doer.collection_deleteCollection(colId)
     except Exception as e:  _exit("", 1, e)
         
     traceln("- Done")
