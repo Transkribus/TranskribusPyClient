@@ -539,7 +539,7 @@ class TranskribusClient():
         self._assertLoggedIn()
         myReq = self.sREQ_LA_batch
         params = self._buidlParamsDic(collId=colId,id=docId, pages=sPages,doBlockSeg=bBlockSeg,doLineSeq=bLineSeq)
-        resp = self.POST(myReq, params=params)
+        resp = self.POST(myReq, params=params,bAppXml=False)
         resp.raise_for_status()
         return resp.text       
     
