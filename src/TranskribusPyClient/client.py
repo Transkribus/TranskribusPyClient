@@ -126,7 +126,7 @@ class TranskribusClient():
 #         self.sREQ_ReqRNN            = sServerUrl + '/rest/recognition/rnn?' +'collId=%s&modelName=%s&dict=%s&id=%s&pages=%s'
 #         
 #         
-#         self.sREQ_LABlocks          = sServerUrl + '/rest/LA/blocks?'+'collId=%s&id=%s&page=%s'
+        self.sREQ_LA_batch          = sServerUrl + '/rest/LA/batch'
 #     
 #         self.sREQ_LALines           = sServerUrl + '/rest/LA/lines'
 #         self.sREQ_LABaseLines       = sServerUrl + '/rest/LA/baselines'
@@ -524,6 +524,25 @@ class TranskribusClient():
 
         logging.info("- DONE (downloaded collection %s, document %s into folder %s    (bForce=%s))"%(colId, docId, docDir, bForce))
         return doc_max_ts
+
+    # --------------------------------------------------------------------------------------------------------------
+    
+    def LA_batch(self,colId, docId, sPages, bBlockSeg,bLineSeq):
+        """
+            apply Layout Analysis
+        int colId, 
+        int docId,
+        String pages, 
+        boolean doBlockSeg,
+        boolean doLineSeg,
+        """
+        self._assertLoggedIn()
+        myReq = self.sREQ_LA_batch
+        params = self._buidlParamsDic(collId=colId,id=docId, pages=sPages,doBlockSeg=bBlockSeg,doLineSeq=bLineSeq)
+        resp = self.POST(myReq, params=params)
+        resp.raise_for_status()
+        return resp.text       
+    
 
     # --------------------------------------------------------------------------------------------------------------
     
