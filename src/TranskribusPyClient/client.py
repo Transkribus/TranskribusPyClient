@@ -126,7 +126,7 @@ class TranskribusClient():
 #         self.sREQ_ReqRNN            = sServerUrl + '/rest/recognition/rnn?' +'collId=%s&modelName=%s&dict=%s&id=%s&pages=%s'
 #         
 #         
-#         self.sREQ_LABlocks          = sServerUrl + '/rest/LA/blocks?'+'collId=%s&id=%s&page=%s'
+        self.sREQ_LA_batch          = sServerUrl + '/rest/LA/batch'
 #     
 #         self.sREQ_LALines           = sServerUrl + '/rest/LA/lines'
 #         self.sREQ_LABaseLines       = sServerUrl + '/rest/LA/baselines'
@@ -163,7 +163,7 @@ class TranskribusClient():
             self._raiseError(Exception, "You are already logged in. Please logout before logging in.")
             
         data = {'user': sLogin, 'pw': sPwd}
-        resp = self.POST(self.sREQ_auth_login, data = {'user': sLogin, 'pw': sPwd}, bAppXml=False)
+        resp = self.POST(self.sREQ_auth_login, data = {'user': sLogin, 'pw': sPwd}, sContentType=None)
         del data
         resp.raise_for_status()
         
@@ -218,7 +218,7 @@ class TranskribusClient():
         self._assertLoggedIn()
         myReq = self.sREQ_collection_list % (colId)
         params = self._buidlParamsDic(index=None, nValues=None, sortColumn=None, sortDirection=None)
-        resp = self.GET(myReq, params=params)
+        resp = self.GET(myReq, params=params, accept="application/json")
         resp.raise_for_status()
 
         #we get some json serialized data
@@ -231,7 +231,7 @@ class TranskribusClient():
         """
         self._assertLoggedIn()
         myReq = self.sREQ_collection_createCollection
-        resp = self.POST(myReq, {'collName':sName }, bAppXml=False) #False-> no content-type in HTTP header.
+        resp = self.POST(myReq, {'collName':sName }, sContentType=None)
         resp.raise_for_status()
         return resp.text
         
@@ -359,7 +359,7 @@ class TranskribusClient():
         self._assertLoggedIn()
         #myReq = self.sREQ_collections_addDocToCollection % (colId) + "?id=%s"%docId
         myReq = self.sREQ_collections_addDocToCollection % (colId)
-        resp = self.POST(myReq, {'id':docId} )
+        resp = self.POST(myReq, {'id':docId} , sContentType="*/*")
         resp.raise_for_status()
         # return resp.text  #return "" or something like " document is already in collection"
         #maise raise an exception upon server error
@@ -524,6 +524,25 @@ class TranskribusClient():
 
         logging.info("- DONE (downloaded collection %s, document %s into folder %s    (bForce=%s))"%(colId, docId, docDir, bForce))
         return doc_max_ts
+
+    # --------------------------------------------------------------------------------------------------------------
+    
+    def LA_batch(self,colId, docId, sPages, bBlockSeg,bLineSeq):
+        """
+            apply Layout Analysis
+        int colId, 
+        int docId,
+        String pages, 
+        boolean doBlockSeg,
+        boolean doLineSeg,
+        """
+        self._assertLoggedIn()
+        myReq = self.sREQ_LA_batch
+        params = self._buidlParamsDic(collId=colId,id=docId, pages=sPages,doBlockSeg=bBlockSeg,doLineSeq=bLineSeq)
+        resp = self.POST(myReq, params=params,bAppXml=False)
+        resp.raise_for_status()
+        return resp.text       
+    
 
     # --------------------------------------------------------------------------------------------------------------
     
@@ -730,9 +749,12 @@ class TranskribusClient():
             logging.info("- %s proxy set to : '%s'"%(sProtocol, sUrl))
         return True
         
-    def POST(self, sRequest, params={}, data={}, bAppXml=True):
+    def POST(self, sRequest, params={}, data={}, sContentType = "application/xml"):
+        """
+        if you set sContentType to None or "", nothing is specified in the request header
+        """
         dHeader = {'Cookie':'JSESSIONID=%s'%self._sessionID}
-        if bAppXml: dHeader['Content-Type'] = 'application/xml'
+        if sContentType: dHeader['Content-Type'] = sContentType
             
         return requests.post(sRequest, params=params, headers=dHeader
                              , proxies=self._dProxies, data=data, verify=False)        
