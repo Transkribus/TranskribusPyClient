@@ -51,7 +51,7 @@ DEBUG = 0
 description = """Apply an HTR model.
 
 The syntax for specifying the page range is:
-- one or sevelral specifiers separated by a comma
+- one or several specifiers separated by a comma
 - one separator is a page number, or a range of page number, e.g. 3-8
 - Examples: 1   1,3,5   1-3    1,3,5-99,100
 
