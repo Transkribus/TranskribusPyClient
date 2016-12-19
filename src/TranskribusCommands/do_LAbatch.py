@@ -94,7 +94,7 @@ if __name__ == '__main__':
     try:                        docId   = int(args.pop(0))
     except Exception as e:      _exit(usage, 1, e)
     try:                        sPages = args.pop(0)
-    except Exception as e:      sPages = None
+    except Exception as e:      _exit(usage, 1, e)
     try:                        doNotBlockSeg = int(args.pop(0)) == 0
     except Exception as e:      doNotBlockSeg = False
     try:                        doNotLineSeg = int(args.pop(0)) == 0
@@ -103,7 +103,7 @@ if __name__ == '__main__':
 
     # --- 
     # do the job...
-    jobid = doer.run(colId, docId, sPages,doNotBlockSeg,doNotLineSeg)
+    jobid = doer.run(colId, docId, sPages,not(doNotBlockSeg),not(doNotLineSeg))
     traceln(jobid)
         
     traceln()      
