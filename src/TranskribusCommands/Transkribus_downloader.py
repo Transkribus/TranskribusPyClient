@@ -75,7 +75,7 @@ class TranskribusDownloader(TranskribusClient):
         if bNoImage==True, do not download the images
         """
         if not( os.path.exists(destDir) and os.path.isdir(destDir) ):
-            raise ValueError("Non-existing destination folder"%destDir)
+            raise ValueError("Non-existing destination folder %s"%destDir)
         
         colDir = os.path.join(destDir, "trnskrbs_%s"%colId)
             

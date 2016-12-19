@@ -268,7 +268,7 @@ class TranskribusClient():
         self._assertLoggedIn()
         myReq = self.sREQ_collection_fulldoc % (colId,docId)
         params = self._buidlParamsDic(nrOfTranscripts=None)
-        resp = self.GET(myReq, params=params)
+        resp = self.GET(myReq, params=params,accept="application/json")
         resp.raise_for_status()
 
         #we get some json serialized data
