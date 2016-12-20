@@ -139,7 +139,7 @@ class TranskribusDownloader(TranskribusClient):
         We concatenate all pages into a "multi-page PageXml"
         return a DOM
         """
-        lsXmlDocFilename = sorted(glob.iglob(os.path.join(docDir, "*.pxml")), reverse=True)
+        lsXmlDocFilename = sorted(glob.iglob(os.path.join(docDir, "*.pxml")))
         assert lsXmlDocFilename, "ERROR: a document should contain at least one XML file (extension .pxml): %s"%docDir
         
         doc = PageXml.MultiPageXml.makeMultiPageXml(lsXmlDocFilename)
