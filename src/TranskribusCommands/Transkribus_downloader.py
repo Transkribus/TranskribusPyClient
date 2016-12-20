@@ -75,7 +75,7 @@ class TranskribusDownloader(TranskribusClient):
         if bNoImage==True, do not download the images
         """
         if not( os.path.exists(destDir) and os.path.isdir(destDir) ):
-            raise ValueError("Non-existing destination folder %s"%destDir)
+            raise ValueError("Non-existing destination folder %s" % destDir)
         
         colDir = os.path.join(destDir, "trnskrbs_%s"%colId)
             
@@ -93,10 +93,10 @@ class TranskribusDownloader(TranskribusClient):
             else:
                 os.mkdir(sDir)
 
-        col_max_ts = self.download_collection(colId, os.path.join(colDir,sCOL), bForce, bNoImage)
+        col_max_ts,ldocids = self.download_collection(colId, os.path.join(colDir,sCOL), bForce, bNoImage)
         with open(destDir+os.sep+sCOL+TranskribusClient.POSTFIX_MAX_TX, "w") as fd: fd.write("%s"%col_max_ts) #"col_max.ts" file
 
-        return col_max_ts, colDir
+        return col_max_ts, colDir, ldocids
     
     def generateCollectionMultiPageXml(self, colDir, bStrict):
         """
@@ -198,7 +198,7 @@ if __name__ == '__main__':
     __Trnskrbs_do_login_stuff(trnkbs2ds, options, trace=trace, traceln=traceln)
     
     traceln("- Downloading collection %s to folder %s"%(colid, os.path.abspath(destDir)))
-    col_ts, colDir = trnkbs2ds.downloadCollection(colid, destDir, bForce=options.bForce, bNoImage=options.bNoImage)
+    col_ts, colDir,ldocids = trnkbs2ds.downloadCollection(colid, destDir, bForce=options.bForce, bNoImage=options.bNoImage)
     traceln("- Done")
     
     with open(os.path.join(colDir, "config.txt"), "w") as fd: fd.write("server=%s\nforce=%s\nstrict=%s\n"%(options.server, options.bForce, options.bStrict))

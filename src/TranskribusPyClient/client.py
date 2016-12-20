@@ -428,8 +428,10 @@ class TranskribusClient():
         # store collections metadata 
         with codecs.open(collDir+os.sep+"trp.json", "wb",'utf-8') as fd: json.dump(lDocInfo, fd, indent=2)
         
+        ldocID = []
         for docInfo in lDocInfo:
             docId = docInfo['docId']  #int here!!!
+            ldocID.append(str(docId))
             docDir = os.path.join(collDir, str(docId))
 
             #Maybe we already have this version of the document??
@@ -452,7 +454,7 @@ class TranskribusClient():
             coll_max_ts = max(coll_max_ts, doc_max_ts)
             
         logging.info("- DONE (downloaded collection %s into folder %s    (bForce=%s))"%(colId, collDir, bForce))
-        return coll_max_ts
+        return coll_max_ts, ldocID
         
 
     def download_document(self, colId, docId, docDir, min_ts=None, bForce=False, bNoImage=False):        
