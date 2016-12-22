@@ -147,6 +147,8 @@ class TranskribusClient():
         self.sREQ_recognition_htrRnnDicts           = sServerUrl + '/rest/recognition/dicts'
         self.sREQ_recognition_htrRnn                = sServerUrl + '/rest/recognition/rnn'
         
+        self.sREQ_jobs                              = sServerUrl + '/rest/jobs/%s'
+        
 #         self.sREQ_GetPAGEXML        = sServerUrl + '/rest/collections/%s/%s/%s'
 #         self.sREQ_PostPAGEXML       = sServerUrl + '/rest/collections/%s/%s/%s/text'
 
@@ -527,7 +529,7 @@ class TranskribusClient():
         logging.info("- DONE (downloaded collection %s, document %s into folder %s    (bForce=%s))"%(colId, docId, docDir, bForce))
         return doc_max_ts
 
-    # --------------------------------------------------------------------------------------------------------------
+    # -------LAYOUT ANALYSIS ------------------------------------------------------------------------------------------
     
     def LA_batch(self,colId, docId, sPages, bBlockSeg, bLineSeq):
         """
@@ -546,7 +548,7 @@ class TranskribusClient():
         return resp.text       
     
 
-    # --------------------------------------------------------------------------------------------------------------
+    # --------RECOGNITION-----------------------------------------------------------------------------------
     
     def recognition_htrModels(self):
         """
@@ -629,7 +631,27 @@ class TranskribusClient():
         resp.raise_for_status()
         return resp.text
 
-    # --- Session Utilities --- ----------------------------------------------------------------
+    
+    # --- JOB -----------------------------------------------------------------------------------------
+
+    
+    def getJobStatus(self,jobid):
+        """
+            return the job status (as namedtuple)
+            attributes are:
+            jobId,docId, pageNr,pages,type,state,success,description,userName,userId,createTime,startTime,endTime,jobData,resumable,jobImpl
+            
+            state values: CREATED, RUNNING, FINISHED, FAILED
+            
+        """
+        self._assertLoggedIn()
+        myReq = self.sREQ_jobs % (jobid)
+        resp = self.GET(myReq, accept="application/json")
+        resp.raise_for_status()
+        return resp.text        
+
+
+    # --- Session Utilities -------------------------------------------------------------------
     @classmethod
     def getStoredCredentials(cls, bAsk=False):
         """
