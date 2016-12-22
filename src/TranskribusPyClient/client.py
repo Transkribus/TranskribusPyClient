@@ -532,26 +532,28 @@ class TranskribusClient():
         return doc_max_ts
 
 
-    def getListofLockedPages(self,colid,docid,page):
+    def getListofLockedPages(self, colid, docid, page):
         """    
-            return the list of locks for colid/docid/page
+        return the list of locks for colid/docid/page
         """
         self._assertLoggedIn()
         myReq = self.sREQ_collections_listPagesLocks% (colid,docid,page)
         resp = self.GET(myReq, accept="application/json")
         resp.raise_for_status()
-        return resp.text        
+        #return resp.text        
+        return json.loads(resp.text)
         
     # -------LAYOUT ANALYSIS ------------------------------------------------------------------------------------------
     
     def analyzeLayout(self,colId, docId, sPages, bBlockSeg, bLineSeq):
         """
         apply Layout Analysis
-        int colId, 
-        int docId,
-        String pages, 
-        boolean doBlockSeg,
-        boolean doLineSeg,
+            int colId, 
+            int docId,
+            String pages, (1 or 1,5 or 1-5, or 1,3,5-8 etc)
+            boolean doBlockSeg (True by default),
+            boolean doLineSeg  (True by default)
+        return a jobId
         """
         self._assertLoggedIn()
         myReq = self.sREQ_LA_batch
@@ -648,12 +650,12 @@ class TranskribusClient():
     # --- JOB -----------------------------------------------------------------------------------------
 
     
-    def getJobStatus(self,jobid):
+    def getJobStatus(self, jobid):
         """
-        return the job status ( dictionary)
-        keys are the strings:
-            jobId, docId, pageNr, pages, type, state, success, description, userName, userId, createTime, startTime, endTime, jobData, resumable, jobImpl
-        state values: "CREATED", "RUNNING", "FINISHED", "FAILED"
+        return the job status (a dictionary)
+            keys are the strings:
+                jobId, docId, pageNr, pages, type, state, success, description, userName, userId, createTime, startTime, endTime, jobData, resumable, jobImpl
+            state values: "CREATED", "RUNNING", "FINISHED", "FAILED"
         """
         self._assertLoggedIn()
         myReq = self.sREQ_jobs % (jobid)
@@ -663,8 +665,8 @@ class TranskribusClient():
 
     def deleteJob(self,jobid):
         """
-            delete a job
-            check state for the deleted jobs. Must return CANCELED
+        delete a job
+        check state for the deleted jobs. Must return CANCELED
         """
         self._assertLoggedIn()
         myReq = self.sREQ_jobskill % (jobid)
