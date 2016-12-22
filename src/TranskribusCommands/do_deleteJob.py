@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 
 """
-    Delete a collection
+    Delete a job
 
     H. Déjean - Nov 2016
 
@@ -29,7 +29,7 @@
 
 """
 
-#    TranskribusCommands/do_delJob.py <JOBID>
+#    TranskribusCommands/do_deleteJob.py <JOBID>
 
 
 #optional: useful if you want to choose the logging level to something else than logging.WARN
