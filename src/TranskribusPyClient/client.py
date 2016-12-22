@@ -637,10 +637,9 @@ class TranskribusClient():
     
     def getJobStatus(self,jobid):
         """
-            return the job status (as namedtuple)
-            attributes are:
-            jobId,docId, pageNr,pages,type,state,success,description,userName,userId,createTime,startTime,endTime,jobData,resumable,jobImpl
-            
+            return the job status ( dictionary)
+            keys are:
+                jobId,docId, pageNr,pages,type,state,success,description,userName,userId,createTime,startTime,endTime,jobData,resumable,jobImpl
             state values: CREATED, RUNNING, FINISHED, FAILED
             
         """
@@ -648,7 +647,7 @@ class TranskribusClient():
         myReq = self.sREQ_jobs % (jobid)
         resp = self.GET(myReq, accept="application/json")
         resp.raise_for_status()
-        return resp.text        
+        return json.loads(resp.text)        
 
 
     # --- Session Utilities -------------------------------------------------------------------
