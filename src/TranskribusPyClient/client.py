@@ -139,7 +139,8 @@ class TranskribusClient():
         self.sREQ_collections_postPageTranscript    = sServerUrl + '/rest/collections/%s/%s/%s/text'
         self.sREQ_collections_addDocToCollection    = sServerUrl + '/rest/collections/%s/addDocToCollection'
         self.sREQ_collections_duplicate             = sServerUrl + '/rest/collections/%s/%s/duplicate'
-
+        self.sREQ_collections_listPagesLocks        = sServerUrl + '/rest/collections/%s/%s/%s/listLocks'
+        
         self.sREQ_recognition                       = sServerUrl + '/rest/recognition'
         self.sREQ_recognition_htrModels             = sServerUrl + '/rest/recognition/htrModels'
         self.sREQ_recognition_htr                   = sServerUrl + '/rest/recognition/htr'
@@ -530,6 +531,17 @@ class TranskribusClient():
         logging.info("- DONE (downloaded collection %s, document %s into folder %s    (bForce=%s))"%(colId, docId, docDir, bForce))
         return doc_max_ts
 
+
+    def getListofLockedPages(self,colid,docid,page):
+        """    
+            return the list of locks for colid/docid/page
+        """
+        self._assertLoggedIn()
+        myReq = self.sREQ_collections_listPagesLocks% (colid,docid,page)
+        resp = self.GET(myReq, accept="application/json")
+        resp.raise_for_status()
+        return resp.text        
+        
     # -------LAYOUT ANALYSIS ------------------------------------------------------------------------------------------
     
     def LA_batch(self,colId, docId, sPages, bBlockSeg, bLineSeq):
