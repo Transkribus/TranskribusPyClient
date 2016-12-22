@@ -2,7 +2,10 @@
 A Pythonic API and some command line tools to access the Transkribus server via its REST API
 
 
-Also see in [TranskribusPyClient/client.html](TranskribusPyClient/client.html)
+
+
+Also see in [TranskribusPyClient/client.html](http://htmlpreview.github.com/?https://github.com/Transkribus/TranskribusPyClient/blob/master/src/TranskribusPyClient/client.html
+)
 
 Help on module client:
 
