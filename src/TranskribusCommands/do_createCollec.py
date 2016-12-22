@@ -93,7 +93,7 @@ if __name__ == '__main__':
     # --- 
     # do the job...
     try:
-        resp = doer.collection_createCollection(sColName)
+        resp = doer.createCollection(sColName)
     except Exception as e:  _exit("", 1, e)
         
         

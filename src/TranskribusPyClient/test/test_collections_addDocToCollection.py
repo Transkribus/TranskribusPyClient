@@ -18,7 +18,7 @@ login, pwd = getStoredCredentials()
 conn = TranskribusClient(proxies={'https':'http://cornillon:8000'}, loggingLevel=logging.INFO)
 sessionID = conn.auth_login(login, pwd)
 
-data = conn.collections_addDocToCollection(_coldId_Sandbox, _docId_a)
+data = conn.addDocToCollection(_coldId_Sandbox, _docId_a)
 """
 True or Exception
 """

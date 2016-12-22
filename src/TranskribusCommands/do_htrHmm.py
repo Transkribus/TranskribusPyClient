@@ -2,12 +2,11 @@
 #-*- coding:utf-8 -*-
 
 """
-    List the HTR Models
 
     JL Meunier - Dec 2016
 
 
-    Copyright Xerox(C) 2016 H. Déjean, JL. Meunier
+    Copyright Xerox(C) 2016 JL. Meunier
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,41 +42,33 @@ except ImportError:
     sys.path.append( os.path.dirname(os.path.dirname( os.path.abspath(sys.argv[0]) )) )
     import TranskribusPyClient_version
 
-from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit, strTabularFormat
+from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit
 from TranskribusPyClient.client import TranskribusClient
 from common.trace import traceln, trace
 
 DEBUG = 0
 
-description = """List HTR models available in Transkribus.
+description = """Apply an HTR model.
+
+The syntax for specifying the page range is:
+- one or several specifiers separated by a comma
+- one separator is a page number, or a range of page number, e.g. 3-8
+- Examples: 1   1,3,5   1-3    1,3,5-99,100
+
 """ + _Trnskrbs_description
 
-usage = """%s
+usage = """%s <model-name> <colId> <docId> [<pages>]
 """%sys.argv[0]
 
-class DoListHtrModels(TranskribusClient):
+class DoHtr(TranskribusClient):
     sDefaultServerUrl = _Trnskrbs_default_url
     #--- INIT -------------------------------------------------------------------------------------------------------------    
     def __init__(self, trnkbsServerUrl, sHttpProxy=None, loggingLevel=logging.WARN):
         TranskribusClient.__init__(self, sServerUrl=self.sDefaultServerUrl, proxies=sHttpProxy, loggingLevel=loggingLevel)
     
-    def run(self):
-        lDic = self.recognition_htrModels()
-        """
-                    [
-                {
-                    "modelName": "Marine_Lives",
-                    "nrOfTokens": 0,
-                    "isUsableInTranskribus": 1,
-                    "nrOfDictTokens": 0,
-                    "nrOfLines": 0,
-                    "modelId": 45
-                },
-             ...       
-        """
-        #traceln(json.dumps(data, indent=4))
-        traceln( strTabularFormat(lDic, ["modelName", "modelId", "isUsableInTranskribus", "nrOfTokens", "nrOfDictTokens", "nrOfLines"], "modelName")   )     
-        return lDic
+    def run(self, sModelName, colId, docId, sPages):
+        ret = self.rehtrDecode(colId, sModelName, docId, sPages)
+        return ret
 
 if __name__ == '__main__':
     version = "v.01"
@@ -87,7 +78,7 @@ if __name__ == '__main__':
     parser.description = description
     
     #"-s", "--server",  "-l", "--login" ,   "-p", "--pwd",   "--https_proxy"    OPTIONS
-    __Trnskrbs_basic_options(parser, DoListHtrModels.sDefaultServerUrl)
+    __Trnskrbs_basic_options(parser, DoHtr.sDefaultServerUrl)
         
     # ---   
     #parse the command line
@@ -95,12 +86,23 @@ if __name__ == '__main__':
     proxies = {} if not options.https_proxy else {'https_proxy':options.https_proxy}
 
     # --- 
-    doer = DoListHtrModels(options.server, proxies, loggingLevel=logging.WARN)
+    doer = DoHtr(options.server, proxies, loggingLevel=logging.WARN)
     __Trnskrbs_do_login_stuff(doer, options, trace=trace, traceln=traceln)
+    # --- 
+    try:                        sModelName = args.pop(0)
+    except Exception as e:      _exit(usage, 1, e)
+    try:                        colId = int(args.pop(0))
+    except Exception as e:      _exit(usage, 1, e)
+    try:                        docId   = int(args.pop(0))
+    except Exception as e:      _exit(usage, 1, e)
+    try:                        sPages = args.pop(0)
+    except Exception as e:      sPages = None
+    if args:                    _exit(usage, 2, Exception("Extra arguments to the command"))
 
     # --- 
     # do the job...
-    doer.run()
+    jobid = doer.run(sModelName, colId, docId, sPages)
+    traceln(jobid)
         
     traceln()      
     traceln("- Done")

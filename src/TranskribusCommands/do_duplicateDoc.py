@@ -113,7 +113,7 @@ if __name__ == '__main__':
     #the only issue is that we need to have the name of each document...
     traceln("- checking existence of each document in source collection '%d'"%(colIdFrom))
     dName_by_docId = {}
-    lDocDic = doer.collections_list(colIdFrom)
+    lDocDic = doer.listDocsByCollectionId(colIdFrom)
     for docDic in lDocDic:
         dName_by_docId[ docDic['docId'] ] = docDic['title']
     #check now, so as to avoid partial copies...
@@ -125,12 +125,12 @@ if __name__ == '__main__':
             traceln("ERROR: document '%d' is not in source collection '%d'"%(docId, colIdFrom))
             _exit("", 3, e)
     
-    trace("- copying from collection %d to collection '%d' the %d documents: "%(colIdFrom, colIdTo, len(lDocId)))
+    trace("- duplicating from collection %d to collection '%d' the %d documents: "%(colIdFrom, colIdTo, len(lDocId)))
     for docId in lDocId:
         name = dName_by_docId[docId]
         trace(" %d  ('%s')"%(docId, name))
         try:
-            doer.collections_copyDocToCollection(colIdFrom, docId, colIdTo, name)
+            doer.duplicateDoc(colIdFrom, docId, colIdTo, name)
         except Exception as e:
             traceln()
             traceln("ERROR: could not copy document '%d' from collection '%d' to collection '%d'"%(docId, colIdFrom, colIdTo))

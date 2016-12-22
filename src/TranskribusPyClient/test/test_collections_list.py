@@ -18,7 +18,7 @@ conn = TranskribusClient(proxies={'https':'http://cornillon:8000'}
                          , loggingLevel=logging.INFO)
 
 sessionID = conn.auth_login(login, pwd)
-data = conn.collections_list(_colId_A)
+data = conn.listDocsByCollectionId(_colId_A)
 import pprint
 pprint.pprint(data)
 

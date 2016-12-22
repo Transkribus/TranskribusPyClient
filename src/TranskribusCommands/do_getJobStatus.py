@@ -2,9 +2,9 @@
 #-*- coding:utf-8 -*-
 
 """
-    Delete a job
+    Get the status of a job
 
-    H. Déjean - Dec 2016
+    JL Meunier - Dev 2016
 
 
     Copyright Xerox(C) 2016 H. Déjean, JL. Meunier
@@ -48,7 +48,7 @@ from common.trace import traceln, trace
 
 DEBUG = 0
 
-description = """delete a Transkribus job.
+description = """Get the status of a Transkribus job.
 """ + _Trnskrbs_description
 
 usage = """%s <jobId> 
@@ -93,11 +93,7 @@ if __name__ == '__main__':
     # --- 
     # do the job...
     try:
-        resp = doer.deleteJob(jobid)
+        resp = doer.getJobStatus(jobid)
     except Exception as e:  _exit("", 1, e)
-    
-    if resp != "CANCELED":
-        raise Exception("Job status should be CANCELED not '%s'"%resp)
-        
-    traceln("- Done")
+    traceln(resp)
     

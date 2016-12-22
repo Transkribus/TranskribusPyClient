@@ -31,8 +31,8 @@ print sessionID
 
 # ret = conn.getDocumentFromServer(colid, docid)
 #ret = conn.getDocumentFromServer("3571", "7750")
-data = conn.collections_fulldoc_xml(_colId_A, str(_docId_a))  #str just to stress-test
-#data = conn.collections_fulldoc_xml(3571, "7750")
+data = conn.getDocByIdAsXml(_colId_A, str(_docId_a))  #str just to stress-test
+#data = conn.getDocByIdAsXml(3571, "7750")
 print data
 """
 

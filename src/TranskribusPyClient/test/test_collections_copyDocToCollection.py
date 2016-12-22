@@ -18,8 +18,8 @@ login, pwd = getStoredCredentials()
 conn = TranskribusClient(proxies={'https':'http://cornillon:8000'}, loggingLevel=logging.INFO)
 sessionID = conn.auth_login(login, pwd)
 
-data = conn.collections_copyDocToCollection(_colId_A, _docId_c, _coldId_Sandbox, "named_by_JL")
-data = conn.collections_copyDocToCollection(_colId_A, _docId_d, _coldId_Sandbox)
+data = conn.duplicateDoc(_colId_A, _docId_c, _coldId_Sandbox, "named_by_JL")
+data = conn.duplicateDoc(_colId_A, _docId_d, _coldId_Sandbox)
 """
 True or Exception
 """

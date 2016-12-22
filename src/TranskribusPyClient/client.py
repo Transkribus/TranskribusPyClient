@@ -197,7 +197,7 @@ class TranskribusClient():
         return True
 
     #--- --- collections --- -------------------------------------------------------------------------------------------------------------
-    def collections_listEditDeclFeats(self, colId):
+    def listEditDeclFeatures(self, colId):
         """
         Return the Transkribus data structure (XML as a DOM) 
         or raise an exception
@@ -212,7 +212,7 @@ class TranskribusClient():
         #we get some json serialized data
         return self._xmlParseDoc(resp.text)
 
-    def collections_list(self, colId, index=None, nValues=None, sortColumn=None, sortDirection=None):
+    def listDocsByCollectionId(self, colId, index=None, nValues=None, sortColumn=None, sortDirection=None):
         """
         Return the Transkribus data structure (Pythonic data) 
         or raise an exception
@@ -228,7 +228,7 @@ class TranskribusClient():
         #we get some json serialized data
         return json.loads(resp.text)
     
-    def collection_createCollection(self, sName):
+    def createCollection(self, sName):
         """
         create a new collectin with given name.
         Return the collection unique identifier: colId   (as a string)
@@ -239,7 +239,7 @@ class TranskribusClient():
         resp.raise_for_status()
         return resp.text
         
-    def collection_deleteCollection(self, colId):
+    def deleteCollection(self, colId):
         """
         delete a collection
         Return True
@@ -250,7 +250,7 @@ class TranskribusClient():
         resp.raise_for_status()
         return resp.text
 
-    def collection_deleteDocument(self, colId, docId):
+    def deleteDocument(self, colId, docId):
         """
         delete a document from a collection
         Return True
@@ -262,7 +262,7 @@ class TranskribusClient():
         return resp
  
 
-    def collections_fulldoc(self, colId, docId, nrOfTranscripts=None):
+    def getDocById(self, colId, docId, nrOfTranscripts=None):
         """
         Return the Transkribus data structure ( Pythonic data ) 
         or raise an exception
@@ -279,7 +279,7 @@ class TranskribusClient():
         return json.loads(resp.text)
 
 
-    def collections_fulldoc_xml(self, colId, docId, nrOfTranscripts=None, bParse=True):
+    def getDocByIdAsXml(self, colId, docId, nrOfTranscripts=None, bParse=True):
         """
         Return the Transkribus data structure (either parsed as a DOM or as a serialized XML, , i.e. a unicode string)
         or raise an exception
@@ -300,12 +300,12 @@ class TranskribusClient():
         else:     
             return resp.text
 
-#     def collections_postPageTranscript(self, colId, docId, pnum, sStatus, sXMlTranscript
+#     def postPageTranscript(self, colId, docId, pnum, sStatus, sXMlTranscript
 #     the status parameter when saving a transcript is becoming obsolete anyway (updating the status should be done with a separate call in the future: updatePageStatus).
 # You should be fine by setting it to null, i.e. completely omitting this parameter. If you want to use it, then try NEW, IN_PROGRESS, DONE, FINAL as values (cf.
 # https://github.com/Transkribus/TranskribusCore/blob/master/src/main/java/eu/transkribus/core/model/beans/enums/EditStatus.java)
 
-    def collections_postPageTranscript(self, colId, docId, pnum, sXMlTranscript
+    def postPageTranscript(self, colId, docId, pnum, sXMlTranscript
                                        , bOverwrite=None
                                        , sNote=None
                                        , parentId=None
@@ -352,7 +352,7 @@ class TranskribusClient():
         resp.raise_for_status()
         return resp.text
     
-    def collections_addDocToCollection(self, colId, docId):
+    def addDocToCollection(self, colId, docId):
         """
         Add document docId to collection colId   (this is not a copy!!)
         
@@ -370,7 +370,7 @@ class TranskribusClient():
         # requests.exceptions.HTTPError: 500 Server Error: Internal Server Error for url: https://transkribus.eu/TrpServer/rest/collections/3820/addDocToCollection?id=66666
         return True
         
-    def collections_copyDocToCollection(self, colIdFrom, docId, colIdTo, name=None):
+    def duplicateDoc(self, colIdFrom, docId, colIdTo, name=None):
         """
         Copy document docId from collection colIdFrom to collection colIdTo
         The document is renamed if a name is provided
@@ -383,7 +383,7 @@ class TranskribusClient():
         if not name:
             name = -1
             #let's find it! :-(
-            lDocDic = self.collections_list(colIdFrom)
+            lDocDic = self.listDocsByCollectionId(colIdFrom)
             for docDic in lDocDic:
                 if docDic['docId'] == docId:
                     name = docDic['title']
@@ -428,7 +428,7 @@ class TranskribusClient():
         
         coll_max_ts = None
         #list collection content
-        lDocInfo = self.collections_list(colId)
+        lDocInfo = self.listDocsByCollectionId(colId)
         # store collections metadata 
         with codecs.open(collDir+os.sep+"trp.json", "wb",'utf-8') as fd: json.dump(lDocInfo, fd, indent=2)
         
@@ -475,7 +475,7 @@ class TranskribusClient():
         """
         logging.info("- downloading collection %s, document %s  into folder %s    (bForce=%s)"%(colId, docId, docDir, bForce))
         
-        trp = self.collections_fulldoc(colId, docId, nrOfTranscripts=1)
+        trp = self.getDocById(colId, docId, nrOfTranscripts=1)
         pageList = trp["pageList"]
         doc_max_ts = max( [page['tsList']["transcripts"][0]['timestamp'] for page in pageList['pages'] ] )
 
@@ -544,7 +544,7 @@ class TranskribusClient():
         
     # -------LAYOUT ANALYSIS ------------------------------------------------------------------------------------------
     
-    def LA_batch(self,colId, docId, sPages, bBlockSeg, bLineSeq):
+    def analyzeLayout(self,colId, docId, sPages, bBlockSeg, bLineSeq):
         """
         apply Layout Analysis
         int colId, 
@@ -563,7 +563,7 @@ class TranskribusClient():
 
     # --------RECOGNITION-----------------------------------------------------------------------------------
     
-    def recognition_htrModels(self):
+    def listHmmHtrModels(self):
         """
         List the HTR models
         Return a list of dictionaries, like:
@@ -587,7 +587,7 @@ class TranskribusClient():
         #we get some json serialized data
         return json.loads(resp.text)
         
-    def recognition_htrDecode(self, colId, sHtrModelName, docId, sPages):
+    def htrDecode(self, colId, sHtrModelName, docId, sPages):
         """
         Do the HTR using the given model.
         - Maybe you can set sPages to None, or both docId and sPage to None ?? 
@@ -603,7 +603,7 @@ class TranskribusClient():
         return resp.text
 
     # ---
-    def recognition_htrRnnModels(self):
+    def listRnnsText(self):
         """
         List the HTR RNN models
         Return a textual list of dictionary names, one per line 
@@ -615,7 +615,7 @@ class TranskribusClient():
         resp.raise_for_status()
         return resp.text
         
-    def recognition_htrRnnDicts(self):
+    def listDictsText(self):
         """
         List the HTR RNN dictionaries
         Return a textual list of dictionary names, one per line 
@@ -629,7 +629,7 @@ class TranskribusClient():
         resp.raise_for_status()
         return resp.text
         
-    def recognition_htrRnnDecode(self, colId, sHtrModelName, sDictName, docId, sPages):
+    def htrRnnDecode(self, colId, sHtrModelName, sDictName, docId, sPages):
         """
         Do the HTR using the given RNN model and dictionary.
         - Maybe you can set sPages to None, or both docId and sPage to None ?? 

@@ -116,7 +116,7 @@ if __name__ == '__main__':
     for docId in lDocId:
         trace(" %d"%docId)
         try:
-            doer.collections_addDocToCollection(colId, docId)
+            doer.addDocToCollection(colId, docId)
         except Exception as e:
             traceln()
             traceln("ERROR: could not add document '%d' to collection '%d'"%(docId, colId))

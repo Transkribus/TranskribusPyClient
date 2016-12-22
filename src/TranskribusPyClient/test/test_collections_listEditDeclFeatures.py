@@ -19,7 +19,7 @@ conn = TranskribusClient(proxies={'https':'http://cornillon:8000'}
                          , loggingLevel=logging.INFO)
 
 sessionID = conn.auth_login(login, pwd)
-doc = conn.collections_listEditDeclFeats(_colId_A)
+doc = conn.listEditDeclFeatures(_colId_A)
 doc.saveFormatFileEnc("-", "UTF-8", True)
 conn.xmlFreeDoc(doc)
 

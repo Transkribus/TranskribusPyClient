@@ -30,7 +30,7 @@ print sessionID
 
 # ret = conn.getDocumentFromServer(colid, docid)
 #ret = conn.getDocumentFromServer("3571", "7750")
-data = conn.collections_fulldoc(_colId_A, _docId_b)
+data = conn.getDocById(_colId_A, _docId_b)
 print data
 
 

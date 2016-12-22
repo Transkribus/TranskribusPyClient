@@ -67,7 +67,7 @@ class DoHtrRnn(TranskribusClient):
         TranskribusClient.__init__(self, sServerUrl=self.sDefaultServerUrl, proxies=sHttpProxy, loggingLevel=loggingLevel)
     
     def run(self, sModelName, sDictName, colId, docId, sPages):
-        ret = self.recognition_htrRnnDecode(colId, sModelName, sDictName, docId, sPages)
+        ret = self.rehtrRnnDecodeolId, sModelName, sDictName, docId, sPages)
         return ret
 
 if __name__ == '__main__':

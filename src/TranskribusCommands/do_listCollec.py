@@ -96,7 +96,7 @@ class DoListCollec(TranskribusClient):
   u'uploaderId': 275}]
   
   """        
-        data = self.collections_list(colId)
+        data = self.listCollection(colId)
         if data:
             _d = data[0][u'collectionList'][u'colList'][0]
             print "Collection: %s  (%s)"%(_d[u'colName'], _d[u'colId'])

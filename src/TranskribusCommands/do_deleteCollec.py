@@ -93,7 +93,7 @@ if __name__ == '__main__':
     # --- 
     # do the job...
     try:
-        resp = doer.collection_deleteCollection(colId)
+        resp = doer.deleteCollection(colId)
     except Exception as e:  _exit("", 1, e)
         
     traceln("- Done")

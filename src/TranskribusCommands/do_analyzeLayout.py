@@ -3,10 +3,10 @@
 
 """
 
-    JL Meunier - Dec 2016
+    H. Déjean - Dec 2016
 
 
-    Copyright Xerox(C) 2016 JL. Meunier
+    Copyright Xerox(C) 2016 H. Déjean
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 
 """
 
-#    TranskribusCommands/do_copyDocToCollec.py 3571 3820 8251 8252
+#    TranskribusCommands/do_LAbatch.py 3571 3820 8251 8252
 
 
 #optional: useful if you want to choose the logging level to something else than logging.WARN
@@ -48,7 +48,7 @@ from common.trace import traceln, trace
 
 DEBUG = 0
 
-description = """Apply an HTR model.
+description = """Apply Layout Analysy (LA) with batch model.
 
 The syntax for specifying the page range is:
 - one or several specifiers separated by a comma
@@ -57,17 +57,17 @@ The syntax for specifying the page range is:
 
 """ + _Trnskrbs_description
 
-usage = """%s <model-name> <colId> <docId> [<pages>]
+usage = """%s <colId> <docId> [<pages>] <doNotBlockSeg> <doNotLineSeg>
 """%sys.argv[0]
 
-class DoHtr(TranskribusClient):
+class DoLAbatch(TranskribusClient):
     sDefaultServerUrl = _Trnskrbs_default_url
     #--- INIT -------------------------------------------------------------------------------------------------------------    
     def __init__(self, trnkbsServerUrl, sHttpProxy=None, loggingLevel=logging.WARN):
         TranskribusClient.__init__(self, sServerUrl=self.sDefaultServerUrl, proxies=sHttpProxy, loggingLevel=loggingLevel)
     
-    def run(self, sModelName, colId, docId, sPages):
-        ret = self.recognition_htrDecode(colId, sModelName, docId, sPages)
+    def run(self, colId, docId, sPages,bBlockSeg,bLineSeq):
+        ret = self.analyzeLayout(colId, docId, sPages,bBlockSeg,bLineSeq)
         return ret
 
 if __name__ == '__main__':
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     parser.description = description
     
     #"-s", "--server",  "-l", "--login" ,   "-p", "--pwd",   "--https_proxy"    OPTIONS
-    __Trnskrbs_basic_options(parser, DoHtr.sDefaultServerUrl)
+    __Trnskrbs_basic_options(parser, DoLAbatch.sDefaultServerUrl)
         
     # ---   
     #parse the command line
@@ -86,22 +86,24 @@ if __name__ == '__main__':
     proxies = {} if not options.https_proxy else {'https_proxy':options.https_proxy}
 
     # --- 
-    doer = DoHtr(options.server, proxies, loggingLevel=logging.WARN)
+    doer = DoLAbatch(options.server, proxies, loggingLevel=logging.WARN)
     __Trnskrbs_do_login_stuff(doer, options, trace=trace, traceln=traceln)
     # --- 
-    try:                        sModelName = args.pop(0)
-    except Exception as e:      _exit(usage, 1, e)
     try:                        colId = int(args.pop(0))
     except Exception as e:      _exit(usage, 1, e)
     try:                        docId   = int(args.pop(0))
     except Exception as e:      _exit(usage, 1, e)
     try:                        sPages = args.pop(0)
-    except Exception as e:      sPages = None
+    except Exception as e:      _exit(usage, 1, e)
+    try:                        doNotBlockSeg = int(args.pop(0)) == 0
+    except Exception as e:      doNotBlockSeg = False
+    try:                        doNotLineSeg = int(args.pop(0)) == 0
+    except Exception as e:      doNotLineSeg= False    
     if args:                    _exit(usage, 2, Exception("Extra arguments to the command"))
 
     # --- 
     # do the job...
-    jobid = doer.run(sModelName, colId, docId, sPages)
+    jobid = doer.run(colId, docId, sPages,not(doNotBlockSeg),not(doNotLineSeg))
     traceln(jobid)
         
     traceln()      
