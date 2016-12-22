@@ -148,6 +148,7 @@ class TranskribusClient():
         self.sREQ_recognition_htrRnn                = sServerUrl + '/rest/recognition/rnn'
         
         self.sREQ_jobs                              = sServerUrl + '/rest/jobs/%s'
+        self.sREQ_jobskill                          = sServerUrl + '/rest/jobs/%s/kill'
         
 #         self.sREQ_GetPAGEXML        = sServerUrl + '/rest/collections/%s/%s/%s'
 #         self.sREQ_PostPAGEXML       = sServerUrl + '/rest/collections/%s/%s/%s/text'
@@ -649,6 +650,17 @@ class TranskribusClient():
         resp.raise_for_status()
         return json.loads(resp.text)        
 
+    def deleteJob(self,jobid):
+        """
+            delete a job
+            check state for the deleted jobs. Must return CANCELED
+        """
+        self._assertLoggedIn()
+        myReq = self.sREQ_jobskill % (jobid)
+        resp = self.POST(myReq,{'id':jobid} ,sContentType=None)
+        resp.raise_for_status()
+        dInfo =self.getJobStatus(jobid)
+        return dInfo['state']       
 
     # --- Session Utilities -------------------------------------------------------------------
     @classmethod
