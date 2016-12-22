@@ -94,7 +94,7 @@ if __name__ == '__main__':
             traceln("- Logging onto Transkribus as %s and making a persistent session"%login)
             doer.cleanPersistentSession()
             resp = doer.auth_login(login, pwd, bPersist=options.persist)
-            traceln("\t --> %s"%os.path.join(DoLogin.sSESSION_FOLDER, DoLogin.sSESSION_FILENAME))
+            traceln("\t --> %s"%os.path.join(DoLogin._sSESSION_FOLDER, DoLogin._sSESSION_FILENAME))
         else:
             trace("- Checking Transkribus login as %s "%login)
             resp = doer.auth_login(login, pwd, bPersist=options.persist)

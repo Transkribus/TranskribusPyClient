@@ -96,11 +96,11 @@ class TranskribusClient():
     """
     
     #timestamp file extension
-    POSTFIX_MAX_TX = "_max.ts"
+    _POSTFIX_MAX_TX = "_max.ts"
     
     #persistent session folder and filename
-    sSESSION_FOLDER     = ".trnskrbs"
-    sSESSION_FILENAME   = "session.txt"
+    _sSESSION_FOLDER     = ".trnskrbs"
+    _sSESSION_FILENAME   = "session.txt"
             
     #--- --- INIT --- -------------------------------------------------------------------------------------------------------------    
     def __init__(self, sServerUrl="https://transkribus.eu/TrpServer"
@@ -167,12 +167,12 @@ class TranskribusClient():
             self._raiseError(Exception, "You are already logged in. Please logout before logging in.")
             
         data = {'user': sLogin, 'pw': sPwd}
-        resp = self.POST(self.sREQ_auth_login, data = {'user': sLogin, 'pw': sPwd}, sContentType=None)
+        resp = self._POST(self.sREQ_auth_login, data = {'user': sLogin, 'pw': sPwd}, sContentType=None)
         del data
         resp.raise_for_status()
         
         ##extract sessionID from xml
-        lsSessionId = self.xmlParse_xpathEval_getContent(resp.text, "//sessionId/text()")
+        lsSessionId = self._xmlParse__xpathEval_getContent(resp.text, "//sessionId/text()")
         
         self.setSessionId(lsSessionId[0])
         
@@ -189,7 +189,7 @@ class TranskribusClient():
         except: pass
         
         try:
-            resp = self.POST(self.sREQ_auth_logout)
+            resp = self._POST(self.sREQ_auth_logout)
             resp.raise_for_status()
         finally:
             self._sessionID = None
@@ -202,15 +202,15 @@ class TranskribusClient():
         Return the Transkribus data structure (XML as a DOM) 
         or raise an exception
 
-        Caller must free the DOM using the xmlFreeDoc method of this object.
+        Caller must free the DOM using the _xmlFreeDoc method of this object.
         """
         self._assertLoggedIn()
         myReq = self.sREQ_collection_listEditDeclFeats % (colId)
-        resp = self.GET(myReq)
+        resp = self._GET(myReq)
         resp.raise_for_status()
 
         #we get some json serialized data
-        return self.xmlParseDoc(resp.text)
+        return self._xmlParseDoc(resp.text)
 
     def collections_list(self, colId, index=None, nValues=None, sortColumn=None, sortDirection=None):
         """
@@ -222,7 +222,7 @@ class TranskribusClient():
         self._assertLoggedIn()
         myReq = self.sREQ_collection_list % (colId)
         params = self._buidlParamsDic(index=None, nValues=None, sortColumn=None, sortDirection=None)
-        resp = self.GET(myReq, params=params, accept="application/json")
+        resp = self._GET(myReq, params=params, accept="application/json")
         resp.raise_for_status()
 
         #we get some json serialized data
@@ -235,7 +235,7 @@ class TranskribusClient():
         """
         self._assertLoggedIn()
         myReq = self.sREQ_collection_createCollection
-        resp = self.POST(myReq, {'collName':sName }, sContentType=None)
+        resp = self._POST(myReq, {'collName':sName }, sContentType=None)
         resp.raise_for_status()
         return resp.text
         
@@ -246,7 +246,7 @@ class TranskribusClient():
         """
         self._assertLoggedIn()
         myReq = self.sREQ_collection+"/%s"%colId
-        resp = self.DELETE(myReq, { 'collId':colId })
+        resp = self._DELETE(myReq, { 'collId':colId })
         resp.raise_for_status()
         return resp.text
 
@@ -257,7 +257,7 @@ class TranskribusClient():
         """
         self._assertLoggedIn()
         myReq = self.sREQ_collection_collection%(colId, docId)
-        resp = self.DELETE(myReq, { 'collId':colId, 'id':docId })
+        resp = self._DELETE(myReq, { 'collId':colId, 'id':docId })
         resp.raise_for_status()
         return resp
  
@@ -272,7 +272,7 @@ class TranskribusClient():
         self._assertLoggedIn()
         myReq = self.sREQ_collection_fulldoc % (colId,docId)
         params = self._buidlParamsDic(nrOfTranscripts=None)
-        resp = self.GET(myReq, params=params,accept="application/json")
+        resp = self._GET(myReq, params=params,accept="application/json")
         resp.raise_for_status()
 
         #we get some json serialized data
@@ -284,19 +284,19 @@ class TranskribusClient():
         Return the Transkribus data structure (either parsed as a DOM or as a serialized XML, , i.e. a unicode string)
         or raise an exception
         
-        If you get a DOM, you need to free it afterward using the xmlFreeDoc method.
+        If you get a DOM, you need to free it afterward using the _xmlFreeDoc method.
         
         nrOfTranscripts can be either -1 (all), 0 (no transcripts) or any positive max. value of transcripts you want to receive per page.
         """
         self._assertLoggedIn()
         myReq = self.sREQ_collection_fulldoc_xml % (colId,docId)
         params = self._buidlParamsDic(nrOfTranscripts=nrOfTranscripts)
-        resp = self.GET(myReq, params=params)
+        resp = self._GET(myReq, params=params)
         resp.raise_for_status()
        
         #we should get some json serialized data   
         if bParse:
-            return self.xmlParseDoc(resp.text)
+            return self._xmlParseDoc(resp.text)
         else:     
             return resp.text
 
@@ -346,9 +346,9 @@ class TranskribusClient():
         myReq = self.sREQ_collections_postPageTranscript % (colId,docId,pnum)
         params = self._buidlParamsDic(overwrite=bOverwrite, note=sNote, parent=parentId, nrIsPageId=bPnumIsPageId)
         if bEncoded:
-            resp = self.POST(myReq, params=params, data=sXMlTranscript)
+            resp = self._POST(myReq, params=params, data=sXMlTranscript)
         else:
-            resp = self.POST(myReq, params=params, data=sXMlTranscript.encode(utf8))
+            resp = self._POST(myReq, params=params, data=sXMlTranscript.encode(utf8))
         resp.raise_for_status()
         return resp.text
     
@@ -363,7 +363,7 @@ class TranskribusClient():
         self._assertLoggedIn()
         #myReq = self.sREQ_collections_addDocToCollection % (colId) + "?id=%s"%docId
         myReq = self.sREQ_collections_addDocToCollection % (colId)
-        resp = self.POST(myReq, {'id':docId} , sContentType="*/*")
+        resp = self._POST(myReq, {'id':docId} , sContentType="*/*")
         resp.raise_for_status()
         # return resp.text  #return "" or something like " document is already in collection"
         #maise raise an exception upon server error
@@ -390,7 +390,7 @@ class TranskribusClient():
                     break
             if name == -1: raise Exception("Document '%d' is not in source collection '%d'"%(docId, colIdFrom))
         self._assertString(name, "name")            
-        resp = self.POST(myReq, {'name':name.encode(utf8), 'collId':colIdTo} )
+        resp = self._POST(myReq, {'name':name.encode(utf8), 'collId':colIdTo} )
         """
     NO WAY TO GET THE CREATED ID???
         print resp.headers
@@ -439,7 +439,7 @@ class TranskribusClient():
             docDir = os.path.join(collDir, str(docId))
 
             #Maybe we already have this version of the document??
-            stored_doc_ts_file = docDir+self.POSTFIX_MAX_TX
+            stored_doc_ts_file = docDir+self._POSTFIX_MAX_TX
             if os.path.exists(stored_doc_ts_file): 
                 with open(stored_doc_ts_file, 'r') as fd: stored_doc_ts = fd.read()
                 stored_doc_ts = int(stored_doc_ts)
@@ -514,14 +514,14 @@ class TranskribusClient():
             if not bNoImage:
                 destImgFilename = docDir + os.sep + imgFileName
                 logging.info("\t\t\t%s"%destImgFilename)
-                resp = self.GET(urlImage, stream=True)
+                resp = self._GET(urlImage, stream=True)
                 with open(destImgFilename, 'wb') as fd:
                     for chunk in resp.iter_content(10240):
                         fd.write(chunk)                
             sBaseName, _ = os.path.splitext(imgFileName)
             destXmlFilename = docDir + os.sep + sBaseName + ".pxml"
             logging.info("\t\t\t%s"%destXmlFilename)
-            resp = self.GET(urlXml)
+            resp = self._GET(urlXml)
             savefile=codecs.open(destXmlFilename,'wb','utf-8')
             savefile.write(resp.text)  
             savefile.close()  
@@ -556,7 +556,7 @@ class TranskribusClient():
         self._assertLoggedIn()
         myReq = self.sREQ_LA_batch
         params = self._buidlParamsDic(collId=colId, id=docId, pages=sPages, doBlockSeg=bBlockSeg, doLineSeq=bLineSeq)
-        resp = self.POST(myReq, params=params, sContentType=None)
+        resp = self._POST(myReq, params=params, sContentType=None)
         resp.raise_for_status()
         return resp.text       
     
@@ -582,7 +582,7 @@ class TranskribusClient():
         """
         self._assertLoggedIn()
         myReq = self.sREQ_recognition_htrModels
-        resp = self.GET(myReq, accept="application/json")
+        resp = self._GET(myReq, accept="application/json")
         resp.raise_for_status()
         #we get some json serialized data
         return json.loads(resp.text)
@@ -598,7 +598,7 @@ class TranskribusClient():
         self._assertLoggedIn()
         myReq = self.sREQ_recognition_htr
         params = self._buidlParamsDic(collId=colId, modelName=sHtrModelName, id=docId, pages=sPages)
-        resp = self.POST(myReq, params=params)
+        resp = self._POST(myReq, params=params)
         resp.raise_for_status()
         return resp.text
 
@@ -611,7 +611,7 @@ class TranskribusClient():
         """
         self._assertLoggedIn()
         myReq = self.sREQ_recognition_htrRnnModels
-        resp = self.GET(myReq, accept="text/plain")
+        resp = self._GET(myReq, accept="text/plain")
         resp.raise_for_status()
         return resp.text
         
@@ -625,7 +625,7 @@ class TranskribusClient():
         """
         self._assertLoggedIn()
         myReq = self.sREQ_recognition_htrRnnDicts
-        resp = self.GET(myReq, accept="text/plain")
+        resp = self._GET(myReq, accept="text/plain")
         resp.raise_for_status()
         return resp.text
         
@@ -640,7 +640,7 @@ class TranskribusClient():
         self._assertLoggedIn()
         myReq = self.sREQ_recognition_htrRnn
         params = self._buidlParamsDic(collId=colId, modelName=sHtrModelName, dict=sDictName, id=docId, pages=sPages)
-        resp = self.POST(myReq, params=params)
+        resp = self._POST(myReq, params=params)
         resp.raise_for_status()
         return resp.text
 
@@ -650,15 +650,14 @@ class TranskribusClient():
     
     def getJobStatus(self,jobid):
         """
-            return the job status ( dictionary)
-            keys are:
-                jobId,docId, pageNr,pages,type,state,success,description,userName,userId,createTime,startTime,endTime,jobData,resumable,jobImpl
-            state values: CREATED, RUNNING, FINISHED, FAILED
-            
+        return the job status ( dictionary)
+        keys are the strings:
+            jobId, docId, pageNr, pages, type, state, success, description, userName, userId, createTime, startTime, endTime, jobData, resumable, jobImpl
+        state values: "CREATED", "RUNNING", "FINISHED", "FAILED"
         """
         self._assertLoggedIn()
         myReq = self.sREQ_jobs % (jobid)
-        resp = self.GET(myReq, accept="application/json")
+        resp = self._GET(myReq, accept="application/json")
         resp.raise_for_status()
         return json.loads(resp.text)        
 
@@ -702,7 +701,7 @@ class TranskribusClient():
         raise an Exception if no session stored
         return True
         """
-        sSessionFilename = os.path.join(self.sSESSION_FOLDER, self.sSESSION_FILENAME)
+        sSessionFilename = os.path.join(self._sSESSION_FOLDER, self._sSESSION_FILENAME)
         with open(sSessionFilename, "rb") as fd:
             sSessionId = cPickle.load(fd)
         self.setSessionId(sSessionId)
@@ -716,16 +715,16 @@ class TranskribusClient():
         return True or raises an exception
         """
         #The folder
-        if os.path.exists(self.sSESSION_FOLDER):
-            if not os.path.isdir(self.sSESSION_FOLDER):
-                sMsg = "'%s' exists and is not a directory"%self.sSESSION_FOLDER
+        if os.path.exists(self._sSESSION_FOLDER):
+            if not os.path.isdir(self._sSESSION_FOLDER):
+                sMsg = "'%s' exists and is not a directory"%self._sSESSION_FOLDER
                 raise Exception(sMsg)
         else:
-            os.mkdir(self.sSESSION_FOLDER)
-        os.chmod(self.sSESSION_FOLDER, 0700)
+            os.mkdir(self._sSESSION_FOLDER)
+        os.chmod(self._sSESSION_FOLDER, 0700)
     
         #the file
-        sSessionFilename = os.path.join(self.sSESSION_FOLDER, self.sSESSION_FILENAME)
+        sSessionFilename = os.path.join(self._sSESSION_FOLDER, self._sSESSION_FILENAME)
         if os.path.exists(sSessionFilename):
             if  os.path.isfile(sSessionFilename):
                 os.unlink(sSessionFilename)
@@ -745,10 +744,10 @@ class TranskribusClient():
         return True or raises an exception
         """    
                 #The folder
-        if os.path.exists(self.sSESSION_FOLDER):
-            if os.path.isdir(self.sSESSION_FOLDER):
+        if os.path.exists(self._sSESSION_FOLDER):
+            if os.path.isdir(self._sSESSION_FOLDER):
                 #the file
-                sSessionFilename = os.path.join(self.sSESSION_FOLDER, self.sSESSION_FILENAME)
+                sSessionFilename = os.path.join(self._sSESSION_FOLDER, self._sSESSION_FILENAME)
                 if os.path.exists(sSessionFilename):
                     if  os.path.isfile(sSessionFilename):
                         os.unlink(sSessionFilename)
@@ -758,7 +757,7 @@ class TranskribusClient():
                         raise Exception(sMsg)
             else:
                 #should be a directory if it exists!!
-                sMsg = "'%s' exists and is not a directory"%self.sSESSION_FOLDER
+                sMsg = "'%s' exists and is not a directory"%self._sSESSION_FOLDER
                 raise Exception(sMsg)
                         
         return True
@@ -796,7 +795,7 @@ class TranskribusClient():
             logging.info("- %s proxy set to : '%s'"%(sProtocol, sUrl))
         return True
         
-    def POST(self, sRequest, params={}, data={}, sContentType = "application/xml"):
+    def _POST(self, sRequest, params={}, data={}, sContentType = "application/xml"):
         """
         if you set sContentType to None or "", nothing is specified in the request header
         """
@@ -806,11 +805,11 @@ class TranskribusClient():
         return requests.post(sRequest, params=params, headers=dHeader
                              , proxies=self._dProxies, data=data, verify=False)        
 
-    def DELETE(self, sRequest, params={}, data={}):
+    def _DELETE(self, sRequest, params={}, data={}):
         return requests.delete(sRequest, params=params, headers={'Cookie':'JSESSIONID=%s'%self._sessionID}
                                , proxies=self._dProxies, data=data, verify=False)        
         
-    def GET(self, sRequest, params={}, stream=None, accept="application/xml"):
+    def _GET(self, sRequest, params={}, stream=None, accept="application/xml"):
         if stream == None: #not sure what is the default value...
             return requests.get(sRequest, params=params, headers={'Cookie':'JSESSIONID=%s'%self._sessionID, 'Accept':accept}
                                 , proxies=self._dProxies, verify=False)
@@ -827,16 +826,16 @@ class TranskribusClient():
     
     # --- XML Utilities --- -------------------------------------------------------------------
 
-    def xmlParseDoc(self, sXml):
+    def _xmlParseDoc(self, sXml):
         """
         Parse a serialized XML and return a DOM, which the caller must free later on!
         """
         return libxml2.parseDoc(sXml.encode(utf8))
     
-    def xmlFreeDoc(self, doc):
+    def _xmlFreeDoc(self, doc):
         return doc.freeDoc()
     
-    def xpathEval(self, domDoc, sXpathExpr, dNS=None):
+    def _xpathEval(self, domDoc, sXpathExpr, dNS=None):
         """
         run some XPATH expression on the dom
         """
@@ -847,16 +846,16 @@ class TranskribusClient():
         ctxt.xpathFreeContext()
         return ret
 
-    def xmlParse_xpathEval_getContent(self, sXml, sXpathExpr):
+    def _xmlParse__xpathEval_getContent(self, sXml, sXpathExpr):
         """
         run some XPATH expression on the response payload, considered as a serialized XML
         """
-        domDoc = self.xmlParseDoc(sXml)
+        domDoc = self._xmlParseDoc(sXml)
         ctxt = domDoc.xpathNewContext()
         lNd = ctxt.xpathEval(sXpathExpr)
         ret = [nd.getContent() for nd in lNd]
         ctxt.xpathFreeContext()
-        self.xmlFreeDoc(domDoc)
+        self._xmlFreeDoc(domDoc)
         return ret
 
     
