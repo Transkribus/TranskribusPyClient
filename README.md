@@ -1,21 +1,37 @@
 # TranskribusPyClient
+
 A Pythonic API and some command line tools to access the Transkribus server via its REST API
 
 
+**Commands**
 
+ * do_addDocToCollec.py
+ * do_copyDocToCollec.py
+ * do_createCollec.py
+ * do_deleteCollec.py
+ * do_htr.py
+ * do_htrRnn.py
+ * do_LAbatch.py
+ * do_listCollec.py
+ * do_listHtrModels.py
+ * do_listHtrRnn.py
+ * do_login.py
+ * do_logout.py
+ * Transkribus_downloader.py
+ * TranskribusDU_transcriptUploader.py
+
+**Help on module client:**
 
 Also see in [TranskribusPyClient/client.html](http://htmlpreview.github.com/?https://github.com/Transkribus/TranskribusPyClient/blob/master/src/TranskribusPyClient/client.html
 )
 
-Help on module client:
-
-NAME
+  NAME
     client - Transkribus REST API for Python clients
 
-FILE
+  FILE
     c:\local\meunier\git\transkribuspyclient\src\transkribuspyclient\client.py
 
-DESCRIPTION
+  DESCRIPTION
     WORK IN PROGRESS...
     
     Copyright Xerox(C) 2016 H. Déjean, JL. Meunier
@@ -38,7 +54,7 @@ DESCRIPTION
     from the European Union’s Horizon 2020 research and innovation programme 
     under grant agreement No 674943.
 
-CLASSES
+  CLASSES
     TranskribusClient
     
     class TranskribusClient
@@ -305,10 +321,10 @@ CLASSES
      |  getStoredCredentials(cls, bAsk=False) from __builtin__.classobj
      |      alias for module function
 
-FUNCTIONS
+  FUNCTIONS
     getStoredCredentials(bAsk=False)
 
-DATA
+  DATA
     utf8 = 'utf-8'
 
 
