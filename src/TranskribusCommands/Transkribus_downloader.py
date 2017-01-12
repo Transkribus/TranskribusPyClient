@@ -94,7 +94,7 @@ class TranskribusDownloader(TranskribusClient):
                 os.mkdir(sDir)
 
         col_max_ts,ldocids = self.download_collection(colId, os.path.join(colDir,sCOL), bForce, bNoImage)
-        with open(destDir+os.sep+sCOL+TranskribusClient.POSTFIX_MAX_TX, "w") as fd: fd.write("%s"%col_max_ts) #"col_max.ts" file
+        with open(destDir+os.sep+sCOL+TranskribusClient._POSTFIX_MAX_TX, "w") as fd: fd.write("%s"%col_max_ts) #"col_max.ts" file
 
         return col_max_ts, colDir, ldocids
     
@@ -105,10 +105,10 @@ class TranskribusDownloader(TranskribusClient):
         """
         lsXmlFilename = list()
         traceln("- Generating multi_page PageXml")
-        lsDocMaxTSFilename = sorted(glob.iglob(os.path.join(colDir, "*%s"%TranskribusClient.POSTFIX_MAX_TX)), reverse=True)  # *_max.ts files
+        lsDocMaxTSFilename = sorted(glob.iglob(os.path.join(colDir, "*%s"%TranskribusClient._POSTFIX_MAX_TX)), reverse=True)  # *_max.ts files
         for sDocMaxTSFilename in lsDocMaxTSFilename:
             
-            docDir = sDocMaxTSFilename[:-len(TranskribusClient.POSTFIX_MAX_TX)]
+            docDir = sDocMaxTSFilename[:-len(TranskribusClient._POSTFIX_MAX_TX)]
             traceln("\t- %s"%docDir)
             
             doc = self.makeMultiPageXml(docDir)
