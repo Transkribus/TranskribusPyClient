@@ -65,9 +65,11 @@ class DoListHtrRnn(TranskribusClient):
         """
         2 textual lists
         """
-        sModels = self.reclistRnnsText        traceln("\n--- Models ---------------------------")
+        sModels = self.listRnnsText()        
+        traceln("\n--- Models ---------------------------")
         traceln(sModels)
-        sDicts = self.reclistDictsText        traceln("\n--- Dictionaries ---------------------")
+        sDicts = self.listDictsText()        
+        traceln("\n--- Dictionaries ---------------------")
         traceln(sDicts)
         return sModels, sDicts
 
