@@ -89,7 +89,7 @@ class TranskribusTranscriptUploader(TranskribusClient):
             traceln("  Done (collection %s)"%colid)
         return
 
-    def uploadDocumentTranscript(self, colid, docid, sColDSDir, sTranscripExt=sTRANSCRIPT_EXTENSION, iVerbose=0):
+    def uploadDocumentTranscript(self, colid, docid, sColDSDir, sNote=None,sTranscripExt=sTRANSCRIPT_EXTENSION, iVerbose=0):
         """
         Upload the transscripts of all document in that collection into Transkribus
         return nothing
@@ -108,7 +108,7 @@ class TranskribusTranscriptUploader(TranskribusClient):
                 else: trace(".")
                 flush()
             sXMlTranscript = pageDoc.serialize("utf-8", True)
-            self.postPageTranscript(colid, docid, pnum, sXMlTranscript, bEncoded=True)
+            self.postPageTranscript(colid, docid, pnum,sNote, sXMlTranscript, bEncoded=True)
         if iVerbose > 1: traceln("")
         
         doc.freeDoc()
