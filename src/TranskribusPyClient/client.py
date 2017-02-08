@@ -408,7 +408,7 @@ class TranskribusClient():
         # requests.exceptions.HTTPError: 500 Server Error: Internal Server Error for url: https://transkribus.eu/TrpServer/rest/collections/3820/addDocToCollection?id=66666
         return True
         
-    def download_collection(self, colId, collDir, bForce=False, bNoImage=False):        
+    def download_collection(self, colId, collDir, bForce=False, bNoImage=False,sDocId=None):        
         """
         Convenience method, not provided directly by the Transkribus API.
         
@@ -431,32 +431,37 @@ class TranskribusClient():
         lDocInfo = self.listDocsByCollectionId(colId)
         # store collections metadata 
         with codecs.open(collDir+os.sep+"trp.json", "wb",'utf-8') as fd: json.dump(lDocInfo, fd, indent=2)
-        
         ldocID = []
         for docInfo in lDocInfo:
+            bSkip=False
             docId = docInfo['docId']  #int here!!!
-            ldocID.append(str(docId))
-            docDir = os.path.join(collDir, str(docId))
+            if sDocId is not None:
+                if docId != sDocId:
+                    bSkip=True 
+            if not bSkip:
+                ldocID.append(str(docId))
+                docDir = os.path.join(collDir, str(docId))
+    
+                #Maybe we already have this version of the document??
+                stored_doc_ts_file = docDir+self._POSTFIX_MAX_TX
+                if os.path.exists(stored_doc_ts_file): 
+                    with open(stored_doc_ts_file, 'r') as fd: stored_doc_ts = fd.read()
+                    stored_doc_ts = int(stored_doc_ts)
+                else:
+                    stored_doc_ts = None    
+                                
+                doc_max_ts = self.download_document(colId, docId, docDir, min_ts=stored_doc_ts, bForce=bForce, bNoImage=bNoImage)
+                
+                assert doc_max_ts >= stored_doc_ts, "Server side data older than disk data???"
+                if doc_max_ts == stored_doc_ts:
+                    #NOTE: we did not check each page!!
+                    logging.info("\tcollection %s, document %s, data on disk is UP-TO-DATE - I do nothing else."%(colId, docId))
+                else:
+                    with open(stored_doc_ts_file, "w") as fd: fd.write("%s"%doc_max_ts) 
+                
+                coll_max_ts = max(coll_max_ts, doc_max_ts)
+                logging.info("- DONE (downloaded doc %s)"%(docId))
 
-            #Maybe we already have this version of the document??
-            stored_doc_ts_file = docDir+self._POSTFIX_MAX_TX
-            if os.path.exists(stored_doc_ts_file): 
-                with open(stored_doc_ts_file, 'r') as fd: stored_doc_ts = fd.read()
-                stored_doc_ts = int(stored_doc_ts)
-            else:
-                stored_doc_ts = None    
-                            
-            doc_max_ts = self.download_document(colId, docId, docDir, min_ts=stored_doc_ts, bForce=bForce, bNoImage=bNoImage)
-            
-            assert doc_max_ts >= stored_doc_ts, "Server side data older than disk data???"
-            if doc_max_ts == stored_doc_ts:
-                #NOTE: we did not check each page!!
-                logging.info("\tcollection %s, document %s, data on disk is UP-TO-DATE - I do nothing else."%(colId, docId))
-            else:
-                with open(stored_doc_ts_file, "w") as fd: fd.write("%s"%doc_max_ts) 
-            
-            coll_max_ts = max(coll_max_ts, doc_max_ts)
-            
         logging.info("- DONE (downloaded collection %s into folder %s    (bForce=%s))"%(colId, collDir, bForce))
         return coll_max_ts, ldocID
         
