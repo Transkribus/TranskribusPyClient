@@ -93,56 +93,54 @@ class TranskribusDownloader(TranskribusClient):
             else:
                 os.mkdir(sDir)
 
-        col_max_ts,ldocids = self.download_collection(colId, os.path.join(colDir,sCOL), bForce, bNoImage,sDocId)
+        col_max_ts,ldocids, dFileListPerDoc = self.download_collection(colId, os.path.join(colDir,sCOL), bForce, bNoImage,sDocId)
         with open(destDir+os.sep+sCOL+TranskribusClient._POSTFIX_MAX_TX, "w") as fd: fd.write("%s"%col_max_ts) #"col_max.ts" file
 
-        return col_max_ts, colDir, ldocids
+        return col_max_ts, colDir, ldocids, dFileListPerDoc
     
-    def generateCollectionMultiPageXml(self, colDir, bStrict):
+    def generateCollectionMultiPageXml(self, colDir, dFileListPerDoc, bStrict):
         """
         We concatenate all pages into a "multi-page PageXml" for each document of the collection
         return the list of XML filenames
         """
         lsXmlFilename = list()
         traceln("- Generating multi_page PageXml")
-        lsDocMaxTSFilename = sorted(glob.iglob(os.path.join(colDir, "*%s"%TranskribusClient._POSTFIX_MAX_TX)), reverse=True)  # *_max.ts files
-        for sDocMaxTSFilename in lsDocMaxTSFilename:
-            
-            docDir = sDocMaxTSFilename[:-len(TranskribusClient._POSTFIX_MAX_TX)]
-            traceln("\t- %s"%docDir)
-            
-            doc = self.makeMultiPageXml(docDir)
-
-            sXmlFilename = docDir+sMPXMLExtension
-            self.writeDom(doc, sXmlFilename, True)
-            lsXmlFilename.append(sXmlFilename)
-
-            trace("\t\t- validating the MultiPageXml ...")
-            if not PageXml.MultiPageXml.validate(doc): 
-                if bStrict:
-                    raise ValueError("Invalid XML generated in '%s'"%sXmlFilename)
-                else:
-                    traceln("   *** WARNING: XML file is invalid against the schema: '%s'"%sXmlFilename)
-            traceln(" Ok!")
+#         lsDocMaxTSFilename = sorted(glob.iglob(os.path.join(colDir, "*%s"%TranskribusClient._POSTFIX_MAX_TX)), reverse=True)  # *_max.ts files
+        for docId in dFileListPerDoc.keys():
+            if dFileListPerDoc[docId] is not None:
+                lFiles= map(lambda x:os.path.join(colDir,docId,x+".pxml"),dFileListPerDoc[docId] )
+                docDir = os.path.join(colDir,docId)
+                traceln("\t- %s"%docDir)
                 
-            if DEBUG>1:
-                PageXml.MultiPageXml.splitMultiPageXml(doc, docDir, "debug_%d.xml", bIndent=True)
-            
-            doc.freeDoc()
-            traceln('\t- %s'%sXmlFilename)
+                doc = self.makeMultiPageXml(lFiles)
+    
+                sXmlFilename = docDir+sMPXMLExtension
+                self.writeDom(doc, sXmlFilename, True)
+                lsXmlFilename.append(sXmlFilename)
+    
+                trace("\t\t- validating the MultiPageXml ...")
+                if not PageXml.MultiPageXml.validate(doc): 
+                    if bStrict:
+                        raise ValueError("Invalid XML generated in '%s'"%sXmlFilename)
+                    else:
+                        traceln("   *** WARNING: XML file is invalid against the schema: '%s'"%sXmlFilename)
+                traceln(" Ok!")
+                    
+                if DEBUG>1:
+                    PageXml.MultiPageXml.splitMultiPageXml(doc, docDir, "debug_%d.xml", bIndent=True)
+                
+                doc.freeDoc()
+                traceln('\t- %s'%sXmlFilename)
 
         
         return lsXmlFilename
             
-    def makeMultiPageXml(self, docDir):
+    def makeMultiPageXml(self, slFilenames):
         """
         We concatenate all pages into a "multi-page PageXml"
         return a DOM
         """
-        lsXmlDocFilename = sorted(glob.iglob(os.path.join(docDir, "*.pxml")))
-        assert lsXmlDocFilename, "ERROR: a document should contain at least one XML file (extension .pxml): %s"%docDir
-        
-        doc = PageXml.MultiPageXml.makeMultiPageXml(lsXmlDocFilename)
+        doc = PageXml.MultiPageXml.makeMultiPageXml(slFilenames)
         
         return doc
                 
@@ -200,12 +198,12 @@ if __name__ == '__main__':
     __Trnskrbs_do_login_stuff(trnkbs2ds, options, trace=trace, traceln=traceln)
     
     traceln("- Downloading collection %s to folder %s"%(colid, os.path.abspath(destDir)))
-    col_ts, colDir,ldocids = trnkbs2ds.downloadCollection(colid, destDir, bForce=options.bForce, bNoImage=options.bNoImage,sDocId=options.docid)
+    col_ts, colDir,ldocids, dFileListPerDoc = trnkbs2ds.downloadCollection(colid, destDir, bForce=options.bForce, bNoImage=options.bNoImage,sDocId=options.docid)
     traceln("- Done")
     
     with open(os.path.join(colDir, "config.txt"), "w") as fd: fd.write("server=%s\nforce=%s\nstrict=%s\n"%(options.server, options.bForce, options.bStrict))
     
-    trnkbs2ds.generateCollectionMultiPageXml(os.path.join(colDir, sCOL), options.bStrict)
+    trnkbs2ds.generateCollectionMultiPageXml(os.path.join(colDir, sCOL), dFileListPerDoc,options.bStrict)
     
     traceln('- Done, see in %s'%colDir)
     

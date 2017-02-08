@@ -432,6 +432,7 @@ class TranskribusClient():
         # store collections metadata 
         with codecs.open(collDir+os.sep+"trp.json", "wb",'utf-8') as fd: json.dump(lDocInfo, fd, indent=2)
         ldocID = []
+        dLFileList= {}
         for docInfo in lDocInfo:
             bSkip=False
             docId = docInfo['docId']  #int here!!!
@@ -449,9 +450,8 @@ class TranskribusClient():
                     stored_doc_ts = int(stored_doc_ts)
                 else:
                     stored_doc_ts = None    
-                                
-                doc_max_ts = self.download_document(colId, docId, docDir, min_ts=stored_doc_ts, bForce=bForce, bNoImage=bNoImage)
-                
+                doc_max_ts, lfileList = self.download_document(colId, docId, docDir, min_ts=stored_doc_ts, bForce=bForce, bNoImage=bNoImage)
+                dLFileList[str(docId)]=lfileList
                 assert doc_max_ts >= stored_doc_ts, "Server side data older than disk data???"
                 if doc_max_ts == stored_doc_ts:
                     #NOTE: we did not check each page!!
@@ -463,7 +463,7 @@ class TranskribusClient():
                 logging.info("- DONE (downloaded doc %s)"%(docId))
 
         logging.info("- DONE (downloaded collection %s into folder %s    (bForce=%s))"%(colId, collDir, bForce))
-        return coll_max_ts, ldocID
+        return coll_max_ts, ldocID, dLFileList
         
 
     def download_document(self, colId, docId, docDir, min_ts=None, bForce=False, bNoImage=False):        
@@ -487,7 +487,7 @@ class TranskribusClient():
         if doc_max_ts <= min_ts:
             #no need to download
             #NOTE: we do not check each page!!
-            return doc_max_ts
+            return doc_max_ts, None
 
         #Ok, we must refresh the disk
         if os.path.exists(docDir):
@@ -507,10 +507,13 @@ class TranskribusClient():
         # store document metadata 
         with codecs.open(docDir+os.sep+"trp.json", "wb",'utf-8') as fd: json.dump(trp, fd, indent=2)
         
+        lFileList= []
         for page in pageList['pages']:
             pagenum= page['pageNr']
             logging.info("\t\t- page %s"%pagenum)
             imgFileName = page['imgFileName']
+            base,_= os.path.splitext(imgFileName)
+            lFileList.append(base)
             urlImage= page['url']
             dicTranscript0 = page['tsList']["transcripts"][0]
             urlXml = dicTranscript0['url']
@@ -534,7 +537,7 @@ class TranskribusClient():
         with open(docDir+os.sep+"max.ts", "w") as fd: fd.write("%s"%doc_max_ts) 
 
         logging.info("- DONE (downloaded collection %s, document %s into folder %s    (bForce=%s))"%(colId, docId, docDir, bForce))
-        return doc_max_ts
+        return doc_max_ts, lFileList
 
 
     def getListofLockedPages(self, colid, docid, page):
