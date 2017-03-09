@@ -62,18 +62,7 @@ class DoListHtrModels(TranskribusClient):
         TranskribusClient.__init__(self, sServerUrl=self.sDefaultServerUrl, proxies=sHttpProxy, loggingLevel=loggingLevel)
     
     def run(self):
-        lDic = self.reclistHmmHtrModels        """
-                    [
-                {
-                    "modelName": "Marine_Lives",
-                    "nrOfTokens": 0,
-                    "isUsableInTranskribus": 1,
-                    "nrOfDictTokens": 0,
-                    "nrOfLines": 0,
-                    "modelId": 45
-                },
-             ...       
-        """
+        lDic = self.listHmmHtrModels()      
         #traceln(json.dumps(data, indent=4))
         traceln( strTabularFormat(lDic, ["modelName", "modelId", "isUsableInTranskribus", "nrOfTokens", "nrOfDictTokens", "nrOfLines"], "modelName")   )     
         return lDic
