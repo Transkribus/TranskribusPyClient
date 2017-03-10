@@ -108,7 +108,7 @@ class TranskribusTranscriptUploader(TranskribusClient):
                 else: trace(".")
                 flush()
             sXMlTranscript = pageDoc.serialize("utf-8", True)
-            self.postPageTranscript(colid, docid, pnum,sNote, sXMlTranscript, bEncoded=True)
+            self.postPageTranscript(colid, docid, pnum,sXMlTranscript, bEncoded=True, sNote=sNote)
         if iVerbose > 1: traceln("")
         
         doc.freeDoc()
