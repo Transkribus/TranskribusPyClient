@@ -401,11 +401,11 @@ assert type(sXml) == types.UnicodeType
 # ret = conn.getDocumentFromServer(colid, docid)
 #ret = conn.getDocumentFromServer("3571", "7750")
 #data = conn.collections_postPageTranscript(3989, 8255, 1, "New", sXml, sNote="test by JL")
-dpostPageTranscripteTranscript(3989, 8255, 1, sXml)
+data = conn.postPageTranscript(1949, 3784, 1, sXml)
 print data
 
 
-conn.setProxiespostPageTranscript00'})
+conn.setProxies({'https':'http://cornillon:8000'})
 
 print conn.auth_logout()
 
