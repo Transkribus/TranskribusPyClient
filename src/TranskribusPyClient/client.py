@@ -134,6 +134,8 @@ class TranskribusClient():
         self.sREQ_collection_listEditDeclFeats      = sServerUrl + '/rest/collections/%s/listEditDeclFeats'
         self.sREQ_collection_list                   = sServerUrl + '/rest/collections/%s/list'
         self.sREQ_collection_createCollection       = sServerUrl + '/rest/collections/createCollection'
+        self.sREQ_collection_createDocument         = sServerUrl + '/rest/collections/%s/upload'
+
         self.sREQ_collection_fulldoc                = sServerUrl + '/rest/collections/%s/%s/fulldoc'
         self.sREQ_collection_fulldoc_xml            = sServerUrl + '/rest/collections/%s/%s/fulldoc.xml'
         self.sREQ_collections_postPageTranscript    = sServerUrl + '/rest/collections/%s/%s/%s/text'
@@ -250,6 +252,22 @@ class TranskribusClient():
         resp.raise_for_status()
         return resp.text
 
+    def createDocument(self,colId,zipFileStreamIO):
+        """
+            upload a set of images in a folder
+            images must be zipped
+
+            
+        """
+        from cStringIO import StringIO
+
+        self._assertLoggedIn()
+        print zipFileStreamIO
+        myReq = self.sREQ_collection_createDocument % colId
+        resp = self._POST(myReq, data=zipFileStreamIO,sContentType='application/octet-stream')
+        resp.raise_for_status()
+        return resp.text
+        
     def deleteDocument(self, colId, docId):
         """
         delete a document from a collection
