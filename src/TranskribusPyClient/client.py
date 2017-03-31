@@ -259,10 +259,8 @@ class TranskribusClient():
 
             
         """
-        from cStringIO import StringIO
 
         self._assertLoggedIn()
-        print zipFileStreamIO
         myReq = self.sREQ_collection_createDocument % colId
         resp = self._POST(myReq, data=zipFileStreamIO,sContentType='application/octet-stream')
         resp.raise_for_status()
