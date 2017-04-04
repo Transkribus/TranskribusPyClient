@@ -708,7 +708,7 @@ class TranskribusClient():
         """
         self._assertLoggedIn()
         myReq = self.sREQ_jobskill % (jobid)
-        resp = self.POST(myReq,{'id':jobid} ,sContentType=None)
+        resp = self._POST(myReq,{'id':jobid} ,sContentType=None)
         resp.raise_for_status()
         dInfo =self.getJobStatus(jobid)
         return dInfo['state']       
