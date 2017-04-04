@@ -149,6 +149,7 @@ class TranskribusClient():
         self.sREQ_recognition_htrRnnModels          = sServerUrl + '/rest/recognition/nets'
         self.sREQ_recognition_htrRnnDicts           = sServerUrl + '/rest/recognition/dicts'
         self.sREQ_recognition_htrRnn                = sServerUrl + '/rest/recognition/rnn'
+        self.sREQ_recognition_htrTrainCITlab        = sServerUrl + '/rest/recognition/htrTrainingCITlab'
         
         self.sREQ_jobs                              = sServerUrl + '/rest/jobs/%s'
         self.sREQ_jobskill                          = sServerUrl + '/rest/jobs/%s/kill'
@@ -588,6 +589,19 @@ class TranskribusClient():
     
 
     # --------RECOGNITION-----------------------------------------------------------------------------------
+    
+    
+    ## training
+    def htrTrainingCITlab(self,XMLconf):
+        """
+        train an HTR with information stored in XMLconf 
+        """ 
+        self._assertLoggedIn()
+
+        myReq = self.sREQ_recognition_htrTrainCITlab
+        resp = self._POST(myReq, data = XMLconf)
+        resp.raise_for_status()
+        return resp.text        
     
     def listHmmHtrModels(self):
         """
