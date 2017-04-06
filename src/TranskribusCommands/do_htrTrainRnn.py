@@ -158,7 +158,8 @@ class DoHtrRnnTrain(TranskribusClient):
         node = libxml2.newNode('testList')
         rootNode.addChild(node)     
         
-        for docid,nbpages in listDocID:
+        print listDocID
+        for docid,(pageid,tsid) in listDocID:
             trainNode = libxml2.newNode('train')
             trainListNode.addChild(trainNode)
             docID= libxml2.newNode('docId')
@@ -166,16 +167,17 @@ class DoHtrRnnTrain(TranskribusClient):
             docID.setContent("%d"%docid)
             pageList= libxml2.newNode('pageList')
             trainNode.addChild(pageList)
-            for i in range(0,nbpages):
-                pages= libxml2.newNode('pages')
-                pageList.addChild(pages)
-                pageId=libxml2.newNode('pageId')
-                pageId.setContent('%d'%(i+1))
-                pages.addChild(pageId)
-                tsId=libxml2.newNode('tsId')
-                tsId.setContent('%d'% (i+1))
-                pages.addChild(tsId)      
-                
+#             for i in range(0,nbpages):
+            pages= libxml2.newNode('pages')
+            pageList.addChild(pages)
+            pageId=libxml2.newNode('pageId')
+            pageId.setContent('%d'%(pageid))
+            pages.addChild(pageId)
+            tsId=libxml2.newNode('tsId')
+            tsId.setContent('%d'% (tsid))
+            pages.addChild(tsId)      
+        traceln('config:')
+        traceln(confDoc.serialize('utf-8',True))  
         return   confDoc.serialize('utf-8',True)        
         
         
@@ -206,7 +208,7 @@ if __name__ == '__main__':
     except Exception as e:      _exit(usage, 1, e)
     try:                        docId   = int(args.pop(0))
     except Exception as e:      _exit(usage, 1, e)
-    try:                        nbPages   = int(args.pop(0))
+    try:                        PagesTSID   = eval(args.pop(0))
     except Exception as e:      _exit(usage, 1, e)
     try:                        sPages = args.pop(0)
     except Exception as e:      sPages = None
@@ -214,7 +216,7 @@ if __name__ == '__main__':
 
     # --- 
     # do the job...
-    xmlconf = doer.createXMLConf(sModelName,colId,((docId,nbPages),))
+    xmlconf = doer.createXMLConf(sModelName,colId,((docId,PagesTSID),))
     jobid = doer.run(xmlconf)
     traceln(jobid)
         
