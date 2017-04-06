@@ -146,13 +146,14 @@ class TranskribusClient():
         self.sREQ_recognition                       = sServerUrl + '/rest/recognition'
         self.sREQ_recognition_htrModels             = sServerUrl + '/rest/recognition/htrModels'
         self.sREQ_recognition_htr                   = sServerUrl + '/rest/recognition/htr'
-        self.sREQ_recognition_htrRnnModels          = sServerUrl + '/rest/recognition/nets'
+        self.sREQ_recognition_htrRnnModels          = sServerUrl + '/rest/recognition/nets' #htrModels' #/rest/recognition/nets'
         self.sREQ_recognition_htrRnnDicts           = sServerUrl + '/rest/recognition/dicts'
         self.sREQ_recognition_htrRnn                = sServerUrl + '/rest/recognition/rnn'
         self.sREQ_recognition_htrTrainCITlab        = sServerUrl + '/rest/recognition/htrTrainingCITlab'
         
         self.sREQ_jobs                              = sServerUrl + '/rest/jobs/%s'
         self.sREQ_jobskill                          = sServerUrl + '/rest/jobs/%s/kill'
+        self.sREQ_getJobs                          =  sServerUrl + '/rest/jobs/list'
         
 #         self.sREQ_GetPAGEXML        = sServerUrl + '/rest/collections/%s/%s/%s'
 #         self.sREQ_PostPAGEXML       = sServerUrl + '/rest/collections/%s/%s/%s/text'
@@ -563,7 +564,7 @@ class TranskribusClient():
         """
         self._assertLoggedIn()
         myReq = self.sREQ_collections_listPagesLocks% (colid,docid,page)
-        resp = self.GET(myReq, accept="application/json")
+        resp = self._GET(myReq, accept="application/json")
         resp.raise_for_status()
         #return resp.text        
         return json.loads(resp.text)
@@ -713,6 +714,13 @@ class TranskribusClient():
         dInfo =self.getJobStatus(jobid)
         return dInfo['state']       
 
+    def getJobs(self):
+        self._assertLoggedIn()
+        myReq = self.sREQ_getJobs
+        resp = self._GET(myReq,accept="application/json")
+        resp.raise_for_status()
+        return json.loads(resp.text)   
+    
     # --- Session Utilities -------------------------------------------------------------------
     @classmethod
     def getStoredCredentials(cls, bAsk=False):
