@@ -46,6 +46,7 @@ from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options,
 from TranskribusPyClient.client import TranskribusClient
 from common.trace import traceln, trace
 
+import json
 DEBUG = 0
 
 description = """Get the status of a Transkribus job.
@@ -95,5 +96,5 @@ if __name__ == '__main__':
     try:
         resp = doer.getJobStatus(jobid)
     except Exception as e:  _exit("", 1, e)
-    traceln(resp)
+    traceln( json.dumps(resp, sort_keys=True, indent=4, separators=(',', ': ')))
     
