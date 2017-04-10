@@ -147,6 +147,8 @@ class TranskribusClient():
         self.sREQ_recognition_htrModels             = sServerUrl + '/rest/recognition/htrModels'
         self.sREQ_recognition_htr                   = sServerUrl + '/rest/recognition/htr'
         self.sREQ_recognition_htrRnnModels          = sServerUrl + '/rest/recognition/nets' #htrModels' #/rest/recognition/nets'
+        self.sREQ_recognition_htrRnnModels          = sServerUrl + '/rest/recognition/htrModels'
+
         self.sREQ_recognition_htrRnnDicts           = sServerUrl + '/rest/recognition/dicts'
         self.sREQ_recognition_htrRnn                = sServerUrl + '/rest/recognition/rnn'
         self.sREQ_recognition_htrTrainCITlab        = sServerUrl + '/rest/recognition/htrTrainingCITlab'
