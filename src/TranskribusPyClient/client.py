@@ -330,6 +330,7 @@ class TranskribusClient():
                                        , sNote=None
                                        , parentId=None
                                        , bPnumIsPageId=None
+                                       ,sToolName=None
                                        , bEncoded=False):  #bEncoded is not part of official API, it is a convenience for Pythonic API
         """
         Post a new transcript for a page
@@ -364,7 +365,7 @@ class TranskribusClient():
         self._assertLoggedIn()
         if not bEncoded: self._assertUnicode(sXMlTranscript)
         myReq = self.sREQ_collections_postPageTranscript % (colId,docId,pnum)
-        params = self._buidlParamsDic(overwrite=bOverwrite, note=sNote, parent=parentId, nrIsPageId=bPnumIsPageId)
+        params = self._buidlParamsDic(overwrite=bOverwrite, note=sNote, parent=parentId, nrIsPageId=bPnumIsPageId,toolName=sToolName)
         if bEncoded:
             resp = self._POST(myReq, params=params, data=sXMlTranscript)
         else:
