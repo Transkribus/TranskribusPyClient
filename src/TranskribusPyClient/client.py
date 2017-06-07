@@ -34,6 +34,7 @@ import codecs
 import json
 import shutil
 import cPickle
+from common.trace import trace,flush
 
 import libxml2
 
@@ -554,7 +555,8 @@ class TranskribusClient():
             savefile=codecs.open(destXmlFilename,'wb','utf-8')
             savefile.write(resp.text)  
             savefile.close()  
-            
+            trace('.')
+            flush()
         with open(docDir+os.sep+"max.ts", "w") as fd: fd.write("%s"%doc_max_ts) 
 
         logging.info("- DONE (downloaded collection %s, document %s into folder %s    (bForce=%s))"%(colId, docId, docDir, bForce))
