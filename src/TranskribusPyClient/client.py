@@ -149,6 +149,7 @@ class TranskribusClient():
         self.sREQ_recognition_htr                   = sServerUrl + '/rest/recognition/htr'
         self.sREQ_recognition_htrRnnModels          = sServerUrl + '/rest/recognition/nets' #htrModels' #/rest/recognition/nets'
         self.sREQ_recognition_htrRnnModels          = sServerUrl + '/rest/recognition/htrModels'
+        self.sREQ_recognition_listHtr               = sServerUrl + '/rest/recognition/%s/list'               
 
         self.sREQ_recognition_htrRnnDicts           = sServerUrl + '/rest/recognition/dicts'
         self.sREQ_recognition_htrRnn                = sServerUrl + '/rest/recognition/rnn'
@@ -649,6 +650,18 @@ class TranskribusClient():
         return resp.text
 
     # ---
+    
+    def listRnns(self,colid):
+        """
+            
+        """
+        self._assertLoggedIn()
+        myReq = self.sREQ_recognition_listHtr % (colid)
+        params = self._buidlParamsDic(prov='CITlab')
+        resp = self._GET(myReq, params=params, accept="application/json")
+        resp.raise_for_status()
+        return json.loads(resp.text)
+        
     def listRnnsText(self):
         """
         List the HTR RNN models

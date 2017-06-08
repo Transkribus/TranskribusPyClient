@@ -61,17 +61,21 @@ class DoListHtrRnn(TranskribusClient):
     def __init__(self, trnkbsServerUrl, sHttpProxy=None, loggingLevel=logging.WARN):
         TranskribusClient.__init__(self, sServerUrl=self.sDefaultServerUrl, proxies=sHttpProxy, loggingLevel=loggingLevel)
     
-    def run(self):
+    def run(self,colid=None):
         """
         2 textual lists
         """
+        sColModels=None
+        if colid is not None:
+            sColModels = self.listRnns(colid)
+            traceln(sColModels)
         sModels = self.listRnnsText()        
         traceln("\n--- Models ---------------------------")
         traceln(sModels)
         sDicts = self.listDictsText()        
         traceln("\n--- Dictionaries ---------------------")
         traceln(sDicts)
-        return sModels, sDicts
+        return sModels, sDicts, sColModels
 
 if __name__ == '__main__':
     version = "v.01"
@@ -79,7 +83,7 @@ if __name__ == '__main__':
     #prepare for the parsing of the command line
     parser = OptionParser(usage=usage, version=version)
     parser.description = description
-    
+    parser.add_option("--colid", dest='colid', type='string', default=None, help = 'get models linked to the colid')
     #"-s", "--server",  "-l", "--login" ,   "-p", "--pwd",   "--https_proxy"    OPTIONS
     __Trnskrbs_basic_options(parser, DoListHtrRnn.sDefaultServerUrl)
         
@@ -87,14 +91,14 @@ if __name__ == '__main__':
     #parse the command line
     (options, args) = parser.parse_args()
     proxies = {} if not options.https_proxy else {'https_proxy':options.https_proxy}
-
+    print options.colid
     # --- 
     doer = DoListHtrRnn(options.server, proxies, loggingLevel=logging.WARN)
     __Trnskrbs_do_login_stuff(doer, options, trace=trace, traceln=traceln)
 
     # --- 
     # do the job...
-    doer.run()
+    doer.run(options.colid)
         
     traceln()      
     traceln("- Done")
