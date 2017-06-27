@@ -152,7 +152,7 @@ class TranskribusClient():
         self.sREQ_recognition_listHtr               = sServerUrl + '/rest/recognition/%s/list'               
 
         self.sREQ_recognition_htrRnnDicts           = sServerUrl + '/rest/recognition/dicts'
-        self.sREQ_recognition_htrRnn                = sServerUrl + '/rest/recognition/rnn'
+        self.sREQ_recognition_htrRnn                = sServerUrl + '/rest/recognition/%s/%s/htrCITlab'
         self.sREQ_recognition_htrTrainCITlab        = sServerUrl + '/rest/recognition/htrTrainingCITlab'
         
         self.sREQ_jobs                              = sServerUrl + '/rest/jobs/%s'
@@ -645,6 +645,7 @@ class TranskribusClient():
         self._assertLoggedIn()
         myReq = self.sREQ_recognition_htr
         params = self._buidlParamsDic(collId=colId, modelName=sHtrModelName, id=docId, pages=sPages)
+        print params
         resp = self._POST(myReq, params=params)
         resp.raise_for_status()
         return resp.text
@@ -688,7 +689,7 @@ class TranskribusClient():
         resp.raise_for_status()
         return resp.text
         
-    def htrRnnDecode(self, colId, sHtrModelName, sDictName, docId, sPages):
+    def htrRnnDecode(self, colId, sRnnModelID, sDictName, docId, sPages):
         """
         Do the HTR using the given RNN model and dictionary.
         - Maybe you can set sPages to None, or both docId and sPage to None ?? 
@@ -697,8 +698,9 @@ class TranskribusClient():
         or raise an exception
         """
         self._assertLoggedIn()
-        myReq = self.sREQ_recognition_htrRnn
-        params = self._buidlParamsDic(collId=colId, modelName=sHtrModelName, dict=sDictName, id=docId, pages=sPages)
+        myReq = self.sREQ_recognition_htrRnn % (colId,sRnnModelID)
+#         params = self._buidlParamsDic(collId=colId, modelName=sRnnModelID, dict=sDictName, id=docId, pages=sPages)
+        params = self._buidlParamsDic(dict=sDictName, id=docId, pages=sPages)
         resp = self._POST(myReq, params=params)
         resp.raise_for_status()
         return resp.text

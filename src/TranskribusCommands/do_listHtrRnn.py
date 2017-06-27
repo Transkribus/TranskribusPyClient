@@ -91,7 +91,6 @@ if __name__ == '__main__':
     #parse the command line
     (options, args) = parser.parse_args()
     proxies = {} if not options.https_proxy else {'https_proxy':options.https_proxy}
-    print options.colid
     # --- 
     doer = DoListHtrRnn(options.server, proxies, loggingLevel=logging.WARN)
     __Trnskrbs_do_login_stuff(doer, options, trace=trace, traceln=traceln)
