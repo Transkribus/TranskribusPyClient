@@ -65,17 +65,24 @@ class DoListHtrRnn(TranskribusClient):
         """
         2 textual lists
         """
+        sModels=None
         sColModels=None
         if colid is not None:
             sColModels = self.listRnns(colid)
-            traceln(sColModels)
-        sModels = self.listRnnsText()        
-        traceln("\n--- Models ---------------------------")
-        traceln(sModels)
+            for models in sColModels:
+                #some old? models do not have params field
+                try: traceln("%s\t%s\t%s" % (models['htrId'],models['name'],models['params']))
+                except KeyError: traceln("%s\t%s\tno params" % (models['htrId'],models['name']))             
+
+        else:
+            sModels = self.listRnnsText()        
+            traceln("\n--- Models ---------------------------")
+            traceln(sModels)
+            
         sDicts = self.listDictsText()        
         traceln("\n--- Dictionaries ---------------------")
         traceln(sDicts)
-        return sModels, sDicts, sColModels
+        return sModels, sColModels, sDicts
 
 if __name__ == '__main__':
     version = "v.01"
