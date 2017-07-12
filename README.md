@@ -15,7 +15,7 @@ A Pythonic API and some command line tools to access the Transkribus server via 
 * pip install libxml2_python-2.9.3‑cp27‑none‑win_amd64.whl
 
 
-**Commands**
+### Commands ###
 
 * do_addDocToCollec.py
 * do_createCollec.py
