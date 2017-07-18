@@ -32,7 +32,7 @@ login="jean-luc.meunier@xrce.xerox.com"
 passwd="my_password was here"
 
 #some existing collection with read access for you
-coldId=3571
+colId=3571
 #2 existing documents, forming a small range
 docId_A=7749
 docId_B=7750
@@ -95,7 +95,7 @@ echo "OK"
 
 echo
 echo "- copying doc $docId_A from collection $colId to the new collection"
-$PYTHON $SRC/TranskribusCommands/do_copyDocToCollec.py --persist $colId $tmp_col_id $docId_A  || error "collection copy error 1"
+$PYTHON $SRC/TranskribusCommands/do_duplicateDoc.py --persist $colId $tmp_col_id $docId_A  || error "collection copy error 1"
 echo "OK"
 
 
