@@ -2,8 +2,20 @@
 
 A Pythonic API and some command line tools to access the Transkribus server via its REST API
 
+### Requirements, installation & testing
 
-**Commands**
+#### Python and Pip
+
+* Install the latest release of [Python] 2.7.x
+* Install [pip]
+
+### Installation for Windows
+
+* download from [LIBXML2]
+* pip install libxml2_python-2.9.3‑cp27‑none‑win_amd64.whl
+
+
+### Commands ###
 
 * do_addDocToCollec.py
 * do_createCollec.py
@@ -30,3 +42,8 @@ A Pythonic API and some command line tools to access the Transkribus server via 
 
 See in [TranskribusPyClient/client.html](http://htmlpreview.github.com/?https://github.com/Transkribus/TranskribusPyClient/blob/master/src/TranskribusPyClient/client.html
 )
+
+
+[Python]: <https://www.python.org>
+[Pip]: <https://pip.pypa.io/en/stable/installing/>
+[LIBXML2]: <http://www.lfd.uci.edu/~gohlke/pythonlibs/#libxml-python>

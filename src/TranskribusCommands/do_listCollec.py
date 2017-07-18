@@ -96,9 +96,9 @@ class DoListCollec(TranskribusClient):
   u'uploaderId': 275}]
   
   """        
-        data = self.listCollection(colId)
+        data = self.listDocsByCollectionId(colId)
         if data:
-            _d = data[0][u'collectionList'][u'colList'][0]
+            _d = data[0][u'collectionList'][u'colList'][-1]
             print "Collection: %s  (%s)"%(_d[u'colName'], _d[u'colId'])
             
             while data:
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     # --- 
     doer = DoListCollec(options.server, proxies, loggingLevel=logging.INFO)
     __Trnskrbs_do_login_stuff(doer, options, trace=trace, traceln=traceln)
-
+    
     # --- 
     # do the job...
     for colId in lColId:

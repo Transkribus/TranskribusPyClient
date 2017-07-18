@@ -66,8 +66,8 @@ class DoHtrRnn(TranskribusClient):
     def __init__(self, trnkbsServerUrl, sHttpProxy=None, loggingLevel=logging.WARN):
         TranskribusClient.__init__(self, sServerUrl=self.sDefaultServerUrl, proxies=sHttpProxy, loggingLevel=loggingLevel)
     
-    def run(self, sModelName, sDictName, colId, docId, sPages):
-        ret = self.htrRnnDecode(colId, sModelName, sDictName, docId, sPages)
+    def run(self, sModelID, sDictName, colId, docId, sPages):
+        ret = self.htrRnnDecode(colId, sModelID, sDictName, docId, sPages)
         return ret
 
 if __name__ == '__main__':
@@ -89,7 +89,7 @@ if __name__ == '__main__':
     doer = DoHtrRnn(options.server, proxies, loggingLevel=logging.WARN)
     __Trnskrbs_do_login_stuff(doer, options, trace=trace, traceln=traceln)
     # --- 
-    try:                        sModelName = args.pop(0)
+    try:                        sModelID = args.pop(0)
     except Exception as e:      _exit(usage, 1, e)
     try:                        sDictName = args.pop(0)
     except Exception as e:      _exit(usage, 1, e)
@@ -103,7 +103,7 @@ if __name__ == '__main__':
 
     # --- 
     # do the job...
-    jobid = doer.run(sModelName, sDictName, colId, docId, sPages)
+    jobid = doer.run(sModelID, sDictName, colId, docId, sPages)
     traceln(jobid)
         
     traceln()      

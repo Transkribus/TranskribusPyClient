@@ -44,9 +44,14 @@ except ImportError:
     sys.path.append( os.path.dirname(os.path.dirname( os.path.abspath(sys.argv[0]) )) )
     import TranskribusPyClient_version
 
-from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit
+from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit,\
+    sCOL
 from TranskribusPyClient.client import TranskribusClient
 from common.trace import traceln, trace
+import  codecs
+import json
+from random import shuffle
+
 
 DEBUG = 0
 
@@ -59,7 +64,7 @@ The syntax for specifying the page range is:
 
 """ + _Trnskrbs_description
 
-usage = """%s <model-name>  <colId> <docId> [<pages>]
+usage = """%s <model-name> <colDir> <colId> <docId> [<pages>]
 """%sys.argv[0]
 
 class DoHtrRnnTrain(TranskribusClient):
@@ -68,12 +73,13 @@ class DoHtrRnnTrain(TranskribusClient):
     def __init__(self, trnkbsServerUrl, sHttpProxy=None, loggingLevel=logging.WARN):
         TranskribusClient.__init__(self, sServerUrl=self.sDefaultServerUrl, proxies=sHttpProxy, loggingLevel=loggingLevel)
     
+        self.percTest=0.1
     def run(self, XMLConf):
         ret = self.htrTrainingCITlab(XMLConf)
         return ret
 
 
-    def createXMLConf(self,sModelName,colID,listDocID,sDesc='A description',lang='lang',numEpochs=200,learningRate=2e-3,noise='both',trainSizePerEpoch=1000):
+    def createXMLConf(self,sModelName,colID,lTrain,lTest,sDesc='A description',lang='lang',numEpochs=200,learningRate=2e-3,noise='both',trainSizePerEpoch=1000):
         """
             create the XML configuration file
             see https://transkribus.eu/wiki/index.php/HTR
@@ -155,11 +161,9 @@ class DoHtrRnnTrain(TranskribusClient):
         
         trainListNode = libxml2.newNode('trainList')
         rootNode.addChild(trainListNode)
-        node = libxml2.newNode('testList')
-        rootNode.addChild(node)     
-        
-        print listDocID
-        for docid,(pageid,tsid) in listDocID:
+        testListNode = libxml2.newNode('testList')
+        rootNode.addChild(testListNode)     
+        for docid,pageid,tsid in lTrain:
             trainNode = libxml2.newNode('train')
             trainListNode.addChild(trainNode)
             docID= libxml2.newNode('docId')
@@ -176,10 +180,52 @@ class DoHtrRnnTrain(TranskribusClient):
             tsId=libxml2.newNode('tsId')
             tsId.setContent('%d'% (tsid))
             pages.addChild(tsId)      
+
+        for docid,pageid,tsid in lTest:
+            testNode = libxml2.newNode('test')
+            testListNode.addChild(testNode)
+            docID= libxml2.newNode('docId')
+            testNode.addChild(docID)
+            docID.setContent("%d"%docid)
+            pageList= libxml2.newNode('pageList')
+            testNode.addChild(pageList)
+#             for i in range(0,nbpages):
+            pages= libxml2.newNode('pages')
+            pageList.addChild(pages)
+            pageId=libxml2.newNode('pageId')
+            pageId.setContent('%d'%(pageid))
+            pages.addChild(pageId)
+            tsId=libxml2.newNode('tsId')
+            tsId.setContent('%d'% (tsid))
+            pages.addChild(tsId) 
+        
         traceln('config:')
         traceln(confDoc.serialize('utf-8',True))  
         return   confDoc.serialize('utf-8',True)        
+    
+    def createTrainTest(self,sColDir, colId, docId):
+        """
+            create train and test set
         
+        pageList / pages /  pageNr /    tsList / transcripts[0] / tsId
+        
+        """
+        trpFile = os.path.join(sColDir,sCOL,str(docId),'trp.json')
+        if not( os.path.exists(trpFile)):
+            raise ValueError("Non-existing trp.json file %s" % trpFile)
+        with codecs.open(trpFile, "rb",'utf-8') as fd: jTrp = json.load(fd)
+        
+        lAlltsId=[]
+        for page in jTrp['pageList']['pages']:
+            lAlltsId.append((docId,page['pageId'],page['tsList']['transcripts'][0]['tsId']))
+#             print page['pageId'], page['tsList']['transcripts'][0]['tsId']
+        
+        shuffle(lAlltsId)
+        lngTest=  int(round(len(lAlltsId) * self.percTest))
+        lngTrain = len(lAlltsId) - lngTest
+#         print len(lAlltsId), lngTrain,lngTest, lngTrain + lngTest
+#         print len(lAlltsId[:lngTrain]),len(lAlltsId[-lngTest:])
+        return lAlltsId[:lngTrain],lAlltsId[-lngTest:]
         
 if __name__ == '__main__':
     version = "v.01"
@@ -201,24 +247,28 @@ if __name__ == '__main__':
     
     doer = DoHtrRnnTrain(options.server, proxies, loggingLevel=logging.WARN)
     __Trnskrbs_do_login_stuff(doer, options, trace=trace, traceln=traceln)
-    # --- 
+    
     try:                        sModelName = args.pop(0)
     except Exception as e:      _exit(usage, 1, e)
+    try:                        sColDir = args.pop(0)
+    except Exception as e:      _exit(usage, 1, e)    
     try:                        colId = int(args.pop(0))
     except Exception as e:      _exit(usage, 1, e)
     try:                        docId   = int(args.pop(0))
     except Exception as e:      _exit(usage, 1, e)
-    try:                        PagesTSID   = eval(args.pop(0))
-    except Exception as e:      _exit(usage, 1, e)
+#     try:                        PagesTSID   = eval(args.pop(0))
+#     except Exception as e:      _exit(usage, 1, e)
     try:                        sPages = args.pop(0)
     except Exception as e:      sPages = None
     if args:                    _exit(usage, 2, Exception("Extra arguments to the command"))
 
+    
     # --- 
     # do the job...
-    xmlconf = doer.createXMLConf(sModelName,colId,((docId,PagesTSID),))
+    lTrain,lTest = doer.createTrainTest(sColDir, colId,docId)
+    xmlconf = doer.createXMLConf(sModelName,colId,lTrain,lTest,sDesc = "ABP 7047 85 pages", lang='German', numEpochs=500)
     jobid = doer.run(xmlconf)
-    traceln(jobid)
+#     traceln(jobid)
         
     traceln()      
     traceln("- Done")
