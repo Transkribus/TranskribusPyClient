@@ -98,7 +98,7 @@ class DoListCollec(TranskribusClient):
   """        
         data = self.listDocsByCollectionId(colId)
         if data:
-            _d = data[0][u'collectionList'][u'colList'][0]
+            _d = data[0][u'collectionList'][u'colList'][-1]
             print "Collection: %s  (%s)"%(_d[u'colName'], _d[u'colId'])
             
             while data:
@@ -138,7 +138,6 @@ if __name__ == '__main__':
     # --- 
     # do the job...
     for colId in lColId:
-        doer.run(colId)
         try:
             doer.run(colId)
         except Exception as e:
