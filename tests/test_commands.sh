@@ -29,7 +29,7 @@
 
 #transkribus valid login
 login="jean-luc.meunier@xrce.xerox.com"
-passwd="my_password was here"
+passwd="my_password_here"
 
 #some existing collection with read access for you
 colId=3571
@@ -38,6 +38,7 @@ docId_A=7749
 docId_B=7750
 
 PYTHON=python
+#PYTHON=/c/Anaconda2/python.exe
 
 # ------------------------------------------------------------------------------------------------------------------------
 # ---  GENERIC STUF BELOW
@@ -58,58 +59,67 @@ function error {
 
 #---------------------------------------------------
 #cleaning any persistent login info
-echo
-echo "- logout"
+echo "==================================================================="
+echo "--- logout"
 tmp_col_id=`$PYTHON $SRC/TranskribusCommands/do_logout.py --persist`
 echo "OK"
 
 #testing a bad login
 echo
-echo "- login"
+echo "--- login"
 tmp_col_id=`$PYTHON $SRC/TranskribusCommands/do_login.py --persist -l "tilla" -p "miaouuuu"` && error "login should have failed"
+echo
 echo "OK"
 
 #making a login and persisting the session token
 echo
-echo "- login"
+echo "--- login"
 tmp_col_id=`$PYTHON $SRC/TranskribusCommands/do_login.py --persist -l "$login" -p "$passwd"` || error "login error"
 echo "OK"
 
 #---------------------------------------------------
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
 
 echo
-echo "- creating a collection $tmp_col_name"
+echo "--- creating a collection $tmp_col_name"
 tmp_col_id=`$PYTHON $SRC/TranskribusCommands/do_createCollec.py --persist $tmp_col_name` || error "collection creation error"
 echo "--> $tmp_col_id"
+echo "OK"
 
 #---------------------------------------------------
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
 echo
-echo "- adding doc $docId_A - $docId_B to the new collection"
+echo "--- adding doc $docId_A - $docId_B to the new collection"
 $PYTHON $SRC/TranskribusCommands/do_addDocToCollec.py --persist $tmp_col_id $docId_A  || error "collection add error 1"
 echo "OK"
 
 echo
-echo "- adding doc $docId_A - $docId_B to the new collection"
+echo "--- adding doc $docId_A - $docId_B to the new collection"
 $PYTHON $SRC/TranskribusCommands/do_addDocToCollec.py --persist $tmp_col_id $docId_A-$docId_B  || error "collection add error 2"
 echo "OK"
 
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
 echo
-echo "- copying doc $docId_A from collection $colId to the new collection"
+echo "--- copying doc $docId_A from collection $colId to the new collection"
 $PYTHON $SRC/TranskribusCommands/do_duplicateDoc.py --persist $colId $tmp_col_id $docId_A  || error "collection copy error 1"
 echo "OK"
 
 
 #---------------------------------------------------
-
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
 echo
-echo "- listing collection $colId "
+echo "--- listing collection $colId "
 $PYTHON $SRC/TranskribusCommands/do_listCollec.py --persist $colId  || error "collection list error"
 echo "OK"
 
 #---------------------------------------------------
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
 echo
-echo "- deleting it ($tmp_col_id)"
+echo "--- deleting it ($tmp_col_id)"
 tmp_col_id=`$PYTHON $SRC/TranskribusCommands/do_deleteCollec.py --persist $tmp_col_id` || error "collection deletion error"
-echo "--> done"
+echo "OK"
+
+echo "==================================================================="
+echo "TESTs done"
 
 
