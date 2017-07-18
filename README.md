@@ -14,6 +14,9 @@ A Pythonic API and some command line tools to access the Transkribus server via 
 * download from [LIBXML2]
 * pip install libxml2_python-2.9.3‑cp27‑none‑win_amd64.whl
 
+### TranskribusDU ###
+
+Install(clone) [TranskribusDU] in the same folder (TranskribusDU and TranskribusPyClient must be in the same folder. Do not change their names)
 
 ### Commands ###
 
@@ -47,3 +50,4 @@ See in [TranskribusPyClient/client.html](http://htmlpreview.github.com/?https://
 [Python]: <https://www.python.org>
 [Pip]: <https://pip.pypa.io/en/stable/installing/>
 [LIBXML2]: <http://www.lfd.uci.edu/~gohlke/pythonlibs/#libxml-python>
+[TranskribusDU] <https://github.com/Transkribus/TranskribusDU>
