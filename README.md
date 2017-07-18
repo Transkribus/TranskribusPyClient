@@ -50,4 +50,4 @@ See in [TranskribusPyClient/client.html](http://htmlpreview.github.com/?https://
 [Python]: <https://www.python.org>
 [Pip]: <https://pip.pypa.io/en/stable/installing/>
 [LIBXML2]: <http://www.lfd.uci.edu/~gohlke/pythonlibs/#libxml-python>
-[TranskribusDU] <https://github.com/Transkribus/TranskribusDU>
+[TranskribusDU]: <https://github.com/Transkribus/TranskribusDU>
