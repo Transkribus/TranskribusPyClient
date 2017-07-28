@@ -160,7 +160,7 @@ class TranskribusDownloader(TranskribusClient):
 #             doc.saveFileEnc(self.getOutputFileName(),"UTF-8")
      
 if __name__ == '__main__':
-    usage = "%s <colid> [<directory>]"%sys.argv[0]
+    usage = "%s [-f|--force] [--strict] [--docid <id>] [--noImage] <colid> [<directory>]"%sys.argv[0]
     version = "v.02"
     description = "Extract a collection from transkribus and create a DS test structure containing that collection. \n" + _Trnskrbs_description
 
