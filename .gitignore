@@ -219,3 +219,7 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+src/Transkribus_credential.py
+*.keep
+src/Transkribus_credential.py
+/trnskrbs_3820/
