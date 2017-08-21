@@ -128,6 +128,43 @@ class TranskribusClient():
 #         
 #         
         self.sREQ_LA_batch          = sServerUrl + '/rest/LA/batch'
+        """
+            Hi Hervé,
+        
+        Sebastian has done the integration of the tools and can answer more indepth questions.
+        
+        Please take a look at:
+        https://transkribus.eu/TrpServer/Swadl/wadl.html
+        
+        or
+        
+        https://transkribus.eu/TrpServer/rest/application.wadl
+        
+        The new methods are at:
+        /LA/analyze
+        
+        Valid values for the jobImpl parameter are:
+        NcsrLaJob
+        CvlLaJob
+        
+        You have to post a list of descriptor objects either as XML or JSON to the service, specifying the pages that have to be analyzed. A single page descriptor would look like this (regionId optional):
+        <documentSelectionDescriptor>
+            <docId>1</docId>
+            <pageList>
+                <pages>
+                    <pageId>2</pageId>
+                    <tsId>3</tsId>
+                    <regionIds>aRegionId</regionIds>
+                </pages>
+            </pageList>
+        </documentSelectionDescriptor>
+        
+        Do let us know if there are any problems with the new method.
+        
+        Best regards and have a nice weekend,
+        Philip
+        
+        """        
 #     
 #         self.sREQ_LALines           = sServerUrl + '/rest/LA/lines'
 #         self.sREQ_LABaseLines       = sServerUrl + '/rest/LA/baselines'
