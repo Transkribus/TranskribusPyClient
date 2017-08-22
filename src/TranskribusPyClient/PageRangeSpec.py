@@ -26,6 +26,7 @@
     under grant agreement No 674943.
     
 """
+import types
 
 class PageRangeSpec:
     def __init__(self, sPageRange=""):
@@ -59,59 +60,88 @@ class PageRangeSpec:
         
     def __str__(self): return ",".join( "%d-%d"%(a,b) if a != b else "%d"%a for (a,b) in self._ltAB )
     
+    #Emulating Container type...
     def __iter__(self):
         """
         Iterator returning each page number in turn
         """    
         for a,b in self._ltAB:
-            for n in range(a,b+1):
-                yield n
+            for n in range(a,b+1): yield n
         raise StopIteration
     
+    def __reversed__(self):
+        """
+        Reversed iterator
+        If we do not provide it, we must provide a __getitem__ (boring to code and how useful??)
+        """
+        for a,b in reversed(self._ltAB):
+            for n in range(b,a-1,-1): yield n
+        raise StopIteration        
+        
     def __len__(self):
         return sum(b-a+1 for a,b in self._ltAB)
+
+    def __contains__(self, item):
+        if type(item) != types.IntType: raise ValueError("A page range contains integer values not %s"%type(item))
+        a, b = None, None
+        for a,b in self._ltAB:
+            if b >= item: break
+        return a<= item and item <= b
+
+def test_good_spec(capsys):
+    def container_test(o, lref):
+        assert list(o) == lref
+        assert list(reversed(o)) == list(reversed(lref))
+        for item in lref: assert item in o
+        assert -99 not in o
         
-def test_good_spec():
     o = PageRangeSpec("1")
-    assert list(o) == [1]
+#     with capsys.disabled():
+#         print "YOOOOOOOOOOOOOOOOOOOOOOOOOOO ", list(reversed(o))    
+    container_test(o, [1])
     
     o = PageRangeSpec("99")
-    assert list(o) == [99]    
+    container_test(o, [99])    
     
     o = PageRangeSpec("1,99")
-    assert list(o) == [1, 99]      
+    container_test(o, [1, 99])      
     
     o = PageRangeSpec("1-5")
-    assert list(o) == range(1, 6)
+    container_test(o, range(1, 6))
 
     o = PageRangeSpec("1-5,6-88")
-    assert list(o) == range(1, 6)+range(6, 89)          
+    container_test(o, range(1, 6)+range(6, 89))          
     
     o = PageRangeSpec("1-3,4-8")
-    assert list(o) == range(1, 9)   
+    container_test(o, range(1, 9))   
     assert len(o) == len(range(1, 9)) 
 
 def test_spaced_good_spec():
+    def container_test(o, lref):
+        assert list(o) == lref
+        assert list(reversed(o))== list(reversed(lref))
+        for item in lref: assert item in o
+        assert -99 not in o
+        
     o = PageRangeSpec(" 1\t\t")
-    assert list(o) == [1]
+    container_test(o, [1])
     
     o = PageRangeSpec("99  ")
-    assert list(o) == [99]    
+    container_test(o, [99])    
     
     o = PageRangeSpec("1  , 99")
-    assert list(o) == [1, 99]      
+    container_test(o, [1, 99])      
     
     o = PageRangeSpec(" 1\t- 5\t")
-    assert list(o) == range(1, 6)
+    container_test(o, range(1, 6))
 
     o = PageRangeSpec("1-5, 6-88")
-    assert list(o) == range(1, 6)+range(6, 89)          
+    container_test(o, range(1, 6)+range(6, 89))          
     
     o = PageRangeSpec("1 -3\t,4- 8")
-    assert list(o) == range(1, 9)   
+    container_test(o, range(1, 9))
     assert len(o) == len(range(1, 9)) 
 
-    
 def test_errors():
     import pytest
     with pytest.raises(ValueError): PageRangeSpec("1 3")
