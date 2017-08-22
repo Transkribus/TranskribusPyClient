@@ -5,7 +5,7 @@
     
     A class to deal with page range specifications like 1-5,8
     
-    Copyright Naver(C) 2017 JL. Meunier
+    Copyright Naver(C) 2017, JL. Meunier, August 2017
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,6 +29,21 @@
 import types
 
 class PageRangeSpec:
+    """
+    A page range object
+    
+    - at creation, pass a page range specification of the form: 1  or 1-3  or 1,3  or 1,5-7,8
+            PAGERANGESPEC = RANGE [, RANGE]+
+        where RANGE if either an integer or 2 integer separated by a '-'
+            RANGE = N
+            RANGE = N-N
+        Spaces are ignored, apart between digits.
+    - the object is a container that supports:
+        - iteration
+        - len()
+        - reversed()
+        - contains test (if n in o: ...)
+    """
     def __init__(self, sPageRange=""):
         self._ltAB = self.parseSpec(sPageRange)
         assert str(self) == "".join(sPageRange.split())
