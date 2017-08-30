@@ -128,6 +128,7 @@ class TranskribusClient():
 #         
 #         
         self.sREQ_LA_batch          = sServerUrl + '/rest/LA/batch'
+        self.sREQ_LA_analyze        = sServerUrl + '/rest/LA/analyze'
         """
             Hi Hervé,
         
@@ -614,7 +615,7 @@ class TranskribusClient():
         
     # -------LAYOUT ANALYSIS ------------------------------------------------------------------------------------------
     
-    def analyzeLayout(self,colId, docId, sPages, bBlockSeg, bLineSeq):
+    def analyzeLayoutBatch(self,colId, docId, sPages, bBlockSeg, bLineSeq):
         """
         apply Layout Analysis
             int colId, 
@@ -630,7 +631,7 @@ class TranskribusClient():
         resp = self._POST(myReq, params=params, sContentType=None)
         resp.raise_for_status()
         return resp.text       
-    
+
 
     # --------RECOGNITION-----------------------------------------------------------------------------------
     

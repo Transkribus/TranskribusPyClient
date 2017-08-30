@@ -48,7 +48,7 @@ from common.trace import traceln, trace
 
 DEBUG = 0
 
-description = """Apply Layout Analysy (LA) with batch model.
+description = """Apply Layout Analysis (LA) with batch model.
 
 The syntax for specifying the page range is:
 - one or several specifiers separated by a comma
@@ -67,7 +67,7 @@ class DoLAbatch(TranskribusClient):
         TranskribusClient.__init__(self, sServerUrl=self.sDefaultServerUrl, proxies=sHttpProxy, loggingLevel=loggingLevel)
     
     def run(self, colId, docId, sPages,bBlockSeg,bLineSeq):
-        ret = self.analyzeLayout(colId, docId, sPages,bBlockSeg,bLineSeq)
+        ret = self.analyzeLayoutBatch(colId, docId, sPages,bBlockSeg,bLineSeq)
         return ret
 
 if __name__ == '__main__':
