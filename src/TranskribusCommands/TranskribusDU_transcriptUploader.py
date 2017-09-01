@@ -89,7 +89,7 @@ class TranskribusTranscriptUploader(TranskribusClient):
             traceln("  Done (collection %s)"%colid)
         return
 
-    def uploadDocumentTranscript(self, colid, docid, sColDSDir, sNote="",sToolName="XRCE DU",sTranscripExt=sTRANSCRIPT_EXTENSION, iVerbose=0):
+    def uploadDocumentTranscript(self, colid, docid, sColDSDir, sNote="",sToolName="NLE DU",sTranscripExt=sTRANSCRIPT_EXTENSION, iVerbose=0):
         """
         Upload the transscripts of all document in that collection into Transkribus
         return nothing
