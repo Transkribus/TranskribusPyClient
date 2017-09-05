@@ -52,8 +52,8 @@ DEBUG = 0
 description = """Get the TRP of a document
 """ + _Trnskrbs_description
 
-usage = """%s <colId> <docId> [<page-ranges>]
-Return the so-called TRP of all or certain pages, optionnally with the given number of transcript(s) per page.
+usage = """%s <colId> <docId> [<page-ranges>] -n <nb_transcripts>
+Return the so-called TRP of all or certain pages, optionally with the given number of transcript(s) per page (-1 means all).
 
 Page range is a comma-separated series of integer or pair of integers separated by a '-' 
 For instance 1  or 1,3  or 1-4 or 1,3-6,8
