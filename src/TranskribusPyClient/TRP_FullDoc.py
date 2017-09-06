@@ -24,7 +24,9 @@
     under grant agreement No 674943.
     
 """
-import types
+import copy
+
+from TimeRangeSpec import DateTimeRangeSpec
 
 class TRP_FullDoc:
     """
@@ -148,7 +150,11 @@ class TRP_FullDoc:
         pass the JSON data
         """
         self.dic = jsonTRP
-        
+    
+    
+    def getCollectionId(self):
+        return self.dic["collection"]["colId"]
+    
     def getPageList(self):
         """
         return the (mutable) list of page dictionaries
@@ -163,17 +169,96 @@ class TRP_FullDoc:
         self.dic["pageList"]["pages"] = lPageDic
         return lPageDic
     
-    def filterPageList(self, lPageNumberToKeep):
+    def getTranscriptList(self):
+        """
+        return the concatenated list of transcripts per page of the document
+        """
+        return [ dTr for dPage in self.getPageList() for dTr in dPage["tsList"]["transcripts"] ]
+
+    @classmethod
+    def deepcopy(self):
+        """
+        deep copy of this object
+        """
+        return self.__class__( copy.deepcopy(self.dic) )
+
+    def filterPageList(self, lPageNumberToKeep, bInPlace=True):
         """
         filter the list of pages to retain only those listed in the given list 
         
         lPageNumberToKeep must be a container of integers, and must support the __contains__ container method. (A PageRangeSpec object is fine, for instance ;-) )
         Note: this code is not optimal, but there is probably no performance gain to obtain here, and at least it is very legible.
         """
-        ldPages = self.getPageList()
-        ldPagesInRange = [ dPage for dPage in ldPages if dPage["pageNr"] in lPageNumberToKeep]
-        return self.setPageList(ldPagesInRange)
+        o = self if bInPlace else self.deepcopy()
 
+        ldPages = o.getPageList()
+        ldPagesInRange = [ dPage for dPage in ldPages if dPage["pageNr"] in lPageNumberToKeep]
+        
+        o.setPageList(ldPagesInRange)
+        return o
+
+    def filterTranscriptsByTime(self, oTimeSpec, bInPlace=True):
+        """
+        filter the list of pages to retain only those listed in the given list 
+        
+        lPageNumberToKeep must be a container of integers, and must support the __contains__ container method. (A PageRangeSpec object is fine, for instance ;-) )
+        Note: this code is not optimal, but there is probably no performance gain to obtain here, and at least it is very legible.
+        """
+        o = self if bInPlace else self.deepcopy()
+        
+        ldPages = o.getPageList()
+        new_ldPages = list()    #we may have to discard pages without any transcript after filtering
+        for dPage in ldPages:
+            ldTr = dPage["tsList"]["transcripts"]
+            new_ldTr = [dTr for dTr in ldTr if dTr["timestamp"] in oTimeSpec]
+            if len(ldTr) != len(new_ldTr):
+                dPage["tsList"]["transcripts"] = new_ldTr
+            if new_ldTr:
+                new_ldPages.append(dPage)
+        o.setPageList(new_ldPages)
+        return o
+    
+    def _getTranscriptSlotList(self, slot):
+        """
+        return the given slot value for each page, as a list of values
+        """
+        return [ tr[slot] for tr in self.getTranscriptList() ]
+        
+        
+    def getTranscriptUsernameList(self):
+        """
+        Return the list of username (of last transcript of each page)
+        """
+        return self._getTranscriptSlotList("userName")
+
+    def getTranscriptStatusList(self):
+        """
+        Return the list of status (of last transcript of each page)
+        """
+        return self._getTranscriptSlotList("status")
+
+    def getTranscriptTimestampList(self):
+        """
+        Return the list of timestamp (of last transcript of each page)
+        """
+        return self._getTranscriptSlotList("timestamp")
+
+
+    def report_short(self, warn=" "):
+        """
+        return a string report
+        """
+        lt4 = [ (tr["pageNr"], tr["timestamp"], tr["status"], tr["userName"]) for tr in self.getTranscriptList() ]
+        ls = list()
+        prev_spnum = None
+        for pnum, ts, st, u in lt4:
+            spnum="p%5s"%pnum
+            spnum = spnum if spnum != prev_spnum else "-     "
+            prev_spnum = spnum
+            
+            ls.append("%s %s  %s %s  %s  %s"%(warn, spnum, ts, DateTimeRangeSpec.isoformat(ts), st, u))  #CSV-compliant syntax!! ;-)
+        return "\n".join(ls)
+    
 #     def __str__(self): return ",".join( "%d-%d"%(a,b) if a != b else "%d"%a for (a,b) in self._ltAB )
 #     
 #     #Emulating Container type...

@@ -129,43 +129,6 @@ class TranskribusClient():
 #         
         self.sREQ_LA_batch          = sServerUrl + '/rest/LA/batch'
         self.sREQ_LA_analyze        = sServerUrl + '/rest/LA/analyze'
-        """
-            Hi Hervé,
-        
-        Sebastian has done the integration of the tools and can answer more indepth questions.
-        
-        Please take a look at:
-        https://transkribus.eu/TrpServer/Swadl/wadl.html
-        
-        or
-        
-        https://transkribus.eu/TrpServer/rest/application.wadl
-        
-        The new methods are at:
-        /LA/analyze
-        
-        Valid values for the jobImpl parameter are:
-        NcsrLaJob
-        CvlLaJob
-        
-        You have to post a list of descriptor objects either as XML or JSON to the service, specifying the pages that have to be analyzed. A single page descriptor would look like this (regionId optional):
-        <documentSelectionDescriptor>
-            <docId>1</docId>
-            <pageList>
-                <pages>
-                    <pageId>2</pageId>
-                    <tsId>3</tsId>
-                    <regionIds>aRegionId</regionIds>
-                </pages>
-            </pageList>
-        </documentSelectionDescriptor>
-        
-        Do let us know if there are any problems with the new method.
-        
-        Best regards and have a nice weekend,
-        Philip
-        
-        """        
 #     
 #         self.sREQ_LALines           = sServerUrl + '/rest/LA/lines'
 #         self.sREQ_LABaseLines       = sServerUrl + '/rest/LA/baselines'
@@ -178,6 +141,7 @@ class TranskribusClient():
         self.sREQ_collection_fulldoc                = sServerUrl + '/rest/collections/%s/%s/fulldoc'
         self.sREQ_collection_fulldoc_xml            = sServerUrl + '/rest/collections/%s/%s/fulldoc.xml'
         self.sREQ_collections_postPageTranscript    = sServerUrl + '/rest/collections/%s/%s/%s/text'
+        self.sREQ_collections_deletePageTranscript  = sServerUrl + '/rest/collections/%s/%s/%s/delete'
         self.sREQ_collections_addDocToCollection    = sServerUrl + '/rest/collections/%s/addDocToCollection'
         self.sREQ_collections_duplicate             = sServerUrl + '/rest/collections/%s/%s/duplicate'
         self.sREQ_collections_listPagesLocks        = sServerUrl + '/rest/collections/%s/%s/%s/listLocks'
@@ -331,7 +295,7 @@ class TranskribusClient():
         """
         self._assertLoggedIn()
         myReq = self.sREQ_collection_fulldoc % (colId,docId)
-        params = self._buidlParamsDic(nrOfTranscripts=None)
+        params = self._buidlParamsDic(nrOfTranscripts=nrOfTranscripts)
         resp = self._GET(myReq, params=params,accept="application/json")
         resp.raise_for_status()
 
@@ -410,6 +374,17 @@ class TranskribusClient():
             resp = self._POST(myReq, params=params, data=sXMlTranscript)
         else:
             resp = self._POST(myReq, params=params, data=sXMlTranscript.encode(utf8))
+        resp.raise_for_status()
+        return resp.text
+
+    def deletePageTranscript(self, colId, docId, pnum, sTranscriptId):
+        """
+        Delete a transcript 
+        """
+        self._assertLoggedIn()
+        myReq = self.sREQ_collections_deletePageTranscript % (colId,docId,pnum)
+        params = self._buidlParamsDic(key=sTranscriptId)
+        resp = self._POST(myReq, params=params)
         resp.raise_for_status()
         return resp.text
     
@@ -614,8 +589,64 @@ class TranskribusClient():
         return json.loads(resp.text)
         
     # -------LAYOUT ANALYSIS ------------------------------------------------------------------------------------------
+
+    def analyzeLayout(self, colId, docId, sPages, sJobImpl, sPars=""
+                      , bBlockSeg=False
+                      , bLineSeg=True
+                      , bWordSeg=False
+                      , bPolygonToBaseline=False
+                      , bBaselineToPolygon=False):
+
+        """
+            Hi Hervé,
+        
+        Sebastian has done the integration of the tools and can answer more indepth questions.
+        
+        Please take a look at:
+        https://transkribus.eu/TrpServer/Swadl/wadl.html
+        
+        or
+        
+        https://transkribus.eu/TrpServer/rest/application.wadl
+        
+        The new methods are at:
+        /LA/analyze
+        
+        Valid values for the jobImpl parameter are:
+        NcsrLaJob
+        CvlLaJob
+        
+        You have to post a list of descriptor objects either as XML or JSON to the service, specifying the pages that have to be analyzed. A single page descriptor would look like this (regionId optional):
+        <documentSelectionDescriptor>
+            <docId>1</docId>
+            <pageList>
+                <pages>
+                    <pageId>2</pageId>
+                    <tsId>3</tsId>
+                    <regionIds>aRegionId</regionIds>
+                </pages>
+            </pageList>
+        </documentSelectionDescriptor>
+        
+        Do let us know if there are any problems with the new method.
+        
+        Best regards and have a nice weekend,
+        Philip
+        
+        """        
+        self._assertLoggedIn()
+        myReq = self.sREQ_LA_analyze
+        params = self._buidlParamsDic(collId=colId
+                                      , doBlockSeg=bBlockSeg, doLineSeg=bLineSeg, doWordSeg=bWordSeg
+                                      , doPolygonToBaseline=bPolygonToBaseline, doBaselineToPolygon=bBaselineToPolygon
+                                      , jobImpl=sJobImpl, pars=sPars)
+        resp = self._POST(myReq, params=params, sContentType=None)
+        
+        zzz
+        resp.raise_for_status()
+        return resp.text 
     
-    def analyzeLayoutBatch(self,colId, docId, sPages, bBlockSeg, bLineSeq):
+    def analyzeLayoutBatch(self,colId, docId, sPages, bBlockSeg, bLineSeg):
         """
         apply Layout Analysis
             int colId, 
@@ -627,7 +658,7 @@ class TranskribusClient():
         """
         self._assertLoggedIn()
         myReq = self.sREQ_LA_batch
-        params = self._buidlParamsDic(collId=colId, id=docId, pages=sPages, doBlockSeg=bBlockSeg, doLineSeq=bLineSeq)
+        params = self._buidlParamsDic(collId=colId, id=docId, pages=sPages, doBlockSeg=bBlockSeg, doLineSeq=bLineSeg)
         resp = self._POST(myReq, params=params, sContentType=None)
         resp.raise_for_status()
         return resp.text       

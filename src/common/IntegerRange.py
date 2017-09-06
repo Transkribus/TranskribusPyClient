@@ -106,7 +106,13 @@ class IntegerRange:
     
     def __str__(self): 
         return ",".join( "%s-%s"%(a,b) if a != b else "%s"%a for (a,b) in self._ltAB )
+
+    def __bool__(self):
+        return bool(self._ltAB)
     
+    def __nonzero__(self):
+        return bool(self._ltAB)
+
     #--- Emulating Container type...
     def __iter__(self):
         """
@@ -137,6 +143,7 @@ class IntegerRange:
         a, b = None, None
         for a,b in self._ltAB:
             if b >= item: break
+            #print a, item, b
         return a<= item and item <= b
 
 

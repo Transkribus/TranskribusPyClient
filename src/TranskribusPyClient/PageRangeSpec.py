@@ -45,5 +45,4 @@ class PageRangeSpec(IntegerRange):
         - reversed()
         - contains test (if n in o: ...)
     """
-    def __init__(self):
-        IntegerRange.__init__(self)
+    pass

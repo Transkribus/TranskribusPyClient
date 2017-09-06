@@ -31,6 +31,7 @@
 import types
 import time
 import datetime
+import dateutil.parser
 
 from common.IntegerRangeHalfBounded import IntegerRangeHalfBounded
 
@@ -44,59 +45,87 @@ class DateTimeRangeSpec(IntegerRangeHalfBounded):
     - the object is a container that supports:
         - contains test (if n in o: ...)
     """
-    dt0 = datetime.datetime(1970, 1, 1)
+#     dt0 = datetime.datetime(1970, 1, 1)
+    dt0 = dateutil.parser.parse("1970/01/01T00:00:00+0000")
     ts0 = 0
+    
+    bUTC = False
     
     def __init__(self):
         IntegerRangeHalfBounded.__init__(self)
+        
+    @classmethod 
+    def setUTC(cls, bUTC):
+        cls.bUTC = bUTC
+        return bUTC
 
-    def add(self, sDateTimeA_or_dt, sDateTimeB_or_dt):
+    def addRange(self, sDateTimeA_or_dt, sDateTimeB_or_dt):
         """
         add a range
         """
-        tsA = self.dt2ts(sDateTimeA_or_dt)
-        tsB = self.dt2ts(sDateTimeB_or_dt)
-        self.addRange(tsA, tsB)
+        tsA = self.o2ts(sDateTimeA_or_dt)
+        tsB = self.o2ts(sDateTimeB_or_dt)
+        IntegerRangeHalfBounded.addRange(self, tsA, tsB)
+        
         
     def addStartsAfter(self, sDateTimeA_or_dt):
         """
         Start of the interval
         """
-        tsA = self.dt2ts(sDateTimeA_or_dt)
-        self.addRange(tsA, self.inf())
+        tsA = self.o2ts(sDateTimeA_or_dt)
+        IntegerRangeHalfBounded.addRange(self, tsA, self.inf())
        
     def addEndsBefore(self, sDateTimeB_or_dt):
         """
         end of the interval
         """
-        tsB = self.dt2ts(sDateTimeB_or_dt)
-        self.addRange(-self.inf(), tsB)
+        tsB = self.o2ts(sDateTimeB_or_dt)
+        IntegerRangeHalfBounded.addRange(self, -self.inf(), tsB)
+    
+    # -------------------------------------------------------------------------------
+    @classmethod
+    def o2dt(cls, o):
+        """
+        make a datetime out of this thing
+        """
+        if isinstance(o, datetime.datetime): return o
+        try:
+            o+0 #numerical value?
+            return cls.ts2dt(o)
+        except TypeError:
+            if type(o) == types.StringType: return cls.txt2dt(o)  #the timezone should be indicated in the string...
+        raise ValueError("Cannot convert to datetime the object '%s'"%`o`)
 
     @classmethod
-    def dt2ts(cls, dt_or_s):
+    def o2ts(cls, o):
         """
-        get either a datetime object or a textual date that is parsed. (Must be in form: "%Y-%m-%dT%H:%M:%S.%f")
-        
-        return a timestamp  (number of milliseconds since Thu Jan 01 01:00:00 1970)
+        make a timestamp out of this thing
         """
-        if type(dt_or_s) == types.StringType:
-            dt = None
-            for i in range(7, 0, -1):  #from "%Y-%m-%dT%H:%M:%S"  to "%Y"
-                sFmt = "".join(["%Y", "-%m", "-%d", "T%H", ":%M", ":%S", ".%f"][0:i])
+        try:
+            o+0 #numerical value?
+            return o
+        except TypeError:
+            if isinstance(o, datetime.datetime): return cls.dt2ts(o)
+            if type(o) == types.StringType:      
                 try:
-                    dt = datetime.datetime.strptime(dt_or_s, sFmt)
-                    break
+                    return cls.txt2ts(o)
                 except ValueError:
-                    pass
-        else:
-            dt = dt_or_s
-            
-        if dt == None: raise ValueError("Invalid textual date or datetime object: %s"%dt_or_s)
-        
-        ts = int((dt-cls.dt0).total_seconds() * 1000)
-        #assert cls.format(cls.ts2dt(ts)).startswith(sDateTime)
-
-        return ts
+                    return cls.dt2ts(cls.txt2dt(o))
+        raise ValueError("Cannot convert to timestamp the object '%s'"%`o`)      
+      
+    # -------------------------------------------------------------------------------
+    @classmethod
+    def txt2dt(cls, sDateTime):
+        """
+        convert a string to a datetime
+        The string can be a timestamp or a ISO-like textual date, with a t least the year
+        return a datetime or raise a ValueError exception
+        """
+        #first try looking at it as a timestamp
+        try:    return cls.ts2dt(sDateTime)
+        except: pass
+        if len(sDateTime) < 13: raise ValueError("The date and the hour must at least be specified")
+        return dateutil.parser.parse(sDateTime)
 
     @classmethod
     def ts2dt(cls, ts):
@@ -109,23 +138,64 @@ class DateTimeRangeSpec(IntegerRangeHalfBounded):
 #         if ts <= 0: raise ValueError("Negative timestamp")
         if type(ts) == types.StringType:
             ts = long(ts)
-                
-        dt = datetime.datetime.utcfromtimestamp(ts/1000.0)
+        
+        if cls.bUTC:
+            dt = datetime.datetime.utcfromtimestamp(ts/1000.0)
+        else:
+            dt = datetime.datetime.fromtimestamp(ts/1000.0) #showing local time
         return dt
 
+    # -------------------------------------------------------------------------------
     @classmethod
-    def format(cls, o):
+    def txt2ts(cls, sTS):
+        return long(sTS)
+    
+    @classmethod
+    def dt2ts(cls, dt_or_s):
         """
-        takes a timestamp or a datetime
-        return a textual date time in ISO format
+        get either a datetime object or a textual date that is parsed. (Must be in form: "%Y-%m-%dT%H:%M:%S.%f")
+        
+        return a timestamp  (number of milliseconds since Thu Jan 01 01:00:00 1970)
         """
-        try:
-            ts = long(o)
-            dt = DateTimeRangeSpec.ts2dt(ts)
-        except TypeError:
-            dt = o
-        return dt.isoformat()
+        if type(dt_or_s) == types.StringType:
+            dt = cls.txt2dt(dt_or_s)
+        else:
+            dt = dt_or_s
             
+        ts = int((dt-cls.dt0).total_seconds() * 1000)
+        #assert cls.format(cls.ts2dt(ts)).startswith(sDateTime)
+
+        return ts
+
+    # -------------------------------------------------------------------------------
+    @classmethod
+    def getTimeZone(cls):
+        nbSecWest = time.altzone
+        h, m = int(nbSecWest/3600), nbSecWest % 3600
+        if h > 0:
+            return "-%02d%02d"%( h,m)
+        else:
+            return "+%02d%02d"%(-h,m)
+        
+    @classmethod
+    def isoformat(cls, dt_or_o):
+        """
+        similar to  ISO 8601 format, YYYY-MM-DDTHH:MM:SS.mmmmmm
+        but with less decimal (so that we show only meaningful and distinguishable ones)
+        """   
+        if cls.bUTC:
+            return cls.o2dt(dt_or_o).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z" #discard the 3 last 0s
+        else:
+            return cls.o2dt(dt_or_o).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + cls.getTimeZone() #discard the 3 last 0s
+        #return cls.o2dt(dt_or_o).isoformat()[:-3] #discard the 3 last 0s  but no timezone!! :-/
+
+    format = isoformat
+    
+    def __str__(self): 
+        
+        return ",".join( "%s / %s"%(a,b) if a != b else "{ %s }"%a for (a,b) in [( self.isoformat(a) if a!=-self._fINF else ""
+                                                                          ,  self.isoformat(b) if b!=+self._fINF else "") for a,b in self._ltAB] )
+    # -------------------------------------------------------------------------------
         
 #     def _check(self):
 #         """
@@ -194,21 +264,22 @@ def test_good_spec(capsys):
     with pytest.raises(ValueError): DateTimeRangeSpec("1 3")
 """
 
-    
+
 def test_class_methods():
     import pytest
 
-    assert datetime.datetime(1970, 1, 1) == DateTimeRangeSpec.ts2dt(0)
-    assert datetime.datetime(1970, 1, 1) == DateTimeRangeSpec.ts2dt("0")
-    assert DateTimeRangeSpec.ts2dt(-10000)
+#     assert datetime.datetime(1970, 1, 1) == DateTimeRangeSpec.ts2dt(0)
+#     assert datetime.datetime(1970, 1, 1) == DateTimeRangeSpec.ts2dt("0")
+    assert DateTimeRangeSpec.ts2dt(10000)
     with pytest.raises(ValueError): DateTimeRangeSpec.ts2dt("yo man")
     
-    assert DateTimeRangeSpec.dt2ts("1970-01-01T00:00:00") == 0
-    assert DateTimeRangeSpec.dt2ts("1969-12-31T23:59:00") == -60000
+    assert DateTimeRangeSpec.dt2ts("1970-01-01T00:00:00.000Z") == 0
+    assert DateTimeRangeSpec.dt2ts("1969-12-31T23:59:00.000Z") == -60000
     with pytest.raises(ValueError): DateTimeRangeSpec.ts2dt("yo man")
     
-    assert DateTimeRangeSpec.format(0) == "1970-01-01T00:00:00"
-    assert DateTimeRangeSpec.format(datetime.datetime(1970, 1, 1)) == "1970-01-01T00:00:00"
+    DateTimeRangeSpec.setUTC(True)
+    assert DateTimeRangeSpec.format(0) == "1970-01-01T00:00:00.000Z"
+    assert DateTimeRangeSpec.format(datetime.datetime(1970, 1, 1)) == "1970-01-01T00:00:00.000Z"
     
     ts = 1504615116779
     dt = datetime.datetime(2017, 9, 5, 12, 38, 36, 779000)
@@ -217,20 +288,26 @@ def test_class_methods():
 def test_simple():
     import pytest
     dts = DateTimeRangeSpec()
-    dts.add("2017-09-04T12:00:00", "2017-09-04T23:00:00")
+    assert dts.len() == 0
     
-    assert DateTimeRangeSpec.dt2ts("2017-09-04T12:00:00") in dts
-    assert DateTimeRangeSpec.dt2ts("2017-09-04T18:30:20") in dts
-    assert DateTimeRangeSpec.dt2ts("2017-09-04T23:00:00") in dts
-    assert DateTimeRangeSpec.dt2ts("2019-09") not in dts
-    assert DateTimeRangeSpec.dt2ts("2010") not in dts
+    dts.addRange("2017-09-04T12:00:00Z", "2017-09-04T23:00:00Z")
+    assert dts.len() == (DateTimeRangeSpec.dt2ts("2017-09-04T23:00:00Z")-DateTimeRangeSpec.dt2ts("2017-09-04T12:00:00Z")+1)
+    
+    assert DateTimeRangeSpec.dt2ts("2017-09-04T12:00:00.000Z") in dts
+    assert DateTimeRangeSpec.dt2ts("2017-09-04T18:30:20.000Z") in dts
+    assert DateTimeRangeSpec.dt2ts("2017-09-04T23:00:00.000Z") in dts
+    with pytest.raises(ValueError): DateTimeRangeSpec.o2ts("2019-09-01")
+    with pytest.raises(ValueError): DateTimeRangeSpec.o2ts("2010-09") 
+    assert DateTimeRangeSpec.o2ts("2019-09-01T12Z") not in dts
     
     #with pytest.raises(ValueError): 
-    dts.addStartsAfter("2018-01-01")
+    dts.addStartsAfter("2018-01-01T00:00Z")
+    assert dts.len() == dts.inf()
+    
     def test_1():
-        assert DateTimeRangeSpec.dt2ts("2019-09") in dts
-        assert DateTimeRangeSpec.dt2ts("2010") not in dts
-        assert DateTimeRangeSpec.dt2ts("2017-12-31T23:59:59") not in dts
+        assert DateTimeRangeSpec.dt2ts("2019-09-01T00:00Z") in dts
+        assert DateTimeRangeSpec.dt2ts("2010-01T00:00Z") not in dts
+        assert DateTimeRangeSpec.dt2ts("2017-12-31T23:59:59Z") not in dts
     test_1()
 
     with pytest.raises(ValueError): dts.addStartsAfter("2018-01-01")
@@ -238,18 +315,18 @@ def test_simple():
     with pytest.raises(ValueError): dts.addStartsAfter("2022-01-01")
     test_1()
 
-    dts.addEndsBefore("2000-12-31T23:59:59")
+    dts.addEndsBefore("2000-12-31T23:59:59Z")
     def test_2():
-        assert DateTimeRangeSpec.dt2ts("1990-10-29T19:00") in dts
-        assert DateTimeRangeSpec.dt2ts("2000-12-31T23:59:59") in dts
-        assert DateTimeRangeSpec.dt2ts("2000-12-31T23:59:58") in dts
-        assert DateTimeRangeSpec.dt2ts("2001-01-01T00:00:00") not in dts
+        assert DateTimeRangeSpec.dt2ts("1990-10-29T19:00Z") in dts
+        assert DateTimeRangeSpec.dt2ts("2000-12-31T23:59:59Z") in dts
+        assert DateTimeRangeSpec.dt2ts("2000-12-31T23:59:58Z") in dts
+        assert DateTimeRangeSpec.dt2ts("2001-01-01T00:00:00Z") not in dts
     test_1()
     test_2()
 
-    with pytest.raises(ValueError): dts.addEndsBefore("2000-12-31T23:59:59")
-    with pytest.raises(ValueError): dts.addEndsBefore("2020-12-31T23:59:59")
-    with pytest.raises(ValueError): dts.addEndsBefore("1900-12-31T23:59:59")
+    with pytest.raises(ValueError): dts.addEndsBefore("2000-12-31T23:59:59Z")
+    with pytest.raises(ValueError): dts.addEndsBefore("2020-12-31T23:59:59Z")
+    with pytest.raises(ValueError): dts.addEndsBefore("1900-12-31T23:59:59Z")
     test_1()
     test_2()
         
