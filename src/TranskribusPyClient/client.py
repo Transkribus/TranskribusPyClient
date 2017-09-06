@@ -110,6 +110,7 @@ class TranskribusClient():
         self._sessionID = None  # if logged in, id of the session, None otherwise
         self._dProxies  = {}    # proxy settings
 
+        self.sServerUrl= sServerUrl
         # Raise or lower this setting according to the amount of debugging
         # output you would like to see.  See http://docs.python.org/lib/module-logging.html
         logging.basicConfig(level=loggingLevel)
@@ -473,7 +474,7 @@ class TranskribusClient():
             bSkip=False
             docId = docInfo['docId']  #int here!!!
             if sDocId is not None:
-                if docId != sDocId:
+                if str(docId) != sDocId:
                     bSkip=True 
             if not bSkip:
                 ldocID.append(str(docId))
@@ -817,6 +818,19 @@ class TranskribusClient():
         alias for module function
         """
         return getStoredCredentials(bAsk)
+    
+    
+    def getServerUrl(self): 
+        """
+            return server URL
+        """
+        return self.sServerUrl
+    
+    def getProxies(self):
+        """
+            return proxy
+        """
+        return self._dProxies
     
     def getSessionId(self):
         """
