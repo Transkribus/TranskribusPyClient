@@ -197,11 +197,10 @@ class TRP_FullDoc:
         o.setPageList(ldPagesInRange)
         return o
 
-    def filterTranscriptsByTime(self, oTimeSpec, bInPlace=True):
+    def filterTranscriptsBySlot(self, oTimeSpec, slotname, bInPlace=True):
         """
         filter the list of pages to retain only those listed in the given list 
         
-        lPageNumberToKeep must be a container of integers, and must support the __contains__ container method. (A PageRangeSpec object is fine, for instance ;-) )
         Note: this code is not optimal, but there is probably no performance gain to obtain here, and at least it is very legible.
         """
         o = self if bInPlace else self.deepcopy()
@@ -210,7 +209,7 @@ class TRP_FullDoc:
         new_ldPages = list()    #we may have to discard pages without any transcript after filtering
         for dPage in ldPages:
             ldTr = dPage["tsList"]["transcripts"]
-            new_ldTr = [dTr for dTr in ldTr if dTr["timestamp"] in oTimeSpec]
+            new_ldTr = [dTr for dTr in ldTr if dTr[slotname] in oTimeSpec]
             if len(ldTr) != len(new_ldTr):
                 dPage["tsList"]["transcripts"] = new_ldTr
             if new_ldTr:
@@ -258,6 +257,22 @@ class TRP_FullDoc:
             
             ls.append("%s %s  %s %s  %s  %s"%(warn, spnum, ts, DateTimeRangeSpec.isoformat(ts), st, u))  #CSV-compliant syntax!! ;-)
         return "\n".join(ls)
+    
+    def report_stat(self):
+        ls = []
+        lTr = self.getTranscriptList()
+        lts = [tr["timestamp"] for tr in lTr]
+        for opname, op in [("min", min), ("max", max)]:
+            ts = op(lts)
+            ls.append("stat: timestamp : %s=%s %s"%(opname, ts, DateTimeRangeSpec.isoformat(ts)))
+        for name, slotName  in [("user", "userName"), ("status", "status")]:
+            lValue = [tr[slotName] for tr in lTr]
+            lUniqueValue = list(set(lValue))
+            lUniqueValue.sort()
+            ls.append("stat: %s : %d : %s"%(name, len(lUniqueValue), ", ".join([s.encode("utf-8") for s in lUniqueValue])))
+        
+        return "\n".join(ls)
+    
     
 #     def __str__(self): return ",".join( "%d-%d"%(a,b) if a != b else "%d"%a for (a,b) in self._ltAB )
 #     

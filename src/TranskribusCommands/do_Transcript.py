@@ -55,11 +55,19 @@ DEBUG = 0
 description = """Managiong the transcripts of one or several document(s) or of a whole collection.
 """ + _Trnskrbs_description
 
-usage = """%s <colId> <docId> [<page-ranges>] [--within <date>/<date>]+ [--at <date>]+ [--after <date>] [--before <date>] [--utc] [--check_user <username>] <operation>
+usage = """%s <colId> <docId> [<page-ranges>] 
+    [--within <date>/<date>]+ [--at <date>]+ [--after <date>] [--before <date>] [--utc] 
+    [--user <username>]+
+    [--status <status>]+ 
+    [--check_user <username>]+
+    [--check_status <status>]+ 
+    <operation>
 
 To filter the transcripts before applying the operation, use:
  page ranges
  --at, --within, --after, --before for time filtering
+ --user
+ --status
  
 To check assumption regarding the transcripts before applying the operation, use:
  --check_user, --check_status
@@ -89,7 +97,9 @@ class DoTranscript(TranskribusClient):
     def __init__(self, trnkbsServerUrl, sHttpProxy=None, loggingLevel=logging.WARN):
         TranskribusClient.__init__(self, sServerUrl=self.sDefaultServerUrl, proxies=sHttpProxy, loggingLevel=loggingLevel)
     
-    def filter(self, colId, docId, page_filter=None, time_filter=None, bVerbose=False):
+    def filter(self, colId, docId
+               , page_filter=None, time_filter=None, user_filter=None, status_filter=None
+               , bVerbose=False):
         trp = TRP_FullDoc(self.getDocById(colId, docId, -1))
     
         if page_filter:
@@ -101,14 +111,18 @@ class DoTranscript(TranskribusClient):
                 n1 = len(trp.getPageList())
                 traceln(" --> %d pages in-scope (after excluding %d)"%(n1, n0-n1))
         
-        if time_filter:
-            if bVerbose: 
-                trace("\t[filter] as per time specification: %s"%time_filter)
-                n0 = len(trp.getTranscriptList())
-            trp.filterTranscriptsByTime(time_filter)
-            if bVerbose: 
-                n1 = len(trp.getTranscriptList())
-                traceln(" --> %d transcripts in-scope (after excluding %d)"%(n1, n0-n1))
+        for filter, filter_name, slot in [  (time_filter, "time", "timestamp")
+                                          , (user_filter, "user", "userName")
+                                          , (status_filter, "status", "status")]:
+            if filter:
+                if bVerbose: 
+                    trace("\t[filter] as per %s specification: %s"%(filter_name, filter))
+                    n0 = len(trp.getTranscriptList())
+                trp.filterTranscriptsBySlot(filter, slot)
+                if bVerbose: 
+                    n1 = len(trp.getTranscriptList())
+                    traceln(" --> %d transcripts in-scope (after excluding %d)"%(n1, n0-n1))
+
         return trp
     
     @classmethod
@@ -171,6 +185,8 @@ if __name__ == '__main__':
     parser.add_option("--before", dest='before', action="store", type="string", default=None, help="Consider transcripts created on or before this date.")
     parser.add_option("--within", dest='within', action="append", type="string", default=None, help="Consider transcripts created within this range(s) of dates.")
     parser.add_option("--at"    , dest='at'    , action="append", type="string", default=None, help="Consider transcripts created at a date(s).")
+    parser.add_option("--user"  , dest='user'  , action="append", type="string", default=None, help="Consider transcripts that were authored by this or these users.")
+    parser.add_option("--status", dest='status', action="append", type="string", default=None, help="Consider transcripts that have this or these status(es).")
     parser.add_option("--check_user"  , dest='check_user'   , action="append", type="string", default=None, help="Check that the transcripts were authored by this or these users.")
     parser.add_option("--check_status", dest='check_status' , action="append", type="string", default=None, help="Check that the transcripts have this or these status(es).")
     parser.add_option("-n", "--n"  , dest='nbTranscript', action="store", type="int", default=1, help="Number of transcripts")
@@ -223,7 +239,9 @@ if __name__ == '__main__':
     
     # --- 
     # get a filtered TRP data
-    trp = doer.filter(colId, docId, page_filter=oPageRange, time_filter=oTimeRange, bVerbose=True)
+    trp = doer.filter(colId, docId, page_filter=oPageRange
+                      , time_filter=oTimeRange, user_filter=options.user, status_filter=options.status
+                      , bVerbose=True)
 
     #CHECKs
     try:
@@ -242,6 +260,8 @@ if __name__ == '__main__':
     else:
         #by default we list
         print trp.report_short()
+        traceln()
+        traceln(trp.report_stat())
         
     traceln()      
     traceln("- Done")
