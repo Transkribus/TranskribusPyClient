@@ -155,6 +155,9 @@ class TRP_FullDoc:
     def getCollectionId(self):
         return self.dic["collection"]["colId"]
     
+    def getNumberOfPages(self):
+        return self.dic["md"]["nrOfPages"]
+    
     def getPageList(self):
         """
         return the (mutable) list of page dictionaries
@@ -260,18 +263,25 @@ class TRP_FullDoc:
     
     def report_stat(self):
         ls = []
+        nbPage = self.getNumberOfPages()
+        ls.append("stat: number of pages in document: %d"%nbPage)
         lTr = self.getTranscriptList()
         ls.append("stat: number of selected transcripts: %d"%len(lTr))
         lts = [tr["timestamp"] for tr in lTr]
         for opname, op in [("min", min), ("max", max)]:
-            ts = op(lts)
-            ls.append("stat: timestamp : %s=%s %s"%(opname, ts, DateTimeRangeSpec.isoformat(ts)))
+            if lts:  #otherwise min and max have no meaning
+                ts = op(lts)
+                ls.append("stat: timestamp : %s=%s %s"%(opname, ts, DateTimeRangeSpec.isoformat(ts)))
         for name, slotName  in [("user", "userName"), ("status", "status"), ('pages', 'pageNr')]:
             lValue = [tr[slotName] for tr in lTr]
             lUniqueValue = list(set(lValue))
             lUniqueValue.sort()
             ls.append("stat: %s : %d : %s"%(name, len(lUniqueValue), " ".join([str(s).encode("utf-8") for s in lUniqueValue])))
-        
+            if name == "pages":
+                #indicate which pages were not considered at all
+                lMissingPageNr = list(set(range(1, 1+nbPage)).difference(set(lUniqueValue)))
+                lMissingPageNr.sort()
+                ls.append("stat: %s : %d : %s"%("pages not listed", len(lMissingPageNr), " ".join([str(s).encode("utf-8") for s in lMissingPageNr])))
         return "\n".join(ls)
     
     

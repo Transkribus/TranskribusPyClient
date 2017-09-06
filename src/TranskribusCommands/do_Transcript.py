@@ -56,6 +56,7 @@ description = """Managiong the transcripts of one or several document(s) or of a
 """ + _Trnskrbs_description
 
 usage = """%s <colId> <docId> [<page-ranges>] 
+    [--last]
     [--within <date>/<date>]+ [--at <date>]+ [--after <date>] [--before <date>] [--utc] 
     [--user <username>]+
     [--status <status>]+ 
@@ -66,8 +67,9 @@ usage = """%s <colId> <docId> [<page-ranges>]
 To filter the transcripts before applying the operation, use:
  page ranges
  --at, --within, --after, --before for time filtering
- --user
- --status
+ --user    for considering only those transcripts authored by those user(s)
+ --status  for considering only those transcript having this or thse status(es)
+ --last    for considreing only the last transcript of each page
  
 To check assumption regarding the transcripts before applying the operation, use:
  --check_user, --check_status
@@ -99,8 +101,13 @@ class DoTranscript(TranskribusClient):
     
     def filter(self, colId, docId
                , page_filter=None, time_filter=None, user_filter=None, status_filter=None
-               , bVerbose=False):
-        trp = TRP_FullDoc(self.getDocById(colId, docId, -1))
+               , bVerbose=False
+               , bLast=False):
+        if bLast:
+            #consider only last transcript per page
+            trp = TRP_FullDoc(self.getDocById(colId, docId, 1))
+        else:
+            trp = TRP_FullDoc(self.getDocById(colId, docId, -1))
     
         if page_filter:
             if bVerbose: 
@@ -181,6 +188,7 @@ if __name__ == '__main__':
     
     #"-s", "--server",  "-l", "--login" ,   "-p", "--pwd",   "--https_proxy"    OPTIONS
     __Trnskrbs_basic_options(parser, DoTranscript.sDefaultServerUrl)
+    parser.add_option("--last"  , dest='last'  , action="store_true"          , default=False, help="Consider last transcript of each page.")
     parser.add_option("--after" , dest='after' , action="store", type="string", default=None, help="Consider transcripts created on or after this date.")
     parser.add_option("--before", dest='before', action="store", type="string", default=None, help="Consider transcripts created on or before this date.")
     parser.add_option("--within", dest='within', action="append", type="string", default=None, help="Consider transcripts created within this range(s) of dates.")
@@ -241,6 +249,7 @@ if __name__ == '__main__':
     # get a filtered TRP data
     trp = doer.filter(colId, docId, page_filter=oPageRange
                       , time_filter=oTimeRange, user_filter=options.user, status_filter=options.status
+                      , bLast=options.last
                       , bVerbose=True)
 
     #CHECKs
