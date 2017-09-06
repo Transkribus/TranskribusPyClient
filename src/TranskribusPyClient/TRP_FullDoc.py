@@ -261,15 +261,16 @@ class TRP_FullDoc:
     def report_stat(self):
         ls = []
         lTr = self.getTranscriptList()
+        ls.append("stat: number of selected transcripts: %d"%len(lTr))
         lts = [tr["timestamp"] for tr in lTr]
         for opname, op in [("min", min), ("max", max)]:
             ts = op(lts)
             ls.append("stat: timestamp : %s=%s %s"%(opname, ts, DateTimeRangeSpec.isoformat(ts)))
-        for name, slotName  in [("user", "userName"), ("status", "status")]:
+        for name, slotName  in [("user", "userName"), ("status", "status"), ('pages', 'pageNr')]:
             lValue = [tr[slotName] for tr in lTr]
             lUniqueValue = list(set(lValue))
             lUniqueValue.sort()
-            ls.append("stat: %s : %d : %s"%(name, len(lUniqueValue), ", ".join([s.encode("utf-8") for s in lUniqueValue])))
+            ls.append("stat: %s : %d : %s"%(name, len(lUniqueValue), " ".join([str(s).encode("utf-8") for s in lUniqueValue])))
         
         return "\n".join(ls)
     
