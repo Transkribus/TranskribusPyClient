@@ -69,14 +69,15 @@ To filter the transcripts before applying the operation, use:
  --at, --within, --after, --before for time filtering
  --user    for considering only those transcripts authored by those user(s)
  --status  for considering only those transcript having this or thse status(es)
- --last    for considreing only the last transcript of each page
+ --last    for considering only the last transcript of each page
  
 To check assumption regarding the transcripts before applying the operation, use:
  --check_user, --check_status
 
 <operation> is one of:
---list    list the in-scope transcripts  (default operation if none given)
---rm      REMOVE the in-scope transcripts
+--list                   list the in-scope transcripts  (default operation if none given)
+--rm                     REMOVE the in-scope transcripts
+--set_status <status>    update the transcripts' status
 
 Page range is a comma-separated series of integer or pair of integers separated by a '-' 
 For instance 1  or 1,3  or 1-4 or 1,3-6,8
@@ -88,8 +89,6 @@ Date takes the form:
     Incomplete dates are converted into the first millisecond of the given period. For instance 2017 is equivalent to 2017-01-01T00:00:00
 Alternatively, it can be a timestamp (number of milliseconds since 1970-01-01)
 --utc option will show UTC times
-
-User name are regular expression (as specified in Python re library)
 
 """%sys.argv[0]
 
@@ -178,7 +177,24 @@ class DoTranscript(TranskribusClient):
             if bVerbose:
                 traceln("\tdeleting %s %s p%s transcript %s"%(colId, docId, pnum, sKey))
                 traceln(self.deletePageTranscript(colId, docId, pnum, sKey))
-
+        return True
+    
+    def setTranscriptStatus(self, trp, status, bVerbose=True):
+        """
+        Set the status of the transcripts listed in the trp
+        """
+        colId = trp.getCollectionId()
+        ldTr = trp.getTranscriptList()
+        
+        for dTr in ldTr:
+            docId = dTr["docId"]
+            pnum = dTr["pageNr"]
+            sTSId = dTr["tsId"]
+            if bVerbose:
+                traceln("\tsetting status to '%s' for %s %s p%s transcript %s"%(status, colId, docId, pnum, sTSId))
+                traceln(self.updatePageStatus(colId, docId, pnum, sTSId, status, "TranskribusPyClient"))
+        return True
+                
 if __name__ == '__main__':
     version = "v.01"
 
@@ -201,8 +217,9 @@ if __name__ == '__main__':
 
     parser.add_option("--utc"   , dest='utc'        , action="store_true", default=False, help="Show UTC time.")
     
-    parser.add_option("--list"  , dest='op_list'    , action="store_true", default=False, help="List   the in-scope transcripts.")
-    parser.add_option("--rm"    , dest='op_rm'      , action="store_true", default=False, help="Remove the in-scope transcripts. (CAUTION)")
+    parser.add_option("--list"      , dest='op_list'    , action="store_true", default=False, help="List   the in-scope transcripts.")
+    parser.add_option("--rm"        , dest='op_rm'      , action="store_true", default=False, help="Remove the in-scope transcripts. (CAUTION)")
+    parser.add_option("--set_status", dest='set_status' , action="store", type="string", default=None, help="Set the transcripts' status.")
         
     # ---   
     #parse the command line
@@ -266,6 +283,8 @@ if __name__ == '__main__':
     if options.op_rm == True:
         #delete the transcripts remaining in trp !
         doer.deleteTranscripts(trp, bVerbose=True)
+    elif options.set_status != None:
+        doer.setTranscriptStatus(trp, options.set_status, bVerbose=True)
     else:
         #by default we list
         print trp.report_short()

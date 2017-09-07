@@ -146,13 +146,14 @@ class TranskribusClient():
         self.sREQ_collections_addDocToCollection    = sServerUrl + '/rest/collections/%s/addDocToCollection'
         self.sREQ_collections_duplicate             = sServerUrl + '/rest/collections/%s/%s/duplicate'
         self.sREQ_collections_listPagesLocks        = sServerUrl + '/rest/collections/%s/%s/%s/listLocks'
+        self.sREQ_collections_updatePageStatus      = sServerUrl + '/rest/collections/%s/%s/%s/%s'         
         
         self.sREQ_recognition                       = sServerUrl + '/rest/recognition'
         self.sREQ_recognition_htrModels             = sServerUrl + '/rest/recognition/htrModels'
         self.sREQ_recognition_htr                   = sServerUrl + '/rest/recognition/htr'
         self.sREQ_recognition_htrRnnModels          = sServerUrl + '/rest/recognition/nets' #htrModels' #/rest/recognition/nets'
         self.sREQ_recognition_htrRnnModels          = sServerUrl + '/rest/recognition/htrModels'
-        self.sREQ_recognition_listHtr               = sServerUrl + '/rest/recognition/%s/list'               
+        self.sREQ_recognition_listHtr               = sServerUrl + '/rest/recognition/%s/list'      
 
         self.sREQ_recognition_htrRnnDicts           = sServerUrl + '/rest/recognition/dicts'
         self.sREQ_recognition_htrRnn                = sServerUrl + '/rest/recognition/%s/%s/htrCITlab'
@@ -378,16 +379,27 @@ class TranskribusClient():
         resp.raise_for_status()
         return resp.text
 
-    def deletePageTranscript(self, colId, docId, pnum, sTranscriptId):
+    def deletePageTranscript(self, colId, docId, pnum, sTranscriptKey):
         """
         Delete a transcript 
         """
         self._assertLoggedIn()
         myReq = self.sREQ_collections_deletePageTranscript % (colId,docId,pnum)
-        params = self._buidlParamsDic(key=sTranscriptId)
+        params = self._buidlParamsDic(key=sTranscriptKey)
         resp = self._POST(myReq, params=params)
         resp.raise_for_status()
         return resp.text
+    
+    def updatePageStatus(self, colId, docId, pnum, sTranscriptId, sStatus, sNote):
+        """
+        Update the status of a transcript
+        """
+        self._assertLoggedIn()
+        myReq = self.sREQ_collections_updatePageStatus % (colId,docId,pnum,sTranscriptId)
+        params = self._buidlParamsDic(status=sStatus, note=sNote)
+        resp = self._POST(myReq, params=params)
+        resp.raise_for_status()
+        return True
     
     def addDocToCollection(self, colId, docId):
         """

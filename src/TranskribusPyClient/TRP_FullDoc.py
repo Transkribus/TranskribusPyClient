@@ -268,26 +268,30 @@ class TRP_FullDoc:
         ls.append("stat: number of pages in document: %d"%nbPage)
         lTr = self.getTranscriptList()
         ls.append("stat: number of selected transcripts: %d"%len(lTr))
-        lts = [tr["timestamp"] for tr in lTr]
-        for opname, op in [("min", min), ("max", max)]:
-            if lts:  #otherwise min and max have no meaning
-                ts = op(lts)
-                ls.append("stat: timestamp : %s=%s %s"%(opname, ts, DateTimeRangeSpec.isoformat(ts)))
-        #for name, slotName  in [("user", "userName"), ("status", "status"), ('pages', 'pageNr')]:
-        for name, slotName  in [("user", "userName"), ("status", "status")]:
-            lValue = [tr[slotName] for tr in lTr]
-            lUniqueValue = list(set(lValue))
-            lUniqueValue.sort()
+
         #Pages
-        name, slotName = ('pages', 'pageNr')
+        name, slotName = ('number of     covered pages', 'pageNr')
         lValue = [tr[slotName] for tr in lTr]
         lUniqueValue = list(set(lValue))
         ls.append("stat: %s : %d : %s"%(name, len(lUniqueValue), IntegerRange().initFromEnumeration(lUniqueValue)))
         #indicate which pages were not considered at all
         lMissingPageNr = list(set(range(1, 1+nbPage)).difference(set(lUniqueValue)))
-        ls.append("stat: %s : %d : %s"%("pages not listed", len(lMissingPageNr), IntegerRange().initFromEnumeration(lMissingPageNr)))
-        return "\n".join(ls)
+        ls.append("stat: %s : %d : %s"%("number of not covered pages", len(lMissingPageNr), IntegerRange().initFromEnumeration(lMissingPageNr)))
+        
+        lts = [tr["timestamp"] for tr in lTr]
+        for opname, op in [("min", min), ("max", max)]:
+            if lts:  #otherwise min and max have no meaning
+                ts = op(lts)
+                ls.append("stat: timestamp : %s=%s %s"%(opname, ts, DateTimeRangeSpec.isoformat(ts)))
+                
+        #for name, slotName  in [("user", "userName"), ("status", "status"), ('pages', 'pageNr')]:
+        for name, slotName  in [("Listed user(s)", "userName"), ("listed status(es)", "status")]:
+            lValue = [tr[slotName] for tr in lTr]
+            lUniqueValue = list(set(lValue))
+            lUniqueValue.sort()
+            ls.append("stat: %s : %d : %s"%(name, len(lUniqueValue), " ".join([str(s).encode("utf-8") for s in lUniqueValue])))
     
+        return "\n".join(ls)
     
 #     def __str__(self): return ",".join( "%d-%d"%(a,b) if a != b else "%d"%a for (a,b) in self._ltAB )
 #     

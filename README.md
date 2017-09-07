@@ -28,6 +28,7 @@ Install(clone) [TranskribusDU] in the same folder (TranskribusDU and Transkribus
 * do_getJobStatus.py
 * do_listCollec.py
 * do_listPageLocks.py
+* do_Transcript.py
 
 * do_analyzeLayout.py
 * do_htrHmm.py
