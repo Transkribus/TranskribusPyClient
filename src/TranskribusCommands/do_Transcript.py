@@ -104,7 +104,7 @@ class DoTranscript(TranskribusClient):
                , bLast=False, bLastFiltered=False):
         if bLast:
             #consider only last transcript per page
-            if bVerbose: trace("\t[filter] ignore all but last transcript of each page")
+            if bVerbose: traceln("\t[filter] ignore all but last transcript of each page")
             trp = TRP_FullDoc(self.getDocById(colId, docId, 1))
         else:
             trp = TRP_FullDoc(self.getDocById(colId, docId, -1))
