@@ -263,21 +263,24 @@ class TRP_FullDoc:
         return self._getTranscriptSlotList("timestamp")
 
 
-    def report_short(self, warn=" "):
+    def report_short(self, warn=" ", bTSId=False):
         """
         return a string report
         """
-        lt4 = [ (tr["pageNr"], tr["timestamp"], tr["status"], tr["userName"]) for tr in self.getTranscriptList() ]
+        lt5 = [ (tr["pageNr"], tr['tsId'], tr["timestamp"], tr["status"], tr["userName"]) for tr in self.getTranscriptList() ]
         ls = list()
         prev_pnum = None
-        for pnum, ts, st, u in lt4:
+        for pnum, tsId, ts, st, u in lt5:
             if pnum == prev_pnum:
                 spnum = "-     "
             else:
                 spnum="p%5s"%pnum
             prev_pnum = pnum
             
-            ls.append("%s %s  %s %s  %s  %s"%(warn, spnum, ts, DateTimeRangeSpec.isoformat(ts), st, u))  #CSV-compliant syntax!! ;-)
+            if bTSId:
+                ls.append("%s %s %s %s %s  %s  %s"%(warn, spnum, tsId, ts, DateTimeRangeSpec.isoformat(ts), st, u))  #CSV-compliant syntax!! ;-)
+            else:
+                ls.append("%s %s %s %s  %s  %s"   %(warn, spnum      , ts, DateTimeRangeSpec.isoformat(ts), st, u))  #CSV-compliant syntax!! ;-)
         return "\n".join(ls)
     
     def report_stat(self):
