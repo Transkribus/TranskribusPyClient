@@ -221,6 +221,22 @@ class TRP_FullDoc:
         o.setPageList(new_ldPages)
         return o
     
+    def filterLastTranscript(self, bInPlace=True):
+        """
+        keep only the last transcipt of each page of the TRP
+        """
+        o = self if bInPlace else self.deepcopy()
+        
+        ldPages = o.getPageList()
+        for dPage in ldPages:
+            ldTr = dPage["tsList"]["transcripts"]
+            if ldTr:
+                #should always be the case
+                new_ldTr = ldTr[0:1]    #keep the first
+                if len(ldTr) != len(new_ldTr):
+                    dPage["tsList"]["transcripts"] = new_ldTr
+        return o
+        
     def _getTranscriptSlotList(self, slot):
         """
         return the given slot value for each page, as a list of values
@@ -253,11 +269,13 @@ class TRP_FullDoc:
         """
         lt4 = [ (tr["pageNr"], tr["timestamp"], tr["status"], tr["userName"]) for tr in self.getTranscriptList() ]
         ls = list()
-        prev_spnum = None
+        prev_pnum = None
         for pnum, ts, st, u in lt4:
-            spnum="p%5s"%pnum
-            spnum = spnum if spnum != prev_spnum else "-     "
-            prev_spnum = spnum
+            if pnum == prev_pnum:
+                spnum = "-     "
+            else:
+                spnum="p%5s"%pnum
+            prev_pnum = pnum
             
             ls.append("%s %s  %s %s  %s  %s"%(warn, spnum, ts, DateTimeRangeSpec.isoformat(ts), st, u))  #CSV-compliant syntax!! ;-)
         return "\n".join(ls)
@@ -293,107 +311,3 @@ class TRP_FullDoc:
     
         return "\n".join(ls)
     
-#     def __str__(self): return ",".join( "%d-%d"%(a,b) if a != b else "%d"%a for (a,b) in self._ltAB )
-#     
-#     #Emulating Container type...
-#     def __iter__(self):
-#         """
-#         Iterator returning each page number in turn
-#         """    
-#         for a,b in self._ltAB:
-#             for n in range(a,b+1): yield n
-#         raise StopIteration
-#     
-#     def __reversed__(self):
-#         """
-#         Reversed iterator
-#         If we do not provide it, we must provide a __getitem__ (boring to code and how useful??)
-#         """
-#         for a,b in reversed(self._ltAB):
-#             for n in range(b,a-1,-1): yield n
-#         raise StopIteration        
-#         
-#     def __len__(self):
-#         return sum(b-a+1 for a,b in self._ltAB)
-# 
-#     def __contains__(self, item):
-#         if type(item) != types.IntType: raise ValueError("A page range contains integer values not %s"%type(item))
-#         a, b = None, None
-#         for a,b in self._ltAB:
-#             if b >= item: break
-#         return a<= item and item <= b
-# 
-# def test_good_spec(capsys):
-#     def container_test(o, lref):
-#         assert list(o) == lref
-#         assert list(reversed(o)) == list(reversed(lref))
-#         for item in lref: assert item in o
-#         assert -99 not in o
-#         
-#     o = PageRangeSpec("1")
-# #     with capsys.disabled():
-# #         print "YOOOOOOOOOOOOOOOOOOOOOOOOOOO ", list(reversed(o))    
-#     container_test(o, [1])
-#     
-#     o = PageRangeSpec("99")
-#     container_test(o, [99])    
-#     
-#     o = PageRangeSpec("1,99")
-#     container_test(o, [1, 99])      
-#     
-#     o = PageRangeSpec("1-5")
-#     container_test(o, range(1, 6))
-# 
-#     o = PageRangeSpec("1-5,6-88")
-#     container_test(o, range(1, 6)+range(6, 89))          
-#     
-#     o = PageRangeSpec("1-3,4-8")
-#     container_test(o, range(1, 9))   
-#     assert len(o) == len(range(1, 9)) 
-# 
-# def test_spaced_good_spec():
-#     def container_test(o, lref):
-#         assert list(o) == lref
-#         assert list(reversed(o))== list(reversed(lref))
-#         for item in lref: assert item in o
-#         assert -99 not in o
-#         
-#     o = PageRangeSpec(" 1\t\t")
-#     container_test(o, [1])
-#     
-#     o = PageRangeSpec("99  ")
-#     container_test(o, [99])    
-#     
-#     o = PageRangeSpec("1  , 99")
-#     container_test(o, [1, 99])      
-#     
-#     o = PageRangeSpec(" 1\t- 5\t")
-#     container_test(o, range(1, 6))
-# 
-#     o = PageRangeSpec("1-5, 6-88")
-#     container_test(o, range(1, 6)+range(6, 89))          
-#     
-#     o = PageRangeSpec("1 -3\t,4- 8")
-#     container_test(o, range(1, 9))
-#     assert len(o) == len(range(1, 9)) 
-# 
-# def test_errors():
-#     import pytest
-#     with pytest.raises(ValueError): PageRangeSpec("1 3")
-#     with pytest.raises(ValueError): PageRangeSpec("3-1")
-#     with pytest.raises(ValueError): PageRangeSpec("3,1")
-#     with pytest.raises(ValueError): PageRangeSpec("1-3,2")
-#     with pytest.raises(ValueError): PageRangeSpec("3,1-2")
-#     with pytest.raises(ValueError): PageRangeSpec("1-3,3-8")
-#     with pytest.raises(ValueError): PageRangeSpec("1-3 3,3-8")
-#     with pytest.raises(ValueError): PageRangeSpec("1-3,3-8 8")
-#     
-# 
-# def test_limit():
-#     o = PageRangeSpec("")
-#     assert list(o) == []
-#     assert len(o) == 0
-#     o = PageRangeSpec("\t  \t ")
-#     assert list(o) == []
-#     assert len(o) == 0    
-#     

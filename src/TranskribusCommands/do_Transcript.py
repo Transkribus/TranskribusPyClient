@@ -101,9 +101,10 @@ class DoTranscript(TranskribusClient):
     def filter(self, colId, docId
                , page_filter=None, time_filter=None, user_filter=None, status_filter=None
                , bVerbose=False
-               , bLast=False):
+               , bLast=False, bLastFiltered=False):
         if bLast:
             #consider only last transcript per page
+            if bVerbose: trace("\t[filter] ignore all but last transcript of each page")
             trp = TRP_FullDoc(self.getDocById(colId, docId, 1))
         else:
             trp = TRP_FullDoc(self.getDocById(colId, docId, -1))
@@ -129,6 +130,14 @@ class DoTranscript(TranskribusClient):
                     n1 = len(trp.getTranscriptList())
                     traceln(" --> %d transcripts in-scope (after excluding %d)"%(n1, n0-n1))
 
+        if bLastFiltered:
+            if bVerbose: 
+                trace("\t[filter] keep last filtered transcript per page")
+                n0 = len(trp.getTranscriptList())
+            trp.filterLastTranscript()
+            if bVerbose: 
+                n1 = len(trp.getTranscriptList())
+                traceln(" --> %d transcripts in-scope (after excluding %d)"%(n1, n0-n1))
         return trp
     
     @classmethod
@@ -192,7 +201,7 @@ class DoTranscript(TranskribusClient):
             sTSId = dTr["tsId"]
             if bVerbose:
                 traceln("\tsetting status to '%s' for %s %s p%s transcript %s"%(status, colId, docId, pnum, sTSId))
-                traceln(self.updatePageStatus(colId, docId, pnum, sTSId, status, "TranskribusPyClient"))
+                traceln(self.updatePageStatus(colId, docId, pnum, sTSId, status, "setStatus by PyClient"))
         return True
                 
 if __name__ == '__main__':
@@ -204,7 +213,8 @@ if __name__ == '__main__':
     
     #"-s", "--server",  "-l", "--login" ,   "-p", "--pwd",   "--https_proxy"    OPTIONS
     __Trnskrbs_basic_options(parser, DoTranscript.sDefaultServerUrl)
-    parser.add_option("--last"  , dest='last'  , action="store_true"          , default=False, help="Consider last transcript of each page.")
+    parser.add_option("--last"          , dest='last'           , action="store_true" , default=False, help="Consider last transcript of each page before any filtering occurs.")
+    parser.add_option("--last_filtered" , dest='last_filtered'  , action="store_true" , default=False, help="Consider last transcript of each page after filtering.")
     parser.add_option("--after" , dest='after' , action="store", type="string", default=None, help="Consider transcripts created on or after this date.")
     parser.add_option("--before", dest='before', action="store", type="string", default=None, help="Consider transcripts created on or before this date.")
     parser.add_option("--within", dest='within', action="append", type="string", default=None, help="Consider transcripts created within this range(s) of dates.")
@@ -267,6 +277,7 @@ if __name__ == '__main__':
     trp = doer.filter(colId, docId, page_filter=oPageRange
                       , time_filter=oTimeRange, user_filter=options.user, status_filter=options.status
                       , bLast=options.last
+                      , bLastFiltered=options.last_filtered
                       , bVerbose=True)
 
     #CHECKs
