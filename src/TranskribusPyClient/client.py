@@ -393,6 +393,31 @@ class TranskribusClient():
     def updatePageStatus(self, colId, docId, pnum, sTranscriptId, sStatus, sNote):
         """
         Update the status of a transcript
+            September 2017
+            I just looked it up in the code and this is the intended behavior:
+            
+            a status update should only work for the most recent transcript!
+            
+            if the given tsId does not belong to the current transcript, then you
+            should get a BAD REQUEST response.
+            
+            (I could omit the tsId in the path but then there might be another user
+            saving in that time and the status would be updated unintentionally on
+            the new version. Don't know if that is a good idea...)
+            
+            For an already stored transcript, it is only possible to update the
+            status on this entity if your user account was used to save it.
+            
+            If the respective transcript was saved by another user, then a duplicate
+            will be stored under your name with a _new timestamp_. This is done
+            silently at the moment. I could return a non-200 status code in that
+            case if it helps.
+            
+            So if there is a mess after using this function, please let me know. I'd
+            like to fix it immediately.
+            
+            Best regards,
+            Philip        
         """
         self._assertLoggedIn()
         myReq = self.sREQ_collections_updatePageStatus % (colId,docId,pnum,sTranscriptId)
