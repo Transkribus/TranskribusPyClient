@@ -47,7 +47,28 @@ class IntegerRange:
     def __init__(self, sRange=""):
         self._ltAB = self.parseSpec(sRange)
         assert str(self) == "".join(sRange.split())
-        
+
+    def initFromEnumeration(self, lN):
+        """
+        create the list of ranges that exactly cover the enumeration. 
+        """        
+        if not lN: 
+            pass
+        elif len(lN) == 1:
+            self.addRange(lN[0])
+        else:
+            lN = sorted(lN)
+            A = lN[0]
+            Nprev = A
+            for N in lN[1:]:
+                if Nprev+1 < N:
+                    #hole in sequence, create an interval!
+                    self.addRange(A, Nprev)
+                    A = N
+                Nprev = N
+            self.addRange(A, Nprev)
+        return self
+    
     @classmethod
     def parseSpec(cls, sSpec):
         """
@@ -272,9 +293,22 @@ def test_add():
     
     assert 50 not in o
     
+def test_enum():
+    def test_enum(l):
+        ll = set(l)    
+        o = IntegerRange()
+        o.initFromEnumeration(l)
+        assert set(o) == ll
     
-    
-    
+    test_enum([])
+    test_enum([2])
+    test_enum([-2])
+    test_enum([2,1])
+    test_enum([1,2])
+    test_enum([1,2,2]) #bad case that we cover anyway
+    test_enum([1,2,4,2,5])
+    test_enum([7,4,6,1])
+    test_enum([0])
     
     
     

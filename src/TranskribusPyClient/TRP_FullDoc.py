@@ -27,6 +27,7 @@
 import copy
 
 from TimeRangeSpec import DateTimeRangeSpec
+from common.IntegerRange import IntegerRange
 
 class TRP_FullDoc:
     """
@@ -272,16 +273,19 @@ class TRP_FullDoc:
             if lts:  #otherwise min and max have no meaning
                 ts = op(lts)
                 ls.append("stat: timestamp : %s=%s %s"%(opname, ts, DateTimeRangeSpec.isoformat(ts)))
-        for name, slotName  in [("user", "userName"), ("status", "status"), ('pages', 'pageNr')]:
+        #for name, slotName  in [("user", "userName"), ("status", "status"), ('pages', 'pageNr')]:
+        for name, slotName  in [("user", "userName"), ("status", "status")]:
             lValue = [tr[slotName] for tr in lTr]
             lUniqueValue = list(set(lValue))
             lUniqueValue.sort()
-            ls.append("stat: %s : %d : %s"%(name, len(lUniqueValue), " ".join([str(s).encode("utf-8") for s in lUniqueValue])))
-            if name == "pages":
-                #indicate which pages were not considered at all
-                lMissingPageNr = list(set(range(1, 1+nbPage)).difference(set(lUniqueValue)))
-                lMissingPageNr.sort()
-                ls.append("stat: %s : %d : %s"%("pages not listed", len(lMissingPageNr), " ".join([str(s).encode("utf-8") for s in lMissingPageNr])))
+        #Pages
+        name, slotName = ('pages', 'pageNr')
+        lValue = [tr[slotName] for tr in lTr]
+        lUniqueValue = list(set(lValue))
+        ls.append("stat: %s : %d : %s"%(name, len(lUniqueValue), IntegerRange().initFromEnumeration(lUniqueValue)))
+        #indicate which pages were not considered at all
+        lMissingPageNr = list(set(range(1, 1+nbPage)).difference(set(lUniqueValue)))
+        ls.append("stat: %s : %d : %s"%("pages not listed", len(lMissingPageNr), IntegerRange().initFromEnumeration(lMissingPageNr)))
         return "\n".join(ls)
     
     
