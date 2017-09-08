@@ -56,28 +56,17 @@ description = """Managiong the transcripts of one or several document(s) or of a
 """ + _Trnskrbs_description
 
 usage = """%s <colId> <docId> [<page-ranges>] 
-    [--last]
+    [--last] 
     [--within <date>/<date>]+ [--at <date>]+ [--after <date>] [--before <date>] [--utc] 
     [--user <username>]+
     [--status <status>]+ 
+    [--last_filtered]
     [--check_user <username>]+
     [--check_status <status>]+ 
     <operation>
 
-To filter the transcripts before applying the operation, use:
- page ranges
- --at, --within, --after, --before for time filtering
- --user    for considering only those transcripts authored by those user(s)
- --status  for considering only those transcript having this or thse status(es)
- --last    for considering only the last transcript of each page
- 
-To check assumption regarding the transcripts before applying the operation, use:
- --check_user, --check_status
-
-<operation> is one of:
---list                   list the in-scope transcripts  (default operation if none given)
---rm                     REMOVE the in-scope transcripts
---set_status <status>    update the transcripts' status
+This command first filters transcripts based on user specification, before checking user's specification on filtered transcript.
+Eventually, the retrieved transcripts are listed, or removed, or their status is updated.
 
 Page range is a comma-separated series of integer or pair of integers separated by a '-' 
 For instance 1  or 1,3  or 1-4 or 1,3-6,8
@@ -213,23 +202,22 @@ if __name__ == '__main__':
     
     #"-s", "--server",  "-l", "--login" ,   "-p", "--pwd",   "--https_proxy"    OPTIONS
     __Trnskrbs_basic_options(parser, DoTranscript.sDefaultServerUrl)
-    parser.add_option("--last"          , dest='last'           , action="store_true" , default=False, help="Consider last transcript of each page before any filtering occurs.")
-    parser.add_option("--last_filtered" , dest='last_filtered'  , action="store_true" , default=False, help="Consider last transcript of each page after filtering.")
-    parser.add_option("--after" , dest='after' , action="store", type="string", default=None, help="Consider transcripts created on or after this date.")
-    parser.add_option("--before", dest='before', action="store", type="string", default=None, help="Consider transcripts created on or before this date.")
-    parser.add_option("--within", dest='within', action="append", type="string", default=None, help="Consider transcripts created within this range(s) of dates.")
-    parser.add_option("--at"    , dest='at'    , action="append", type="string", default=None, help="Consider transcripts created at a date(s).")
-    parser.add_option("--user"  , dest='user'  , action="append", type="string", default=None, help="Consider transcripts that were authored by this or these users.")
-    parser.add_option("--status", dest='status', action="append", type="string", default=None, help="Consider transcripts that have this or these status(es).")
-    parser.add_option("--check_user"  , dest='check_user'   , action="append", type="string", default=None, help="Check that the transcripts were authored by this or these users.")
-    parser.add_option("--check_status", dest='check_status' , action="append", type="string", default=None, help="Check that the transcripts have this or these status(es).")
-    parser.add_option("-n", "--n"  , dest='nbTranscript', action="store", type="int", default=1, help="Number of transcripts")
+    parser.add_option("--last"          , dest='last'           , action="store_true" , default=False, help="filter (i.e. keep) only last transcript of each page before any filtering occurs.")
+    parser.add_option("--after" , dest='after' , action="store", type="string", default=None         , help="filter (i.e. keep) transcripts created on or after this date.")
+    parser.add_option("--before", dest='before', action="store", type="string", default=None         , help="filter (i.e. keep) transcripts created on or before this date.")
+    parser.add_option("--within", dest='within', action="append", type="string", default=None        , help="filter (i.e. keep) transcripts created within this range(s) of dates.")
+    parser.add_option("--at"    , dest='at'    , action="append", type="string", default=None        , help="filter (i.e. keep) transcripts created at a date(s).")
+    parser.add_option("--user"  , dest='user'  , action="append", type="string", default=None        , help="filter (i.e. keep) transcripts that were authored by this or these users.")
+    parser.add_option("--status", dest='status', action="append", type="string", default=None        , help="filter (i.e. keep) transcripts that have this or these status(es).")
+    parser.add_option("--last_filtered" , dest='last_filtered'  , action="store_true" , default=False, help="filter (i.e. keep) only last transcript, if any, of each page (done after any other filter).")
+    parser.add_option("--check_user"  , dest='check_user'   , action="append", type="string", default=None, help="Check that each filtered transcript was authored by one of these users.")
+    parser.add_option("--check_status", dest='check_status' , action="append", type="string", default=None, help="Check that each filtered transcript have on of these statuses.")
 
     parser.add_option("--utc"   , dest='utc'        , action="store_true", default=False, help="Show UTC time.")
     
-    parser.add_option("--list"      , dest='op_list'    , action="store_true", default=False, help="List   the in-scope transcripts.")
-    parser.add_option("--rm"        , dest='op_rm'      , action="store_true", default=False, help="Remove the in-scope transcripts. (CAUTION)")
-    parser.add_option("--set_status", dest='set_status' , action="store", type="string", default=None, help="Set the transcripts' status.")
+    parser.add_option("--list"      , dest='op_list'    , action="store_true", default=False, help="List   the filtered transcripts.")
+    parser.add_option("--rm"        , dest='op_rm'      , action="store_true", default=False, help="Remove the filtered transcripts. (CAUTION)")
+    parser.add_option("--set_status", dest='set_status' , action="store", type="string", default=None, help="Set the filtered transcripts' status.")
         
     # ---   
     #parse the command line
