@@ -56,20 +56,22 @@ description = """Managiong the transcripts of one or several document(s) or of a
 """ + _Trnskrbs_description
 
 usage = """%s <colId> <docId> [<page-ranges>] 
-    [--last]
+    [--last] 
     [--within <date>/<date>]+ [--at <date>]+ [--after <date>] [--before <date>] [--utc] 
     [--user <username>]+
     [--status <status>]+ 
+    [--last_filtered]
     [--check_user <username>]+
     [--check_status <status>]+ 
     <operation>
 
 To filter the transcripts before applying the operation, use:
  page ranges
+ --last                            for considering only the last transcript of each page before any other filter
  --at, --within, --after, --before for time filtering
- --user    for considering only those transcripts authored by those user(s)
- --status  for considering only those transcript having this or thse status(es)
- --last    for considering only the last transcript of each page
+ --user                            for considering only those transcripts authored by those user(s)
+ --status                          for considering only those transcript having this or thse status(es)
+ --last_filtered                   Keep only the last transcript of each page after any other filter.
  
 To check assumption regarding the transcripts before applying the operation, use:
  --check_user, --check_status
