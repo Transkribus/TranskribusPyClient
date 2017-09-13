@@ -511,7 +511,7 @@ class TranskribusClient():
             bSkip=False
             docId = docInfo['docId']  #int here!!!
             if sDocId is not None:
-                if str(docId) != sDocId:
+                if str(docId) != str(sDocId):
                     bSkip=True 
             if not bSkip:
                 ldocID.append(str(docId))
@@ -680,7 +680,7 @@ class TranskribusClient():
                                       , jobImpl=sJobImpl, pars=sPars)
         resp = self._POST(myReq, params=params, sContentType=None)
         
-        zzz
+
         resp.raise_for_status()
         return resp.text 
     
