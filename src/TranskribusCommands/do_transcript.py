@@ -65,8 +65,11 @@ usage = """%s <colId> <docId> [<page-ranges>]
     [--check_status <status>]+ 
     <operation>
 
-This command first filters transcripts based on user specification, before checking user's specification on filtered transcript.
-Eventually, the retrieved transcripts are listed, or removed, or their status is updated.
+Use this command to selectively list or remove the transcripts of a document.
+This command works in 3 stages:
+Step 1 - FILTERING: you can look at all transcripts per page or only the last one. Then you can filter based on the page number, or the transcript date, status, author. The command does a AND of all filters, in other words, a selected transcript satisfies all filters. After filtering, you can also keep only the last transcript per page.
+Step 2 - CHECKING: you can check that the transcripts selected by the filter verify certain conditions, based on transcript status and author. If the condition is not met for one or more selected transcript(s), the operation is not performed (apart the 'list' operation)
+Step 3 - ACTING: an operation applies to the selected transcript, currently you can list, remove them or update their status.
 
 Page range is a comma-separated series of integer or pair of integers separated by a '-' 
 For instance 1  or 1,3  or 1-4 or 1,3-6,8
@@ -91,6 +94,9 @@ class DoTranscript(TranskribusClient):
                , page_filter=None, time_filter=None, user_filter=None, status_filter=None
                , bVerbose=False
                , bLast=False, bLastFiltered=False):
+        """
+        return a TRP containing the transcripts, excluding the ones filtered out.
+        """
         if bLast:
             #consider only last transcript per page
             if bVerbose: traceln("\t[filter] ignore all but last transcript of each page")
