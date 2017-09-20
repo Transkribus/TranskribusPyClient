@@ -36,7 +36,7 @@ import dateutil.parser
 from common.IntegerRangeHalfBounded import IntegerRangeHalfBounded
 
 
-class DateTimeRangeSpec(IntegerRangeHalfBounded):
+class DateTimeRange(IntegerRangeHalfBounded):
     """
     A list of datetime range object
     
@@ -255,59 +255,59 @@ def test_good_spec(capsys):
         for item in lref: assert item in o
         assert -99 not in o
         
-    o = DateTimeRangeSpec("1")
+    o = DateTimeRange("1")
 #     with capsys.disabled():
 #         print "YOOOOOOOOOOOOOOOOOOOOOOOOOOO ", list(reversed(o))    
     container_test(o, [1])
     
     import pytest
-    with pytest.raises(ValueError): DateTimeRangeSpec("1 3")
+    with pytest.raises(ValueError): DateTimeRange("1 3")
 """
 
 
 def test_class_methods():
     import pytest
 
-#     assert datetime.datetime(1970, 1, 1) == DateTimeRangeSpec.ts2dt(0)
-#     assert datetime.datetime(1970, 1, 1) == DateTimeRangeSpec.ts2dt("0")
-    assert DateTimeRangeSpec.ts2dt(10000)
-    with pytest.raises(ValueError): DateTimeRangeSpec.ts2dt("yo man")
+#     assert datetime.datetime(1970, 1, 1) == DateTimeRange.ts2dt(0)
+#     assert datetime.datetime(1970, 1, 1) == DateTimeRange.ts2dt("0")
+    assert DateTimeRange.ts2dt(10000)
+    with pytest.raises(ValueError): DateTimeRange.ts2dt("yo man")
     
-    assert DateTimeRangeSpec.dt2ts("1970-01-01T00:00:00.000Z") == 0
-    assert DateTimeRangeSpec.dt2ts("1969-12-31T23:59:00.000Z") == -60000
-    with pytest.raises(ValueError): DateTimeRangeSpec.ts2dt("yo man")
+    assert DateTimeRange.dt2ts("1970-01-01T00:00:00.000Z") == 0
+    assert DateTimeRange.dt2ts("1969-12-31T23:59:00.000Z") == -60000
+    with pytest.raises(ValueError): DateTimeRange.ts2dt("yo man")
     
-    DateTimeRangeSpec.setUTC(True)
-    assert DateTimeRangeSpec.format(0) == "1970-01-01T00:00:00.000Z"
-    assert DateTimeRangeSpec.format(datetime.datetime(1970, 1, 1)) == "1970-01-01T00:00:00.000Z"
+    DateTimeRange.setUTC(True)
+    assert DateTimeRange.format(0) == "1970-01-01T00:00:00.000Z"
+    assert DateTimeRange.format(datetime.datetime(1970, 1, 1)) == "1970-01-01T00:00:00.000Z"
     
     ts = 1504615116779
     dt = datetime.datetime(2017, 9, 5, 12, 38, 36, 779000)
-    assert DateTimeRangeSpec.ts2dt(1504615116779) == dt
+    assert DateTimeRange.ts2dt(1504615116779) == dt
     
 def test_simple():
     import pytest
-    dts = DateTimeRangeSpec()
+    dts = DateTimeRange()
     assert dts.len() == 0
     
     dts.addRange("2017-09-04T12:00:00Z", "2017-09-04T23:00:00Z")
-    assert dts.len() == (DateTimeRangeSpec.dt2ts("2017-09-04T23:00:00Z")-DateTimeRangeSpec.dt2ts("2017-09-04T12:00:00Z")+1)
+    assert dts.len() == (DateTimeRange.dt2ts("2017-09-04T23:00:00Z")-DateTimeRange.dt2ts("2017-09-04T12:00:00Z")+1)
     
-    assert DateTimeRangeSpec.dt2ts("2017-09-04T12:00:00.000Z") in dts
-    assert DateTimeRangeSpec.dt2ts("2017-09-04T18:30:20.000Z") in dts
-    assert DateTimeRangeSpec.dt2ts("2017-09-04T23:00:00.000Z") in dts
-    with pytest.raises(ValueError): DateTimeRangeSpec.o2ts("2019-09-01")
-    with pytest.raises(ValueError): DateTimeRangeSpec.o2ts("2010-09") 
-    assert DateTimeRangeSpec.o2ts("2019-09-01T12Z") not in dts
+    assert DateTimeRange.dt2ts("2017-09-04T12:00:00.000Z") in dts
+    assert DateTimeRange.dt2ts("2017-09-04T18:30:20.000Z") in dts
+    assert DateTimeRange.dt2ts("2017-09-04T23:00:00.000Z") in dts
+    with pytest.raises(ValueError): DateTimeRange.o2ts("2019-09-01")
+    with pytest.raises(ValueError): DateTimeRange.o2ts("2010-09") 
+    assert DateTimeRange.o2ts("2019-09-01T12Z") not in dts
     
     #with pytest.raises(ValueError): 
     dts.addStartsAfter("2018-01-01T00:00Z")
     assert dts.len() == dts.inf()
     
     def test_1():
-        assert DateTimeRangeSpec.dt2ts("2019-09-01T00:00Z") in dts
-        assert DateTimeRangeSpec.dt2ts("2010-01T00:00Z") not in dts
-        assert DateTimeRangeSpec.dt2ts("2017-12-31T23:59:59Z") not in dts
+        assert DateTimeRange.dt2ts("2019-09-01T00:00Z") in dts
+        assert DateTimeRange.dt2ts("2010-01T00:00Z") not in dts
+        assert DateTimeRange.dt2ts("2017-12-31T23:59:59Z") not in dts
     test_1()
 
     with pytest.raises(ValueError): dts.addStartsAfter("2018-01-01")
@@ -317,10 +317,10 @@ def test_simple():
 
     dts.addEndsBefore("2000-12-31T23:59:59Z")
     def test_2():
-        assert DateTimeRangeSpec.dt2ts("1990-10-29T19:00Z") in dts
-        assert DateTimeRangeSpec.dt2ts("2000-12-31T23:59:59Z") in dts
-        assert DateTimeRangeSpec.dt2ts("2000-12-31T23:59:58Z") in dts
-        assert DateTimeRangeSpec.dt2ts("2001-01-01T00:00:00Z") not in dts
+        assert DateTimeRange.dt2ts("1990-10-29T19:00Z") in dts
+        assert DateTimeRange.dt2ts("2000-12-31T23:59:59Z") in dts
+        assert DateTimeRange.dt2ts("2000-12-31T23:59:58Z") in dts
+        assert DateTimeRange.dt2ts("2001-01-01T00:00:00Z") not in dts
     test_1()
     test_2()
 
@@ -331,16 +331,16 @@ def test_simple():
     test_2()
         
 if __name__ == "__main__":
-    t = DateTimeRangeSpec.ts2dt(1504512814466)
+    t = DateTimeRange.ts2dt(1504512814466)
     print t
-    u = DateTimeRangeSpec.dt2ts("2017-09-04T08:13:34.466000")
+    u = DateTimeRange.dt2ts("2017-09-04T08:13:34.466000")
     print u
     print (u - 1504512814466) == 0
     print t == "2017-09-04T08:13:34.466000"
     
     print datetime.datetime(1970, 1, 1, 0, 0, 0, 0)
-    print DateTimeRangeSpec.ts2dt(0)
-    print DateTimeRangeSpec.ts2dt(-10000)
+    print DateTimeRange.ts2dt(0)
+    print DateTimeRange.ts2dt(-10000)
 #     print datetime.strptime("2017-09-04", "%Y-%m-%d")
 #     print datetime.strptime("2017-09-04T12:00:00", "%Y-%m-%dT%H:%M:%S")
 #     print datetime.strptime("2017-09-04T13", "%Y-%m-%dT%H:%M:%S")

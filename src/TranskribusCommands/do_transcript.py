@@ -44,15 +44,15 @@ except ImportError:
 
 from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit
 from TranskribusPyClient.client import TranskribusClient
-from TranskribusPyClient.PageRangeSpec import PageRangeSpec
-from TranskribusPyClient.TimeRangeSpec import DateTimeRangeSpec
+from common.IntegerRange  import IntegerRange as PageRangeSpec
+from common.DateTimeRange import DateTimeRange as DateTimeRangeSpec
 from TranskribusPyClient.TRP_FullDoc import TRP_FullDoc
 
 from common.trace import traceln, trace
 
 DEBUG = 0
 
-description = """Managiong the transcripts of one or several document(s) or of a whole collection.
+description = """Managing the transcripts of one or several document(s) or of a whole collection.
 """ + _Trnskrbs_description
 
 usage = """%s <colId> <docId> [<page-ranges>] 
@@ -200,7 +200,7 @@ class DoTranscript(TranskribusClient):
         return True
                 
 if __name__ == '__main__':
-    version = "v.01"
+    version = "v.02"
 
     #prepare for the parsing of the command line
     parser = OptionParser(usage=usage, version=version)

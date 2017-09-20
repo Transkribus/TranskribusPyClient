@@ -44,7 +44,7 @@ except ImportError:
 
 from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit
 from TranskribusPyClient.client import TranskribusClient
-from TranskribusPyClient.PageRangeSpec import PageRangeSpec
+from common.IntegerRange  import IntegerRange as PageRangeSpec
 from common.trace import traceln, trace
 
 DEBUG = 0

@@ -26,7 +26,7 @@
 """
 import copy
 
-from TimeRangeSpec import DateTimeRangeSpec
+from common.DateTimeRange import DateTimeRange as DateTimeRangeSpec
 from common.IntegerRange import IntegerRange
 
 class TRP_FullDoc:
