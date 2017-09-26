@@ -74,7 +74,7 @@ class DoListHtrRnn(TranskribusClient):
                 #some old? models do not have params field
                 try: traceln("%s\t%s\t%s\ndescription:%s" % (models['htrId'],models['name'].strip(),models['params'].strip(),models['description'].strip()))
                 except KeyError: traceln("%s\t%s\tno params" % (models['htrId'],models['name']))             
-
+                traceln()
         else:
             sModels = self.listRnnsText()        
             traceln("\n--- Models ---------------------------")
