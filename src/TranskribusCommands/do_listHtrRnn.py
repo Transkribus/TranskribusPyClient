@@ -61,27 +61,30 @@ class DoListHtrRnn(TranskribusClient):
     def __init__(self, trnkbsServerUrl, sHttpProxy=None, loggingLevel=logging.WARN):
         TranskribusClient.__init__(self, sServerUrl=self.sDefaultServerUrl, proxies=sHttpProxy, loggingLevel=loggingLevel)
     
-    def run(self,colid=None):
+    def run(self,colid=None,bListDict=False):
         """
         2 textual lists
         """
         sModels=None
         sColModels=None
+        sDicts = None
         if colid is not None:
             sColModels = self.listRnns(colid)
             for models in sColModels:
                 #some old? models do not have params field
-                try: traceln("%s\t%s\t%s" % (models['htrId'],models['name'],models['params']))
+                try: traceln("%s\t%s\t%s\ndescription:%s" % (models['htrId'],models['name'].strip(),models['params'].strip(),models['description'].strip()))
                 except KeyError: traceln("%s\t%s\tno params" % (models['htrId'],models['name']))             
 
         else:
             sModels = self.listRnnsText()        
             traceln("\n--- Models ---------------------------")
             traceln(sModels)
-            
-        sDicts = self.listDictsText()        
-        traceln("\n--- Dictionaries ---------------------")
-        traceln(sDicts)
+        
+        if bListDict:
+            sDicts = self.listDictsText()        
+            traceln("\n--- Dictionaries ---------------------")
+            traceln(sDicts)
+        
         return sModels, sColModels, sDicts
 
 if __name__ == '__main__':
@@ -91,6 +94,8 @@ if __name__ == '__main__':
     parser = OptionParser(usage=usage, version=version)
     parser.description = description
     parser.add_option("--colid", dest='colid', type='string', default=None, help = 'get models linked to the colid')
+    parser.add_option("--dict", dest='dict', action='store_true', default=False, help = 'get dictionaries')
+
     #"-s", "--server",  "-l", "--login" ,   "-p", "--pwd",   "--https_proxy"    OPTIONS
     __Trnskrbs_basic_options(parser, DoListHtrRnn.sDefaultServerUrl)
         
@@ -104,7 +109,7 @@ if __name__ == '__main__':
 
     # --- 
     # do the job...
-    doer.run(options.colid)
+    doer.run(options.colid,options.dict)
         
     traceln()      
     traceln("- Done")
