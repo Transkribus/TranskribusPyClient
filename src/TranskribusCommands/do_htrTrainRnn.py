@@ -36,7 +36,6 @@
 #optional: useful if you want to choose the logging level to something else than logging.WARN
 import sys, os, logging
 from optparse import OptionParser
-from pygments.unistring import Ll
 # import json
 
 try: #to ease the use without proper Python installation
