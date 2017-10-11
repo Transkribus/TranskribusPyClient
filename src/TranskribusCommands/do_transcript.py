@@ -207,7 +207,7 @@ class DoTranscript(TranskribusClient):
         return True
                 
 if __name__ == '__main__':
-    version = "v.02"
+    version = "v.03"
 
     #prepare for the parsing of the command line
     parser = OptionParser(usage=usage, version=version)

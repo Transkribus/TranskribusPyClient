@@ -116,10 +116,7 @@ class TranskribusDownloader(TranskribusClient):
         doc_max_ts, lFileList = self.download_document(colId, docId, docFolder
                                                        , bForce=False, bOverwrite=bOverwrite, bNoImage=bNoImage
                                                        , trp_spec=trp_spec)        
-        ldocids         = [ str(docId) ]
-        dFileListPerDoc = { str(docId): lFileList  }
-        
-        return doc_max_ts, docFolder, ldocids, dFileListPerDoc
+        return doc_max_ts, docFolder, lFileList
         
     def generateCollectionMultiPageXml(self, colDir, dFileListPerDoc, bStrict):
         """
@@ -184,7 +181,7 @@ class TranskribusDownloader(TranskribusClient):
      
 if __name__ == '__main__':
     usage = "%s [-f|--force] [--strict] [--docid <id>] [--trp <trp_file>] [--noImage] <colid> [<directory>]"%sys.argv[0]
-    version = "v.02"
+    version = "v.03"
     description = "Extract a collection from transkribus and create a DS test structure containing that collection. \n" + _Trnskrbs_description
 
     #prepare for the parsing of the command line
@@ -228,7 +225,9 @@ if __name__ == '__main__':
         if not options.docid:
             options.docid = trp["md"]["docId"]
             traceln(" read docId from TRP: docId = %s"%options.docid) 
-        col_ts, docFolder, ldocids, dFileListPerDoc = trnkbs2ds.download_document_by_trp(colid, options.docid, destDir, trp, bOverwrite=options.bForce, bNoImage=options.bNoImage)
+        logging.basicConfig(level=logging.INFO)
+        col_ts, docFolder, lFileList = trnkbs2ds.download_document_by_trp(colid, options.docid, destDir, trp, bOverwrite=options.bForce, bNoImage=options.bNoImage)
+        traceln(map(lambda x: x.encode('utf-8'), lFileList))
         colFolder = docFolder #inaccurate, but fine for rest of code 
     else:
         traceln("- Downloading collection %s to folder %s"%(colid, os.path.abspath(destDir)))
