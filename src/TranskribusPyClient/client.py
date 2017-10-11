@@ -565,7 +565,7 @@ class TranskribusClient():
                 if str(trp_spec["md"]["docId"]) != str(docId):
                     raise ValueError("Document ID does not match docId of TRP data.")
             else:
-                docId = trp_spec["docId"]            
+                docId = trp_spec["md"]["docId"]            
             trp = trp_spec
         else:
             logging.info("- downloading collection %s, document %s  into folder %s    (bForce=%s)"%(colId, docId, docDir, bForce))
