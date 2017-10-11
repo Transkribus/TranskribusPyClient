@@ -152,6 +152,8 @@ class TRP_FullDoc:
         """
         self.dic = jsonTRP
     
+    def getTRP(self):
+        return self.dic
     
     def getCollectionId(self):
         return self.dic["collection"]["colId"]

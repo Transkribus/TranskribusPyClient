@@ -524,7 +524,7 @@ class TranskribusClient():
                     stored_doc_ts = int(stored_doc_ts)
                 else:
                     stored_doc_ts = None    
-                doc_max_ts, lfileList = self.download_document(colId, docId, docDir, min_ts=stored_doc_ts, bForce=bForce, bNoImage=bNoImage)
+                doc_max_ts, lfileList = self.download_document(colId, docId, docDir, min_ts=stored_doc_ts, bForce=bForce, bOverwrite=False, bNoImage=bNoImage)
                 dLFileList[str(docId)]=lfileList
                 assert doc_max_ts >= stored_doc_ts, "Server side data older than disk data???"
                 if doc_max_ts == stored_doc_ts:
@@ -540,7 +540,7 @@ class TranskribusClient():
         return coll_max_ts, ldocID, dLFileList
         
 
-    def download_document(self, colId, docId, docDir, min_ts=None, bForce=False, bNoImage=False):        
+    def download_document(self, colId, docId, docDir, min_ts=None, bForce=False, bOverwrite=False, bNoImage=False, trp_spec=None):        
         """
         Convenience method, not provided directly by the Transkribus API.
         
@@ -548,13 +548,29 @@ class TranskribusClient():
         Lazy, because it does not download a document that is not more recent than the given timestamp. It uses page timestamp to decide.
         Both the XML and images are fetched from the server. 
         
-        If the destination folder exists, raise an exception, unless bForce is True in which case, the folder is removed and recreated.
+        If the destination folder exists:
+            - if bForce is True, the folder is removed and recreated.
+            - if bOverwrite is True, overwrite whatever is conflicting
+            - otehrwise raise an Exception 
         
         Return the maximum timestamp over all pages of the document.
         """
-        logging.info("- downloading collection %s, document %s  into folder %s    (bForce=%s)"%(colId, docId, docDir, bForce))
+        if trp_spec:
+            logging.info("- downloading collection %s, document %s  into folder %s    (bForce=%s) as specified by trp"%(colId, docId, docDir, bForce))
         
-        trp = self.getDocById(colId, docId, nrOfTranscripts=1)
+            #sanity check
+            if str(trp_spec["collection"]["colId"]) != str(colId):
+                raise ValueError("Collection ID does not match colId of TRP data.")
+            if docId:
+                if str(trp_spec["md"]["docId"]) != str(docId):
+                    raise ValueError("Document ID does not match docId of TRP data.")
+            else:
+                docId = trp_spec["docId"]            
+            trp = trp_spec
+        else:
+            logging.info("- downloading collection %s, document %s  into folder %s    (bForce=%s)"%(colId, docId, docDir, bForce))
+            trp = self.getDocById(colId, docId, nrOfTranscripts=1)
+            
         pageList = trp["pageList"]
         doc_max_ts = max( [page['tsList']["transcripts"][0]['timestamp'] for page in pageList['pages'] ] )
 
@@ -566,7 +582,9 @@ class TranskribusClient():
         #Ok, we must refresh the disk
         if os.path.exists(docDir):
             #we need to deal with this existing folder.
-            if bForce:
+            if bOverwrite:
+                logging.warn("existing data, we may overwrite some data in %s"%docDir)
+            elif bForce:
                 logging.warn("\t\t REMOVING OBSOLETE DATA in %s...  "%docDir)
                 shutil.rmtree(docDir)
                 os.mkdir(docDir)
@@ -579,7 +597,7 @@ class TranskribusClient():
             os.mkdir(docDir)
 
         # store document metadata 
-        with codecs.open(docDir+os.sep+"trp.json", "wb",'utf-8') as fd: json.dump(trp, fd, indent=2)
+        with codecs.open(docDir+os.sep+"trp.json", "wb",'utf-8') as fd: json.dump(trp, fd, sort_keys=True, indent=2, separators=(',', ': '))
         
         lFileList= []
         for page in pageList['pages']:

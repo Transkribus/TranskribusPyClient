@@ -30,11 +30,13 @@
 
 #    TranskribusCommands/do_LAbatch.py 3571 3820 8251 8252
 
+from __future__ import print_function
 
 #optional: useful if you want to choose the logging level to something else than logging.WARN
 import sys, os, logging
 from optparse import OptionParser
 import json
+import codecs
 
 try: #to ease the use without proper Python installation
     import TranskribusPyClient_version
@@ -63,7 +65,10 @@ usage = """%s <colId> <docId> [<page-ranges>]
     [--last_filtered]
     [--check_user <username>]+
     [--check_status <status>]+ 
-    <operation>
+    [--trp <file]
+    [<operation>]
+
+Operation is one of --list, --rm, --set_status
 
 Use this command to selectively list or remove the transcripts of a document, or update their status.
 This command works in 3 stages:
@@ -81,6 +86,8 @@ Date takes the form:
     Incomplete dates are converted into the first millisecond of the given period. For instance 2017 is equivalent to 2017-01-01T00:00:00
 Alternatively, it can be a timestamp (number of milliseconds since 1970-01-01)
 --utc option will show UTC times
+
+--trp stores the trp data reflecting the filtered transcripts in the given file
 
 """%sys.argv[0]
 
@@ -219,7 +226,8 @@ if __name__ == '__main__':
     parser.add_option("--check_user"  , dest='check_user'   , action="append", type="string", default=None, help="Check that each filtered transcript was authored by one of these users.")
     parser.add_option("--check_status", dest='check_status' , action="append", type="string", default=None, help="Check that each filtered transcript have on of these statuses.")
 
-    parser.add_option("--utc"   , dest='utc'        , action="store_true", default=False, help="Show UTC time.")
+    parser.add_option("--utc"   , dest='utc'     , action="store_true", default=False, help="Show UTC time.")
+    parser.add_option("--trp"   , dest='trp'     , action="store", type="string", default=None, help="Store the TRP data reflecting the filtered transcripts in the given file.")
     
     parser.add_option("--list"      , dest='op_list'    , action="store_true", default=False, help="List   the filtered transcripts.")
     parser.add_option("--rm"        , dest='op_rm'      , action="store_true", default=False, help="Remove the filtered transcripts. (CAUTION)")
@@ -282,6 +290,11 @@ if __name__ == '__main__':
         traceln(trp.report_short(warn="!"))
         traceln("ERROR: some check(s) failed.")
         sys.exit(3)
+
+    if options.trp:
+        #dump the Trp on stdout and list on stderr
+        traceln(" - storing TRP data in %s"%options.trp)
+        with codecs.open(options.trp, "wb",'utf-8') as fd: json.dump(trp.getTRP(), fd, sort_keys=True, indent=2, separators=(',', ': '))
     
     traceln()
     
@@ -292,7 +305,7 @@ if __name__ == '__main__':
         doer.setTranscriptStatus(trp, options.set_status, bVerbose=True)
     else:
         #by default we list
-        print trp.report_short()
+        print(trp.report_short())
         traceln()
         traceln(trp.report_stat())
         

@@ -33,7 +33,7 @@ DEBUG = 0
 import sys, os, logging
 
 from optparse import OptionParser
-import glob
+import json, codecs
 
 try: #to ease the use without proper Python installation
     import TranskribusPyClient_version
@@ -66,13 +66,9 @@ class TranskribusDownloader(TranskribusClient):
     def __init__(self, trnkbsServerUrl, sHttpProxy=None, loggingLevel=logging.WARN):
         TranskribusClient.__init__(self, sServerUrl=trnkbsServerUrl, proxies=sHttpProxy, loggingLevel=loggingLevel)
         
-
-    def downloadCollection(self, colId, destDir, bForce=False, bNoImage=False,sDocId=None):
+    def createStandardFolders(self, colId, destDir):
         """
-        Here, we create the appropriate structure and fetch either the whole collection or one document and convert this to DS XML
-
-        if bForce==True, data on disk is overwritten, otherwise raise an exception is some data is there already
-        if bNoImage==True, do not download the images
+        CReate the standard DU folde structure and return the collection folder
         """
         if not( os.path.exists(destDir) and os.path.isdir(destDir) ):
             raise ValueError("Non-existing destination folder %s" % destDir)
@@ -92,12 +88,39 @@ class TranskribusDownloader(TranskribusClient):
                 if not os.path.isdir(sDir): raise ValueError("%s exists and is not a folder."%sDir)
             else:
                 os.mkdir(sDir)
+        
+        return colDir
+    
+    def downloadCollection(self, colId, destDir, bForce=False, bNoImage=False,sDocId=None):
+        """
+        Here, we create the appropriate structure and fetch either the whole collection or one document and convert this to DS XML
+
+        if bForce==True, data on disk is overwritten, otherwise raise an exception is some data is there already
+        if bNoImage==True, do not download the images
+        """
+        colDir = self.createStandardFolders(colId, destDir)
 
         col_max_ts,ldocids, dFileListPerDoc = self.download_collection(colId, os.path.join(colDir,sCOL), bForce, bNoImage,sDocId)
         with open(destDir+os.sep+sCOL+TranskribusClient._POSTFIX_MAX_TX, "w") as fd: fd.write("%s"%col_max_ts) #"col_max.ts" file
 
         return col_max_ts, colDir, ldocids, dFileListPerDoc
     
+    def download_document_by_trp(self, colId, docId, destDir, trp_spec, bOverwrite=False, bNoImage=False):       
+        """
+        we have a trp, and download what is specified in it
+        """ 
+        colDir = self.createStandardFolders(colId, destDir)
+        
+        docFolder = os.path.join(colDir, sCOL, str(docId))
+        
+        doc_max_ts, lFileList = self.download_document(colId, docId, docFolder
+                                                       , bForce=False, bOverwrite=bOverwrite, bNoImage=bNoImage
+                                                       , trp_spec=trp_spec)        
+        ldocids         = [ str(docId) ]
+        dFileListPerDoc = { str(docId): lFileList  }
+        
+        return doc_max_ts, docFolder, ldocids, dFileListPerDoc
+        
     def generateCollectionMultiPageXml(self, colDir, dFileListPerDoc, bStrict):
         """
         We concatenate all pages into a "multi-page PageXml" for each document of the collection
@@ -160,7 +183,7 @@ class TranskribusDownloader(TranskribusClient):
 #             doc.saveFileEnc(self.getOutputFileName(),"UTF-8")
      
 if __name__ == '__main__':
-    usage = "%s [-f|--force] [--strict] [--docid <id>] [--noImage] <colid> [<directory>]"%sys.argv[0]
+    usage = "%s [-f|--force] [--strict] [--docid <id>] [--trp <trp_file>] [--noImage] <colid> [<directory>]"%sys.argv[0]
     version = "v.02"
     description = "Extract a collection from transkribus and create a DS test structure containing that collection. \n" + _Trnskrbs_description
 
@@ -171,10 +194,11 @@ if __name__ == '__main__':
     #"-s", "--server",  "-l", "--login" ,   "-p", "--pwd",   "--https_proxy"    OPTIONS
     __Trnskrbs_basic_options(parser, TranskribusDownloader.sDefaultServerUrl)
         
-    parser.add_option("-f", "--force"   , dest='bForce' ,  action="store_true", default=False, help="Force rewrite if disk data is obsolete")    
+    parser.add_option("-f", "--force"   , dest='bForce' ,  action="store_true", default=False, help="Force rewrite if disk data is obsolete, or force overwrite in --trp mode")    
     parser.add_option("--strict"        , dest='bStrict',  action="store_true", default=False, help="Failed schema validation stops the processus.")    
     parser.add_option("--noimage", "--noImage", dest='bNoImage', action="store_true", default=False, help="Do not download images.")    
     parser.add_option("--docid",  dest='docid', action="store", type="int", help="download specific document")    
+    parser.add_option("--trp"  ,  dest='trp'  , action="store", type="string", help="download the content specified by the trp file.")    
 
     # --- 
     #parse the command line
@@ -197,13 +221,24 @@ if __name__ == '__main__':
     trnkbs2ds = TranskribusDownloader(options.server, proxies, loggingLevel=logging.WARN)
     __Trnskrbs_do_login_stuff(trnkbs2ds, options, trace=trace, traceln=traceln)
     
-    traceln("- Downloading collection %s to folder %s"%(colid, os.path.abspath(destDir)))
-    col_ts, colDir,ldocids, dFileListPerDoc = trnkbs2ds.downloadCollection(colid, destDir, bForce=options.bForce, bNoImage=options.bNoImage,sDocId=options.docid)
+    if options.trp:
+        traceln("- Loading trp data from %s" % options.trp)
+        trp = json.load(codecs.open(options.trp, "rb",'utf-8'))
+        traceln("- Downloading collection %s to folder %s, as specified by trp data"%(colid, os.path.abspath(destDir)))
+        if not options.docid:
+            options.docid = trp["md"]["docId"]
+            traceln(" read docId from TRP: docId = %s"%options.docid) 
+        col_ts, docFolder, ldocids, dFileListPerDoc = trnkbs2ds.download_document_by_trp(colid, options.docid, destDir, trp, bOverwrite=options.bForce, bNoImage=options.bNoImage)
+        colFolder = docFolder #inaccurate, but fine for rest of code 
+    else:
+        traceln("- Downloading collection %s to folder %s"%(colid, os.path.abspath(destDir)))
+        col_ts, colFolder, ldocids, dFileListPerDoc = trnkbs2ds.downloadCollection(colid, destDir, bForce=options.bForce, bNoImage=options.bNoImage,sDocId=options.docid)
+        trnkbs2ds.generateCollectionMultiPageXml(os.path.join(colFolder, sCOL), dFileListPerDoc,options.bStrict)
     traceln("- Done")
     
-    with open(os.path.join(colDir, "config.txt"), "w") as fd: fd.write("server=%s\nforce=%s\nstrict=%s\n"%(options.server, options.bForce, options.bStrict))
+    with open(os.path.join(colFolder, "config.txt"), "w") as fd: 
+        fd.write("server=%s\nforce=%s\nstrict=%s\ntrp=%s\n"%(options.server, options.bForce, options.bStrict, options.trp))
     
-    trnkbs2ds.generateCollectionMultiPageXml(os.path.join(colDir, sCOL), dFileListPerDoc,options.bStrict)
     
-    traceln('- Done, see in %s'%colDir)
+    traceln('- Done, see in %s'%colFolder)
     
