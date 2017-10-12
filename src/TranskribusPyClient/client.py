@@ -596,8 +596,9 @@ class TranskribusClient():
         else:
             os.mkdir(docDir)
 
-        # store document metadata 
-        with codecs.open(docDir+os.sep+"trp.json", "wb",'utf-8') as fd: json.dump(trp, fd, sort_keys=True, indent=2, separators=(',', ': '))
+        if not trp_spec:
+            # store document metadata, if not provided 
+            with codecs.open(docDir+os.sep+"trp.json", "wb",'utf-8') as fd: json.dump(trp, fd, sort_keys=True, indent=2, separators=(',', ': '))
         
         lFileList= []
         for page in pageList['pages']:
