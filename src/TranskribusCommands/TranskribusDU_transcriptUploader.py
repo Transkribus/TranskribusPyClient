@@ -68,7 +68,7 @@ class TranskribusDUTranscriptUploader(TranskribusClient):
     def __init__(self, trnkbsServerUrl, sHttpProxy=None, loggingLevel=logging.WARN):
         TranskribusClient.__init__(self, sServerUrl=trnkbsServerUrl, proxies=sHttpProxy, loggingLevel=loggingLevel)
         
-    def uploadCollectionTranscript(self, colid, sColDSDir, sTranscripExt=sTRANSCRIPT_EXTENSION, iVerbose=0):
+    def uploadCollectionTranscript(self, colid, sColDSDir, sTranscripExt=sTRANSCRIPT_EXTENSION, sNote="", sToolName="NLE DU", iVerbose=0):
         """
         Upload the transcripts of all document in that collection into Transkribus
         return nothing
@@ -84,7 +84,7 @@ class TranskribusDUTranscriptUploader(TranskribusClient):
             except ValueError:
                 traceln("Warning: folder %s : %s invalid docid, IGNORING IT"%(sColDSDir, sDocId))
                 continue
-            self.uploadDocumentTranscript(colid, docid, sColDSDir, sTranscripExt=sTranscripExt, iVerbose=iVerbose)
+            self.uploadDocumentTranscript(colid, docid, sColDSDir, sTranscripExt=sTranscripExt, sNote=sNote, iVerbose=iVerbose)
         
         if iVerbose: 
             traceln("  Done (collection %s)"%colid)
@@ -102,7 +102,7 @@ class TranskribusDUTranscriptUploader(TranskribusClient):
         doc = libxml2.parseFile(sDocFilename)
 
         #We will also try to set the parent-Id of each transcript, by parsing the trp.json
-        trpFilename = os.path.join(sColDSDir, str(docid)+"trp.json")
+        trpFilename = os.path.join(sColDSDir, str(docid), "trp.json")
         try:
             trp = json.load(codecs.open(trpFilename, "rb",'utf-8'))
             trpPageList = trp["pageList"]['pages']
@@ -184,7 +184,7 @@ class TranskribusDUTranscriptUploader(TranskribusClient):
 #             
 #         return lFileList
 
-def main():        
+if __name__ == '__main__':
     usage = "%s <directory> <coldId> [<docId>]"%sys.argv[0]
     version = "v.01"
     description = """Upload the DU transcript(s) from the DS structure to Transkribus, either of all or one of its %s file(s) to the given collection. 
@@ -202,6 +202,8 @@ Extract the page transcript from the MultiPageXml (not from the single page Page
     parser.add_option("--strict", dest='bStrict',  action="store_true", default=False, help="Failed schema validation stops the processus.")    
     parser.add_option("--nodu"  , dest='bNoDU',  action="store_true", default=False, help="Upload the non-DU transcript (the .mpxml one)")    
     parser.add_option("-q", "--quiet"  , dest='bQuiet',  action="store_true", default=False, help="Quiet mode")    
+    parser.add_option("--toolname",  dest='tool'  , action="store", type="string", default="", help="Set the Toolname metadata in Transkribus.")    
+
     #parser.add_option("--trp"  ,  dest='trp'  , action="store", type="string", help="download the content specified by the trp file.")    
 
     # --- 
@@ -245,13 +247,11 @@ Extract the page transcript from the MultiPageXml (not from the single page Page
         traceln("- Transcript will be taken from %s file(s) from: %s"%(sTRANSCRIPT_EXTENSION, sColDSDir))    
         
         if docid == None:
-            doer.uploadCollectionTranscript(colid, sColDSDir, sTranscripExt=sTRANSCRIPT_EXTENSION, sNote="TranskribusDU_TranskribusUploader", iVerbose=iVerbose)
+            doer.uploadCollectionTranscript(colid, sColDSDir, sTranscripExt=sTRANSCRIPT_EXTENSION, sNote="TranskribusDU_TranskribusUploader", sToolName=options.tool, iVerbose=iVerbose)
 
         else:
-            doer.uploadDocumentTranscript(colid, docid, sColDSDir, sTranscripExt=sTRANSCRIPT_EXTENSION, sNote="TranskribusDU_TranskribusUploader", iVerbose=iVerbose)
+            doer.uploadDocumentTranscript(colid, docid, sColDSDir, sTranscripExt=sTRANSCRIPT_EXTENSION, sNote="TranskribusDU_TranskribusUploader", sToolName=options.tool, iVerbose=iVerbose)
         
     
     traceln('- DONE, all transcripts were uploaded. See in collection %s'%colid)
     
-if __name__ == '__main__':
-    main()
