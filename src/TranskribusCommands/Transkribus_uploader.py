@@ -76,6 +76,8 @@ class TranskribusTranscriptUploader(TranskribusClient):
 
         trpFilename = os.path.join(sColDSDir, "trp.json")
         traceln(" - reading %s"%trpFilename)
+        if not os.path.exists(trpFilename):
+            raise Exception("File not found %s. \nData probably created in --trp mode, so upload must be done in --trp mode."%trpFilename)
         trp = json.load(codecs.open(trpFilename, "rb",'utf-8'))
         
         for docid in [d["docId"] for d in trp]:
@@ -92,6 +94,8 @@ class TranskribusTranscriptUploader(TranskribusClient):
         """
         trpFilename = os.path.join(sColDSDir, str(docid), "trp.json")
         traceln(" - reading %s"%trpFilename)
+        if not os.path.exists(trpFilename):
+            raise Exception("File not found %s. \nData probably created in --trp mode, so upload must be done in --trp mode."%trpFilename)
         trp = json.load(codecs.open(trpFilename, "rb",'utf-8'))
         self.uploadDocumentTranscript_by_trp(colid, docid, trp, sColDSDir, sNote=sNote, sToolName=sToolName, iVerbose=iVerbose)
         return
@@ -129,7 +133,7 @@ class TranskribusTranscriptUploader(TranskribusClient):
             sBaseName, _ = os.path.splitext(imgFileName)
             xmlFilename = docDir + os.sep + sBaseName + ".pxml"
             logging.info("\t\t\t%s"%xmlFilename)
-            traceln(xmlFilename)
+            traceln("page %5d: %s : %s"%(pagenum, tsId, xmlFilename))
             assert os.path.exists(xmlFilename)
             with open(xmlFilename, "rb") as fd: sXMlTranscript = fd.read()
             
