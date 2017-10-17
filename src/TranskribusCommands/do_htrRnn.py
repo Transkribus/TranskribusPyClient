@@ -34,7 +34,9 @@
 #optional: useful if you want to choose the logging level to something else than logging.WARN
 import sys, os, logging
 from optparse import OptionParser
-# import json
+
+import json
+import codecs
 
 try: #to ease the use without proper Python installation
     import TranskribusPyClient_version
@@ -44,6 +46,12 @@ except ImportError:
 
 from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit
 from TranskribusPyClient.client import TranskribusClient
+
+from do_transcript import DoTranscript
+
+from common.IntegerRange import IntegerRange
+from TranskribusPyClient.TRP_FullDoc import TRP_FullDoc
+
 from common.trace import traceln, trace
 
 DEBUG = 0
@@ -54,22 +62,63 @@ The syntax for specifying the page range is:
 - one or several specifiers separated by a comma
 - one separator is a page number, or a range of page number, e.g. 3-8
 - Examples: 1   1,3,5   1-3    1,3,5-99,100
-
 """ + _Trnskrbs_description
 
-usage = """%s <modelID> <dictionary-name> <colId> <docId> [<pages>]
+usage = """%s <modelID> <dictionary-name> <colId> [--trp] [--docid]
 """%sys.argv[0]
 
 class DoHtrRnn(TranskribusClient):
+    """
+        10/16/2017:  at region level
+        {"docId":2278,"pageList":{"pages":[{"pageId":10070,"tsId":25143,"regionIds":["r2","r1"]}]}}
+        
+        Our client sends it like this:
+        
+        3 > POST
+        https://transkribus.eu/TrpServerTesting/rest/recognition/2/241/htrCITlab?id=2278
+        3 > Accept: text/plain
+        ...
+        3 > Content-Type: application/json
+        3 > Cookie: $Version=1;JSESSIONID=....
+        {"docId":2278,"pageList":{"pages":[{"pageId":10070,"tsId":25143,"regionIds":["r2","r1"]}]}}
+
+
+    """
     sDefaultServerUrl = _Trnskrbs_default_url
     #--- INIT -------------------------------------------------------------------------------------------------------------    
     def __init__(self, trnkbsServerUrl, sHttpProxy=None, loggingLevel=logging.WARN):
         TranskribusClient.__init__(self, sServerUrl=self.sDefaultServerUrl, proxies=sHttpProxy, loggingLevel=loggingLevel)
-    
-    def run(self, sModelID, sDictName, colId, docId, sPages):
-        ret = self.htrRnnDecode(colId, sModelID, sDictName, docId, sPages)
+        
+        self._trpMng = DoTranscript(self.sDefaultServerUrl, sHttpProxy=sHttpProxy, loggingLevel=loggingLevel)
+
+    def run(self, sModelID, sDictName, colId, docId, sDescPages):
+        ret = self.htrRnnDecode(colId, sModelID, sDictName, docId, sDescPages)
         return ret
 
+    def buildDescription(self,colId,docpage,trp=None):
+        """
+            '{"docId":17442,"pageList":{"pages":[{"pageId":400008,"tsId":1243509,"regionIds":[]}]}}'
+        """
+        jsonDesc = {}
+        
+        if trp is None:
+            docId,pageRange= docpage.split('/')
+            jsonDesc["docId"]=docId
+            oPageRange = IntegerRange(pageRange)                 
+            trpObj = self._trpMng.filter(colId,docId,page_filter=oPageRange,bLast=True)
+        else:
+            trpObj = TRP_FullDoc(trp)
+        jsonDesc["pageList"]={}
+        pList= trpObj.getTranscriptList()
+        jsonDesc["pageList"]['pages']= []
+        for page in trpObj.getPageList():
+            docId = page['docId']
+            jsonDesc["docId"]=page['docId']
+            jsonDesc["pageList"]['pages'].append({"pageId":page['pageId'],"tsId":page['tsList']['transcripts'][0]['tsId'],"regionIds":[]})        
+        
+        
+        return jsonDesc["docId"], json.dumps(jsonDesc,encoding='utf-8')
+    
 if __name__ == '__main__':
     version = "v.01"
 
@@ -80,6 +129,9 @@ if __name__ == '__main__':
     #"-s", "--server",  "-l", "--login" ,   "-p", "--pwd",   "--https_proxy"    OPTIONS
     __Trnskrbs_basic_options(parser, DoHtrRnn.sDefaultServerUrl)
         
+    parser.add_option("-r", "--region"  , dest='region', action="store", type="string", default=DoHtrRnn.sDefaultServerUrl, help="apply HTR at region level")
+    parser.add_option("--trp"  , dest='trp_doc', action="store", type="string",default=None, help="use trp doc file")
+    parser.add_option("--docid"  , dest='docid'   , action="store", type="string", default=None, help="document/pages to be htr'd")
     # ---   
     #parse the command line
     (options, args) = parser.parse_args()
@@ -88,22 +140,31 @@ if __name__ == '__main__':
     # --- 
     doer = DoHtrRnn(options.server, proxies, loggingLevel=logging.WARN)
     __Trnskrbs_do_login_stuff(doer, options, trace=trace, traceln=traceln)
+    doer._trpMng.setSessionId(doer._sessionID)
+
     # --- 
+    
     try:                        sModelID = args.pop(0)
     except Exception as e:      _exit(usage, 1, e)
     try:                        sDictName = args.pop(0)
     except Exception as e:      _exit(usage, 1, e)
     try:                        colId = int(args.pop(0))
     except Exception as e:      _exit(usage, 1, e)
-    try:                        docId   = int(args.pop(0))
-    except Exception as e:      _exit(usage, 1, e)
-    try:                        sPages = args.pop(0)
-    except Exception as e:      sPages = None
+#     try:                        docId   = int(args.pop(0))
+#     except Exception as e:      _exit(usage, 1, e)
+#     try:                        sPages = args.pop(0)
+#     except Exception as e:      sPages = None
+
     if args:                    _exit(usage, 2, Exception("Extra arguments to the command"))
 
-    # --- 
+    if options.trp_doc:
+        trpdoc =  json.load(codecs.open(options.trp_doc, "rb",'utf-8'))
+        docId,sPageDesc = doer.buildDescription(colId,options.docid,trpdoc)
+    else:
+        docId,sPageDesc = doer.buildDescription(colId,options.docid)
+
     # do the job...
-    jobid = doer.run(sModelID, sDictName, colId, docId, sPages)
+    jobid = doer.run(sModelID, sDictName, colId, docId, sPageDesc)
     traceln(jobid)
         
     traceln()      

@@ -154,6 +154,7 @@ class TranskribusClient():
         self.sREQ_recognition_htrRnnModels          = sServerUrl + '/rest/recognition/nets' #htrModels' #/rest/recognition/nets'
         self.sREQ_recognition_htrRnnModels          = sServerUrl + '/rest/recognition/htrModels'
         self.sREQ_recognition_listHtr               = sServerUrl + '/rest/recognition/%s/list'      
+        self.sREQ_recognition_uploadDict            = sServerUrl + '/rest/recognition/tempDict'
 
         self.sREQ_recognition_htrRnnDicts           = sServerUrl + '/rest/recognition/dicts'
         self.sREQ_recognition_htrRnn                = sServerUrl + '/rest/recognition/%s/%s/htrCITlab'
@@ -815,19 +816,64 @@ class TranskribusClient():
         resp.raise_for_status()
         return resp.text
         
-    def htrRnnDecode(self, colId, sRnnModelID, sDictName, docId, sPages):
+    def uploadDict(self,dictName,dictString):
+        """
+        temp. dictionaries also can be sent now, see example below.
+        The response will contain the dict. filename to be used in the HTR
+        request's tempDict parameter. If extension of the given name does not
+        match ".dict", this will be appended.
+        The POST request's body should contain the dictionary data as UTF-8 String.
+        The temp. dictionaries are now bound to the user account and you can
+        check the transmission outcome by logging in via FTP to transkribus.eu
+        with your credentials. There you will find a dir. called "dictTmp"
+        containing the sent files, that will be used for HTR. You can also put
+        dictionaries there via FTP and use them for HTR with the tempDict parameter.
+
+        POST /TrpServerTesting/rest/recognition/tempDict?fileName=test.dict HTTP/1.1
+        Host: transkribus.eu
+        Content-Type: text/plain
+        Cache-Control: no-cache
+        
+        wanŋ,16        
+        
+        """
+        #sREQ_recognition_uploadDict
+        self._assertLoggedIn()
+        myReq = self.sREQ_recognition_uploadDict
+        params = self._buidlParamsDic(fileName=dictName)
+        resp = self._POST(myReq, params = params,data = dictString.encode('utf-8'),sContentType="text/plain")
+        resp.raise_for_status()
+        return resp.text
+
+        
+    def htrRnnDecode(self, colId, sRnnModelID, sDictName, docId, sPagesDesc):
         """
         Do the HTR using the given RNN model and dictionary.
         - Maybe you can set sPages to None, or both docId and sPage to None ?? 
         
+               
         Return the Transkribus server response (a job id)
         or raise an exception
+        
+            it should do a full page HTR if either
+        - the regionIds set is empty (I assume this works only when using JSON)
+        - the regionIds element is missing from the XML/JSON
+        
+        Internally, I use the regionIds and gather all respective lineIds, which
+        is what the HTR and Baseline2Polygon interfaces expect as argument.
+        
+        So if you use that (and it works correctly on my end) then you should
+        have the typical "jagged" polygons, produced by URO Baseline2Polygon, on
+        the processed lines in the new PAGE XML.
+        
         """
+        
         self._assertLoggedIn()
         myReq = self.sREQ_recognition_htrRnn % (colId,sRnnModelID)
-#         params = self._buidlParamsDic(collId=colId, modelName=sRnnModelID, dict=sDictName, id=docId, pages=sPages)
-        params = self._buidlParamsDic(dict=sDictName, id=docId, pages=sPages)
-        resp = self._POST(myReq, params=params)
+        params = self._buidlParamsDic(id=docId,tempDict=sDictName)
+        postparams= sPagesDesc #'{"docId":17442,"pageList":{"pages":[{"pageId":400008,"tsId":1243590,"regionIds":[]}]}}'
+
+        resp = self._POST(myReq, params=params,data=postparams ,  sContentType = "application/json")
         resp.raise_for_status()
         return resp.text
 
