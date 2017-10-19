@@ -162,6 +162,7 @@ The page transcript from the single page PageXml files are uploaded. (The multi-
     parser.add_option("-q", "--quiet"  , dest='bQuiet',  action="store_true", default=False, help="Quiet mode")    
     parser.add_option("--trp"  ,  dest='trp'  , action="store", type="string", help="download the content specified by the trp file.")    
     parser.add_option("--toolname",  dest='tool'  , action="store", type="string", default="", help="Set the Toolname metadata in Transkribus.")    
+    parser.add_option("--message",  dest='message', action="store", type="string", default="", help="Set the message metadata in Transkribus.")    
 
     # --- 
     #parse the command line
@@ -195,19 +196,21 @@ The page transcript from the single page PageXml files are uploaded. (The multi-
         if not docid:
             docid = trp["md"]["docId"]
             traceln(" read docId from TRP: docId = %s"%docid) 
+            sToolname = options.tool if options.tool else "Transkribus_uploader (--trp)"
         lFileList = doer.uploadDocumentTranscript_by_trp(colid, docid, trp, sColDSDir
-                                , sNote="Transkribus_uploader (--trp)", sToolName=options.tool, iVerbose=iVerbose)
+                                , sNote=options.message, sToolName=sToolname, iVerbose=iVerbose)
         #traceln(map(lambda x: x.encode('utf-8'), lFileList))
     else:
         if docid == None:
+            sToolname = options.tool if options.tool else "Transkribus_uploader"
             doer.uploadCollectionTranscript(colid, sColDSDir
-                                , sNote="Transkribus_uploader", sToolName=options.tool, iVerbose=iVerbose)
+                                , sNote=options.message, sToolName=sToolname, iVerbose=iVerbose)
 
         else:
+            sToolname = options.tool if options.tool else "Transkribus_uploader (docid)"
             doer.uploadDocumentTranscript(colid, docid, sColDSDir
-                                , sNote="Transkribus_uploader  (docid)", sToolName=options.tool, iVerbose=iVerbose)
+                                , sNote=options.message, sToolName=sToolname, iVerbose=iVerbose)
         
-    
     traceln('- DONE, all transcripts were uploaded. See in collection %s'%colid)
     
 if __name__ == '__main__':

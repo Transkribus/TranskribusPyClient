@@ -77,6 +77,8 @@ class TranskribusDUTranscriptUploader(TranskribusClient):
             traceln("- Uploading all transcripts from folder %s to collection %s"%(sColDSDir, colid))
         
         lsDocFilename = sorted(glob.iglob(os.path.join(sColDSDir, "*"+sTranscripExt)))
+        if not lsDocFilename:
+            raise ValueError("No file found in %s"%os.path.join(sColDSDir, "*"+sTranscripExt))
         for sDocFilename in lsDocFilename:
             sDocId = os.path.basename(sDocFilename)[:-len(sTranscripExt)]
             try:
@@ -202,7 +204,8 @@ Extract the page transcript from the MultiPageXml (not from the single page Page
     parser.add_option("--strict", dest='bStrict',  action="store_true", default=False, help="Failed schema validation stops the processus.")    
     parser.add_option("--nodu"  , dest='bNoDU',  action="store_true", default=False, help="Upload the non-DU transcript (the .mpxml one)")    
     parser.add_option("-q", "--quiet"  , dest='bQuiet',  action="store_true", default=False, help="Quiet mode")    
-    parser.add_option("--toolname",  dest='tool'  , action="store", type="string", default="", help="Set the Toolname metadata in Transkribus.")    
+    parser.add_option("--toolname",  dest='tool'  , action="store", type="string", default="TranskribusDU_TranskribusUploader", help="Set the Toolname metadata in Transkribus.")    
+    parser.add_option("--message",  dest='message', action="store", type="string", default="", help="Set the message metadata in Transkribus.")    
 
     #parser.add_option("--trp"  ,  dest='trp'  , action="store", type="string", help="download the content specified by the trp file.")    
 
@@ -247,10 +250,12 @@ Extract the page transcript from the MultiPageXml (not from the single page Page
         traceln("- Transcript will be taken from %s file(s) from: %s"%(sTRANSCRIPT_EXTENSION, sColDSDir))    
         
         if docid == None:
-            doer.uploadCollectionTranscript(colid, sColDSDir, sTranscripExt=sTRANSCRIPT_EXTENSION, sNote="TranskribusDU_TranskribusUploader", sToolName=options.tool, iVerbose=iVerbose)
+            doer.uploadCollectionTranscript(colid, sColDSDir, sTranscripExt=sTRANSCRIPT_EXTENSION
+                                            , sNote=options.message, sToolName=options.tool, iVerbose=iVerbose)
 
         else:
-            doer.uploadDocumentTranscript(colid, docid, sColDSDir, sTranscripExt=sTRANSCRIPT_EXTENSION, sNote="TranskribusDU_TranskribusUploader", sToolName=options.tool, iVerbose=iVerbose)
+            doer.uploadDocumentTranscript(colid, docid, sColDSDir, sTranscripExt=sTRANSCRIPT_EXTENSION
+                                          , sNote=options.message, sToolName=options.tool, iVerbose=iVerbose)
         
     
     traceln('- DONE, all transcripts were uploaded. See in collection %s'%colid)
