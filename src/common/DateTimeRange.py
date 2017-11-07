@@ -170,7 +170,16 @@ class DateTimeRange(IntegerRangeHalfBounded):
     # -------------------------------------------------------------------------------
     @classmethod
     def getTimeZone(cls):
-        nbSecWest = time.altzone
+        #The line below is wrong on Nov7th in France, but was corret before the daylight change...
+        #I do not understand the documentation, it seems... :-/
+        #nbSecWest = time.altzone
+        
+        #fix, which I hope works also in summer time... :-O
+        t0 = time.time()
+        nbSecGMT  = time.mktime(time.gmtime   (t0))
+        nbSecHere = time.mktime(time.localtime(t0))
+        nbSecWest = nbSecGMT - nbSecHere 
+        
         h, m = int(nbSecWest/3600), nbSecWest % 3600
         if h > 0:
             return "-%02d%02d"%( h,m)
@@ -329,7 +338,23 @@ def test_simple():
     with pytest.raises(ValueError): dts.addEndsBefore("1900-12-31T23:59:59Z")
     test_1()
     test_2()
-        
+
+
+def test_GMT0200():
+    """
+    seems like the Winter time is putting a mess. Nov 7th, 2017
+    """
+    import pytest
+    dts = DateTimeRange()
+    assert dts.len() == 0
+    
+    dts.addRange("2017-11-07T09:45:15.004Z", "2017-11-07T09:45:18.465Z")
+    
+    assert DateTimeRange.dt2ts("2017-11-07T09:45:15.042Z") in dts
+    assert DateTimeRange.dt2ts("2017-11-07T10:45:15.042+0100") in dts
+    assert DateTimeRange.dt2ts("2017-11-07T10:45:15.042+0200") not in dts
+    
+
 if __name__ == "__main__":
     t = DateTimeRange.ts2dt(1504512814466)
     print t
