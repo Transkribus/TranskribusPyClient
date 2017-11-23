@@ -55,7 +55,7 @@ from common.trace import traceln, trace
 
 DEBUG = 0
 
-description = """Apply Layout Analysis (LA) with batch model.
+description = """Apply Layout Analysis (LA) 
 
 The syntax for specifying the page range is:
 - one or several specifiers separated by a comma
@@ -64,7 +64,7 @@ The syntax for specifying the page range is:
 
 """ + _Trnskrbs_description
 
-usage = """%s <colId> <docId> [<pages>] <doNotBlockSeg> <doNotLineSeg>
+usage = """%s <colId>  <docid> [--trp]
 """%sys.argv[0]
 
 class DoLAbatch(TranskribusClient):
@@ -115,10 +115,65 @@ class DoLAbatch(TranskribusClient):
         self._trpMng = DoTranscript(self.sDefaultServerUrl, sHttpProxy=sHttpProxy, loggingLevel=loggingLevel)
 
 
+    def jsonToXMLDescription(self,jsonDesc):
+        """
+            convert json description to XML
+
+
+        <documentSelectionDescriptors>
+             <documentSelectionDescriptor>
+              <docId>1955</docId>
+              <pageList>
+               <pages>
+                <pageId>9304</pageId>
+                <tsId>22744</tsId>
+               </pages>
+              </pageList>
+             </documentSelectionDescriptor>
+            </documentSelectionDescriptors>
+            
+        """
+        import libxml2
+        s = '{"docId":17442,"pageList":{"pages":[{"pageId":400008,"tsId":1243509,"regionIds":[]}]}}'
+        s ='{"pageList": {"pages": [{"tsId": "1305027", "regionIds": [], "pageId": "478362"}]}, "docId": "18975"}'
+
+        jsonDesc=json.loads(s)
+    
+        xmldesc= libxml2.newDoc("1.0")
+        root =libxml2.newNode("documentSelectionDescriptors")
+        xmldesc.setRootElement(root)
+        root2 =libxml2.newNode("documentSelectionDescriptor")
+        root.addChild(root2)
+
+        # docId
+        node = libxml2.newNode("docId")
+        root2.addChild(node)
+        node.setContent(str(jsonDesc["docId"]))
+        
+        #pageList
+        nodelp = libxml2.newNode("pageList")
+        root2.addChild(nodelp)
+        nodep = libxml2.newNode("pages")
+        nodelp.addChild(nodep)
+                
+        for page in jsonDesc["pageList"]['pages']:
+            pageId = libxml2.newNode("pageId")
+            pageId.setContent(str(page['pageId']))
+            tsId=libxml2.newNode("tsId")
+            tsId.setContent(str(page['tsId']))
+            regId=libxml2.newNode("regionIds")
+            regId.setContent('')
+            nodep.addChild(pageId)
+            nodep.addChild(tsId)
+            nodep.addChild(regId)
+        
+        return xmldesc.serialize('utf-8',True)    
+            
     def buildDescription(self,colId,docpage,trp=None):
         """
             '{"docId":17442,"pageList":{"pages":[{"pageId":400008,"tsId":1243509,"regionIds":[]}]}}'
-<documentSelectionDescriptor>
+            or
+            <documentSelectionDescriptor>
             <docId>1</docId>
             <pageList>
                 <pages>
@@ -147,20 +202,54 @@ class DoLAbatch(TranskribusClient):
             jsonDesc["docId"]=page['docId']
             jsonDesc["pageList"]['pages'].append({"pageId":page['pageId'],"tsId":page['tsList']['transcripts'][0]['tsId'],"regionIds":[]})        
         
-        
         return jsonDesc["docId"], json.dumps(jsonDesc,encoding='utf-8')
 
     
-    def run(self, colId, sDescription, sJobImpl='CITlabAdvancedLaJob',bBlockSeg,bLineSeq):
-        ret = self.analyzeLayoutNew(colId, sDescription,sJobImpl,bBlockSeg,bLineSeq)
+    def run(self, colId, sDescription, sJobImpl,bBlockSeg=False):
+        ret = self.analyzeLayoutNew(colId, sDescription,sJobImpl,"",bBlockSeg,bLineSeg=True)
         return ret
 
 
 
+def test_json2xml():
+    
+    s = '{"docId":17442,"pageList":{"pages":[{"pageId":400008,"tsId":1243509,"regionIds":[]}]}}'
+    jsonDesc=json.loads(s)
+    print jsonDesc
+    import libxml2
+    
+    xmldesc= libxml2.newDoc("1.0")
+    root =libxml2.newNode("documentSelectionDescriptor")
+    xmldesc.setRootElement(root)
+    
+    # docId
+    node = libxml2.newNode("docId")
+    root.addChild(node)
+    node.setContent(str(jsonDesc["docId"]))
+    
+    #pageList
+    nodelp = libxml2.newNode("pageList")
+    root.addChild(nodelp)
+    nodep = libxml2.newNode("pages")
+    nodelp.addChild(nodep)
+            
+    for page in jsonDesc["pageList"]['pages']:
+        pageId=libxml2.newNode("pageId")
+        pageId.setContent(str(page['pageId']))
+        tsId=libxml2.newNode("tsId")
+        tsId.setContent(str(page['tsId']))
+        regId=libxml2.newNode("regionIds")
+        regId.setContent('')
+        nodep.addChild(pageId)
+        nodep.addChild(tsId)
+        nodep.addChild(regId)
+    
+    print xmldesc.serialize('utf-8',True)    
+    
+    
 
 if __name__ == '__main__':
     version = "v.01"
-
     #prepare for the parsing of the command line
     parser = OptionParser(usage=usage, version=version)
     parser.description = description
@@ -170,7 +259,9 @@ if __name__ == '__main__':
         
     parser.add_option("-r", "--region"  , dest='region', action="store", type="string", default=DoLAbatch.sDefaultServerUrl, help="apply Layout Analysis (textLine)")
     parser.add_option("--trp"  , dest='trp_doc', action="store", type="string",default=None, help="use trp doc file")
-    parser.add_option("--docid"  , dest='docid'   , action="store", type="string", default=None, help="document/pages to be htr'd")        
+    parser.add_option("--docid"  , dest='docid'   , action="store", type="string", default=None, help="document/pages to be analyzed")        
+    parser.add_option("--doRegionSeg"  , dest='doRegionSeg'   , action="store", type="string", default=None, help="do Region detection")        
+
     # ---   
     #parse the command line
     (options, args) = parser.parse_args()
@@ -184,14 +275,6 @@ if __name__ == '__main__':
     # --- 
     try:                        colId = int(args.pop(0))
     except Exception as e:      _exit(usage, 1, e)
-    try:                        docId   = int(args.pop(0))
-    except Exception as e:      _exit(usage, 1, e)
-    try:                        sPages = args.pop(0)
-    except Exception as e:      _exit(usage, 1, e)
-    try:                        doNotBlockSeg = int(args.pop(0)) == 0
-    except Exception as e:      doNotBlockSeg = False
-    try:                        doNotLineSeg = int(args.pop(0)) == 0
-    except Exception as e:      doNotLineSeg= False    
     if args:                    _exit(usage, 2, Exception("Extra arguments to the command"))
 
     # --- 
@@ -201,8 +284,10 @@ if __name__ == '__main__':
         docId,sPageDesc = doer.buildDescription(colId,options.docid,trpdoc)
     else:
         docId,sPageDesc = doer.buildDescription(colId,options.docid)    
-    
-    jobid = doer.run(colId, sPageDesc,not(doNotBlockSeg),not(doNotLineSeg))
+#     NcsrLaJob
+#     CITlabAdvancedLaJob
+    sPageDesc = doer.jsonToXMLDescription(sPageDesc)
+    jobid = doer.run(colId, sPageDesc,'CITlabAdvancedLaJob',options.doRegionSeg)
     traceln(jobid)
         
     traceln()      

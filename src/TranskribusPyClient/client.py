@@ -648,7 +648,7 @@ class TranskribusClient():
         
     # -------LAYOUT ANALYSIS ------------------------------------------------------------------------------------------
 
-    def analyzeLayout(self, colId, docId, sPages, sJobImpl, sPars=""
+    def analyzeLayoutNew(self, colId, sDescription, sJobImpl="CITlabAdvancedLaJob", sPars=""
                       , bBlockSeg=False
                       , bLineSeg=True
                       , bWordSeg=False
@@ -673,6 +673,7 @@ class TranskribusClient():
         Valid values for the jobImpl parameter are:
         NcsrLaJob
         CvlLaJob
+            
         
         You have to post a list of descriptor objects either as XML or JSON to the service, specifying the pages that have to be analyzed. A single page descriptor would look like this (regionId optional):
         <documentSelectionDescriptor>
@@ -694,13 +695,17 @@ class TranskribusClient():
         """        
         self._assertLoggedIn()
         myReq = self.sREQ_LA_analyze
-        params = self._buidlParamsDic(collId=colId
-                                      , doBlockSeg=bBlockSeg, doLineSeg=bLineSeg, doWordSeg=bWordSeg
-                                      , doPolygonToBaseline=bPolygonToBaseline, doBaselineToPolygon=bBaselineToPolygon
-                                      , jobImpl=sJobImpl, pars=sPars)
-        resp = self._POST(myReq, params=params, sContentType=None)
-        
+#         params = self._buidlParamsDic(collId=colId
+#                                     , doBlockSeg=bBlockSeg, doLineSeg=bLineSeg, doWordSeg=bWordSeg
+#                                     , doPolygonToBaseline=bPolygonToBaseline, doBaselineToPolygon=bBaselineToPolygon
+#                                       , jobImpl=sJobImpl,pars=sPars)
 
+        #https://transkribus.eu/TrpServerTesting/rest/LA/analyze?doLineSeg=true&collId=2&doBlockSeg=true&doWordSeg=false&jobImpl=CITlabAdvancedLaJob
+        params = self._buidlParamsDic(collId=colId
+                                    , doBlockSeg=bBlockSeg, doLineSeg=bLineSeg, doWordSeg=bWordSeg
+                                    , jobImpl=sJobImpl)
+        
+        resp = self._POST(myReq, params=params, data=sDescription,sContentType="application/xml")
         resp.raise_for_status()
         return resp.text 
     
@@ -846,7 +851,7 @@ class TranskribusClient():
         return resp.text
 
         
-    def htrRnnDecode(self, colId, sRnnModelID, sDictName, docId, sPagesDesc):
+    def htrRnnDecode(self, colId, sRnnModelID, sDictName, docId, sPagesDesc, bDictTemp=True):
         """
         Do the HTR using the given RNN model and dictionary.
         - Maybe you can set sPages to None, or both docId and sPage to None ?? 
@@ -870,7 +875,10 @@ class TranskribusClient():
         
         self._assertLoggedIn()
         myReq = self.sREQ_recognition_htrRnn % (colId,sRnnModelID)
-        params = self._buidlParamsDic(id=docId,tempDict=sDictName)
+        if bDictTemp:
+            params = self._buidlParamsDic(id=docId,tempDict=sDictName)
+        else:
+            params = self._buidlParamsDic(id=docId,dict=sDictName)
         postparams= sPagesDesc #'{"docId":17442,"pageList":{"pages":[{"pageId":400008,"tsId":1243590,"regionIds":[]}]}}'
 
         resp = self._POST(myReq, params=params,data=postparams ,  sContentType = "application/json")
