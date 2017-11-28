@@ -44,18 +44,13 @@ except ImportError:
     sys.path.append( os.path.dirname(os.path.dirname( os.path.abspath(sys.argv[0]) )) )
     import TranskribusPyClient_version
 
-from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit,\
-    sCOL
+from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit
 from do_transcript import DoTranscript
 
-from common.IntegerRange import IntegerRange
-from TranskribusPyClient.TRP_FullDoc import TRP_FullDoc
+from TranskribusPyClient.common.IntegerRange import IntegerRange
 
 from TranskribusPyClient.client import TranskribusClient
-from common.trace import traceln, trace
-import  codecs
-import json
-from random import shuffle
+from TranskribusPyClient.common.trace import traceln, trace
 
 
 DEBUG = 0

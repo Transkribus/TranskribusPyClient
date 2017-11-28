@@ -49,10 +49,10 @@ from TranskribusPyClient.client import TranskribusClient
 
 from do_transcript import DoTranscript
 
-from common.IntegerRange import IntegerRange
+from TranskribusPyClient.common.IntegerRange import IntegerRange
 from TranskribusPyClient.TRP_FullDoc import TRP_FullDoc
 
-from common.trace import traceln, trace
+from TranskribusPyClient.common.trace import traceln, trace
 
 DEBUG = 0
 

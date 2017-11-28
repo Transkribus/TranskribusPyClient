@@ -43,9 +43,9 @@ except ImportError:
     sys.path.append( os.path.dirname(os.path.dirname( os.path.abspath(sys.argv[0]) )) )
     import TranskribusPyClient_version
 
-from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit, strTabularFormat
+from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, strTabularFormat
 from TranskribusPyClient.client import TranskribusClient
-from common.trace import traceln, trace
+from TranskribusPyClient.common.trace import traceln, trace
 
 DEBUG = 0
 

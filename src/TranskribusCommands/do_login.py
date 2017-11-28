@@ -41,7 +41,7 @@ except ImportError:
 
 from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, _exit
 from TranskribusPyClient.client import TranskribusClient, getStoredCredentials
-from common.trace import traceln, trace
+from TranskribusPyClient.common.trace import traceln, trace
 
 DEBUG = 0
 
