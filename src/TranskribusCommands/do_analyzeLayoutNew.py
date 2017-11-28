@@ -134,10 +134,10 @@ class DoLAbatch(TranskribusClient):
             
         """
         import libxml2
-        s = '{"docId":17442,"pageList":{"pages":[{"pageId":400008,"tsId":1243509,"regionIds":[]}]}}'
-        s ='{"pageList": {"pages": [{"tsId": "1305027", "regionIds": [], "pageId": "478362"}]}, "docId": "18975"}'
-
-        jsonDesc=json.loads(s)
+#         s = '{"docId":17442,"pageList":{"pages":[{"pageId":400008,"tsId":1243509,"regionIds":[]}]}}'
+#         s ='{"pageList": {"pages": [{"tsId": "1305027", "regionIds": [], "pageId": "478362"}]}, "docId": "18975"}'
+# 
+        jsonDesc=json.loads(jsonDesc)
     
         xmldesc= libxml2.newDoc("1.0")
         root =libxml2.newNode("documentSelectionDescriptors")
