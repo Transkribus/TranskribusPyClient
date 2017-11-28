@@ -288,6 +288,7 @@ if __name__ == '__main__':
 #     CITlabAdvancedLaJob
     sPageDesc = doer.jsonToXMLDescription(sPageDesc)
     jobid = doer.run(colId, sPageDesc,'CITlabAdvancedLaJob',options.doRegionSeg)
+    traceln("job status:")
     traceln(jobid)
         
     traceln()      
