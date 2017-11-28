@@ -891,7 +891,31 @@ class TranskribusClient():
     
     # --- JOB -----------------------------------------------------------------------------------------
 
-    
+        
+    def getJobIDsFromXMLStatuses(self,xmlString):
+        """
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <trpJobStatuses>
+            <trpJobStatus>
+            <jobId>193504</jobId>
+            <docId>29436</docId><pageNr>1</pageNr><type>Layout analysis (CITlabAdvancedLaJob: lines)</type><state>CREATED</state><success>false</success><description></description><userName>herve.dejean@naverlabs.com</userName><userId>275</userId><createTime>1511864236714</createTime><startTime>0</startTime><endTime>0</endTime><jobData>#Tue Nov 28 11:17:16 CET 2017
+doWordSeg=false
+doLineSeg=true
+doPolygonToBaseline=false
+doBaselineToPolygon=false
+doBlockSeg=false
+</jobData><resumable>false</resumable><jobImpl>CITlabAdvancedLaJob</jobImpl><created>2017-11-28T11:17:16.714+01:00</created><pageid>971875</pageid><tsid>1594101</tsid><regionids></regionids><colId>8828</colId></trpJobStatus></trpJobStatuses>
+        """
+        doc = self._xmlParseDoc(xmlString)
+        ctxt = doc.xpathNewContext()    
+        ctxt.setContextNode(doc.getRootElement())
+        lN= ctxt.xpathEval("*//jobId")
+        ctxt.xpathFreeContext()       
+        if lN != []:
+            return map(lambda x:x.getContent().decode('utf-8'),lN)
+        else:
+            return []
+        
     def getJobStatus(self, jobid):
         """
         return the job status (a dictionary)

@@ -33,7 +33,7 @@ import time
 import datetime
 import dateutil.parser
 
-from common.IntegerRangeHalfBounded import IntegerRangeHalfBounded
+from TranskribusPyClient.common.IntegerRangeHalfBounded import IntegerRangeHalfBounded
 
 
 class DateTimeRange(IntegerRangeHalfBounded):

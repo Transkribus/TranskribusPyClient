@@ -46,11 +46,11 @@ except ImportError:
 
 from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit
 from TranskribusPyClient.client import TranskribusClient
-from common.IntegerRange  import IntegerRange as PageRangeSpec
-from common.DateTimeRange import DateTimeRange as DateTimeRangeSpec
+from TranskribusPyClient.common.IntegerRange  import IntegerRange as PageRangeSpec
+from TranskribusPyClient.common.DateTimeRange import DateTimeRange as DateTimeRangeSpec
 from TranskribusPyClient.TRP_FullDoc import TRP_FullDoc
 
-from common.trace import traceln, trace
+from TranskribusPyClient.common.trace import traceln, trace
 
 DEBUG = 0
 
