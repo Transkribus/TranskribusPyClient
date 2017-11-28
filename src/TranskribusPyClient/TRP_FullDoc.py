@@ -203,7 +203,7 @@ class TRP_FullDoc:
         o.setPageList(ldPagesInRange)
         return o
 
-    def filterTranscriptsBySlot(self, oTimeSpec, slotname, bInPlace=True):
+    def filterTranscriptsBySlot(self, oTimeSpec, slotname, bNot=False, bInPlace=True):
         """
         filter the list of pages to retain only those listed in the given list 
         
@@ -215,7 +215,10 @@ class TRP_FullDoc:
         new_ldPages = list()    #we may have to discard pages without any transcript after filtering
         for dPage in ldPages:
             ldTr = dPage["tsList"]["transcripts"]
-            new_ldTr = [dTr for dTr in ldTr if dTr[slotname] in oTimeSpec]
+            if bNot:
+                new_ldTr = [dTr for dTr in ldTr if dTr[slotname] not in oTimeSpec]
+            else:
+                new_ldTr = [dTr for dTr in ldTr if dTr[slotname]     in oTimeSpec]
             if len(ldTr) != len(new_ldTr):
                 dPage["tsList"]["transcripts"] = new_ldTr
             if new_ldTr:
