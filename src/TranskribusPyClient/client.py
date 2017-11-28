@@ -703,9 +703,12 @@ class TranskribusClient():
         #https://transkribus.eu/TrpServerTesting/rest/LA/analyze?doLineSeg=true&collId=2&doBlockSeg=true&doWordSeg=false&jobImpl=CITlabAdvancedLaJob
         params = self._buidlParamsDic(collId=colId
                                     , doBlockSeg=bBlockSeg, doLineSeg=bLineSeg, doWordSeg=bWordSeg
+#                                     , doPolygonToBaseline=False, doBaselineToPolygon=False
                                     , jobImpl=sJobImpl)
         
+#         print myReq, params, sDescription
         resp = self._POST(myReq, params=params, data=sDescription,sContentType="application/xml")
+#         print resp.text
         resp.raise_for_status()
         return resp.text 
     
