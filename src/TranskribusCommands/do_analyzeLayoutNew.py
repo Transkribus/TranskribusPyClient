@@ -63,7 +63,7 @@ The syntax for specifying the page range is:
 
 """ + _Trnskrbs_description
 
-usage = """%s <colId>  <docid> [--trp]
+usage = """%s <colId> 
 """%sys.argv[0]
 
 class DoLAbatch(TranskribusClient):
@@ -103,6 +103,18 @@ class DoLAbatch(TranskribusClient):
         
         Best regards and have a nice weekend,
         Philip    
+    
+    
+    13/12/2017:
+        Hi Hervé,
+        
+        I just deployed the new LA job on the productive server, but the old
+        behavior is still the default.
+        
+        If your client already can handle the /rest/LA/analyze call, all you
+        have to do is append an additional query parameter to the POST request:
+        
+        ...&doCreateJobBatch=false
     
     
     """
@@ -152,10 +164,10 @@ class DoLAbatch(TranskribusClient):
         #pageList
         nodelp = libxml2.newNode("pageList")
         root2.addChild(nodelp)
-        nodep = libxml2.newNode("pages")
-        nodelp.addChild(nodep)
                 
         for page in jsonDesc["pageList"]['pages']:
+            nodep = libxml2.newNode("pages")
+            nodelp.addChild(nodep)
             pageId = libxml2.newNode("pageId")
             pageId.setContent(str(page['pageId']))
             tsId=libxml2.newNode("tsId")
@@ -204,8 +216,8 @@ class DoLAbatch(TranskribusClient):
         return jsonDesc["docId"], json.dumps(jsonDesc,encoding='utf-8')
 
     
-    def run(self, colId, sDescription, sJobImpl,bBlockSeg=False):
-        ret = self.analyzeLayoutNew(colId, sDescription,sJobImpl,"",bBlockSeg,bLineSeg=True)
+    def run(self, colId, sDescription, sJobImpl,bBlockSeg=False,bCreateJobBatch=False):
+        ret = self.analyzeLayoutNew(colId, sDescription,sJobImpl,"",bBlockSeg,bLineSeg=True,bCreateJobBatch=bCreateJobBatch)
         jobid= self.getJobIDsFromXMLStatuses(ret)
         return ret,jobid
 
@@ -260,7 +272,8 @@ if __name__ == '__main__':
     parser.add_option("-r", "--region"  , dest='region', action="store", type="string", default=DoLAbatch.sDefaultServerUrl, help="apply Layout Analysis (textLine)")
     parser.add_option("--trp"  , dest='trp_doc', action="store", type="string",default=None, help="use trp doc file")
     parser.add_option("--docid"  , dest='docid'   , action="store", type="string", default=None, help="document/pages to be analyzed")        
-    parser.add_option("--doRegionSeg"  , dest='doRegionSeg'   , action="store", type="string", default=None, help="do Region detection")        
+    parser.add_option("--doRegionSeg"  , dest='doRegionSeg'   , action="store_true",  default=False, help="do Region detection")        
+    parser.add_option("--batchjob"  , dest='doBatchJob'   , action="store_true",  default=False, help="do one job per page")        
 
     # ---   
     #parse the command line
@@ -287,7 +300,8 @@ if __name__ == '__main__':
 #     NcsrLaJob
 #     CITlabAdvancedLaJob
     sPageDesc = doer.jsonToXMLDescription(sPageDesc)
-    status, jobid = doer.run(colId, sPageDesc,'CITlabAdvancedLaJob',options.doRegionSeg)
+    
+    status, jobid = doer.run(colId, sPageDesc,'CITlabAdvancedLaJob',options.doRegionSeg,bCreateJobBatch=options.doBatchJob)
     traceln("job status:")
     traceln(jobid)
         

@@ -648,6 +648,7 @@ class TranskribusClient():
         
     # -------LAYOUT ANALYSIS ------------------------------------------------------------------------------------------
 
+
     def analyzeLayoutNew(self, colId, sDescription, sJobImpl="CITlabAdvancedLaJob", sPars=""
                       , bBlockSeg=False
                       , bLineSeg=True
