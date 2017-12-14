@@ -648,13 +648,14 @@ class TranskribusClient():
         
     # -------LAYOUT ANALYSIS ------------------------------------------------------------------------------------------
 
-
-    def analyzeLayoutNew(self, colId, sDescription, sJobImpl="CITlabAdvancedLaJob", sPars=""
-                      , bBlockSeg=False
-                      , bLineSeg=True
-                      , bWordSeg=False
-                      , bPolygonToBaseline=False
-                      , bBaselineToPolygon=False):
+    def analyzeLayoutNew(self, colId, sDescription, sJobImpl="CITlabAdvancedLaJob"
+                    ,  sPars=""
+                    , bBlockSeg = False
+                    , bLineSeg = True
+                    , bWordSeg = False
+                    , bPolygonToBaseline = False
+                    , bBaselineToPolygon = False
+                    , bCreateJobBatch = False):
 
         """
             Hi Hervé,
@@ -705,6 +706,7 @@ class TranskribusClient():
         params = self._buidlParamsDic(collId=colId
                                     , doBlockSeg=bBlockSeg, doLineSeg=bLineSeg, doWordSeg=bWordSeg
 #                                     , doPolygonToBaseline=False, doBaselineToPolygon=False
+                                    , doCreateJobBatch=bCreateJobBatch
                                     , jobImpl=sJobImpl)
         
 #         print myReq, params, sDescription
