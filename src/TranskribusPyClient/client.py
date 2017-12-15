@@ -337,7 +337,8 @@ class TranskribusClient():
                                        , sNote=None
                                        , parentId=None
                                        , bPnumIsPageId=None
-                                       ,sToolName=None
+                                       , sToolName=None
+                                       , status = None
                                        , bEncoded=False):  #bEncoded is not part of official API, it is a convenience for Pythonic API
         """
         Post a new transcript for a page
@@ -372,7 +373,7 @@ class TranskribusClient():
         self._assertLoggedIn()
         if not bEncoded: self._assertUnicode(sXMlTranscript)
         myReq = self.sREQ_collections_postPageTranscript % (colId,docId,pnum)
-        params = self._buidlParamsDic(overwrite=bOverwrite, note=sNote, parent=parentId, nrIsPageId=bPnumIsPageId,toolName=sToolName)
+        params = self._buidlParamsDic(overwrite=bOverwrite, note=sNote, parent=parentId, nrIsPageId=bPnumIsPageId,toolName=sToolName, status=status)
         if bEncoded:
             resp = self._POST(myReq, params=params, data=sXMlTranscript)
         else:
@@ -535,8 +536,9 @@ class TranskribusClient():
                     with open(stored_doc_ts_file, "w") as fd: fd.write("%s"%doc_max_ts) 
                 
                 coll_max_ts = max(coll_max_ts, doc_max_ts)
-                logging.info("- DONE (downloaded doc %s)"%(docId))
+                logging.info("- DONE (downloaded doc %s)"%(docId)) 
 
+        if sDocId is not None and not ldocID: raise ValueError("No such document")  
         logging.info("- DONE (downloaded collection %s into folder %s    (bForce=%s))"%(colId, collDir, bForce))
         return coll_max_ts, ldocID, dLFileList
         
