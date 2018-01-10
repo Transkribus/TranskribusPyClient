@@ -66,7 +66,7 @@ class TranskribusTranscriptUploader(TranskribusClient):
     def __init__(self, trnkbsServerUrl, sHttpProxy=None, loggingLevel=logging.WARN):
         TranskribusClient.__init__(self, sServerUrl=trnkbsServerUrl, proxies=sHttpProxy, loggingLevel=loggingLevel)
         
-    def uploadCollectionTranscript(self, colid, sColDSDir, sNote="",sToolName="", iVerbose=0):
+    def uploadCollectionTranscript(self, colid, sColDSDir, sNote="",sToolName="", iVerbose=0, status=None):
         """
         Upload the transcripts of all document in that collection into Transkribus
         return nothing
@@ -81,13 +81,13 @@ class TranskribusTranscriptUploader(TranskribusClient):
         trp = json.load(codecs.open(trpFilename, "rb",'utf-8'))
         
         for docid in [d["docId"] for d in trp]:
-            self.uploadDocumentTranscript(colid, docid, sColDSDir, sNote=sNote, sToolName=sToolName, iVerbose=iVerbose)
+            self.uploadDocumentTranscript(colid, docid, sColDSDir, sNote=sNote, sToolName=sToolName, iVerbose=iVerbose, status=status)
         
         if iVerbose: 
             traceln("  Done (collection %s)"%colid)
         return
 
-    def uploadDocumentTranscript(self, colid, docid, sColDSDir, sNote="",sToolName="", iVerbose=0):
+    def uploadDocumentTranscript(self, colid, docid, sColDSDir, sNote="",sToolName="", iVerbose=0, status=None):
         """
         Upload the transcripts of all document in that collection into Transkribus
         return nothing
@@ -97,12 +97,14 @@ class TranskribusTranscriptUploader(TranskribusClient):
         if not os.path.exists(trpFilename):
             raise Exception("File not found %s. \nData probably created in --trp mode, so upload must be done in --trp mode."%trpFilename)
         trp = json.load(codecs.open(trpFilename, "rb",'utf-8'))
-        self.uploadDocumentTranscript_by_trp(colid, docid, trp, sColDSDir, sNote=sNote, sToolName=sToolName, iVerbose=iVerbose)
+        self.uploadDocumentTranscript_by_trp(colid, docid, trp, sColDSDir, sNote=sNote, sToolName=sToolName, iVerbose=iVerbose, status=status)
         return
     
-    def uploadDocumentTranscript_by_trp(self, colid, docid, trp, sColDSDir, sNote="",sToolName="", iVerbose=0):
+    def uploadDocumentTranscript_by_trp(self, colid, docid, trp, sColDSDir, sNote="",sToolName="", iVerbose=0, status=None):
         """
         Upload the transcripts of one document in that collection into Transkribus, as specified by the TRP data
+            status = None     ==> we get the status from the TRP
+            otherwise         ==> we set the given status
         return nothing
         """
         if iVerbose:
@@ -121,23 +123,25 @@ class TranskribusTranscriptUploader(TranskribusClient):
         if not os.path.exists(docDir): raise ValueError("Document directory not found: %s" % docDir)
         
         lFileList= []
-        for page in pageList['pages']:
-            pagenum= page['pageNr']
+        for dPage in pageList['pages']:
+            pagenum= dPage['pageNr']
             logging.info("\t\t- page %s"%pagenum)
             
-            imgFileName = page['imgFileName']
+            imgFileName = dPage['imgFileName']
             base,_= os.path.splitext(imgFileName)
             lFileList.append(base)
             
-            tsId = page['tsList']["transcripts"][0]['tsId']
+            _trpTranscript0 = dPage['tsList']["transcripts"][0]
+            tsId = _trpTranscript0['tsId']
             sBaseName, _ = os.path.splitext(imgFileName)
             xmlFilename = docDir + os.sep + sBaseName + ".pxml"
             logging.info("\t\t\t%s"%xmlFilename)
-            traceln("page %5d: %s : %s"%(pagenum, tsId, xmlFilename))
             assert os.path.exists(xmlFilename)
             with open(xmlFilename, "rb") as fd: sXMlTranscript = fd.read()
-            
-            self.postPageTranscript(colid, docid, pagenum, sXMlTranscript, parentId=tsId, bEncoded=True, sNote=sNote, sToolName=sToolName)
+            cur_status = _trpTranscript0["status"] if status == None else status
+            traceln("page %5d : %s : %s : %s : %s : %s"%(pagenum, cur_status, sToolName, tsId, sNote, xmlFilename))
+            self.postPageTranscript(colid, docid, pagenum, sXMlTranscript, parentId=tsId, bEncoded=True, sNote=sNote, sToolName=sToolName, status=cur_status)
+                
             
         if iVerbose:
             traceln("   Done (collection %s, document %s as per TRP)"%(colid, docid))
@@ -163,6 +167,7 @@ The page transcript from the single page PageXml files are uploaded. (The multi-
     parser.add_option("--trp"  ,  dest='trp'  , action="store", type="string", help="download the content specified by the trp file.")    
     parser.add_option("--toolname",  dest='tool'  , action="store", type="string", default="", help="Set the Toolname metadata in Transkribus.")    
     parser.add_option("--message",  dest='message', action="store", type="string", default="", help="Set the message metadata in Transkribus.")    
+    parser.add_option("--set_status",  dest='set_status', action="store", type="string", default=None, help="Set the status of the uploaded trasnscript.")    
 
     # --- 
     #parse the command line
@@ -196,20 +201,23 @@ The page transcript from the single page PageXml files are uploaded. (The multi-
         if not docid:
             docid = trp["md"]["docId"]
             traceln(" read docId from TRP: docId = %s"%docid) 
-            sToolname = options.tool if options.tool else "Transkribus_uploader (--trp)"
+        sToolname = options.tool if options.tool else "Transkribus_uploader (--trp)"
         lFileList = doer.uploadDocumentTranscript_by_trp(colid, docid, trp, sColDSDir
-                                , sNote=options.message, sToolName=sToolname, iVerbose=iVerbose)
+                                , sNote=options.message, sToolName=sToolname, iVerbose=iVerbose
+                                , status=options.set_status)
         #traceln(map(lambda x: x.encode('utf-8'), lFileList))
     else:
         if docid == None:
             sToolname = options.tool if options.tool else "Transkribus_uploader"
             doer.uploadCollectionTranscript(colid, sColDSDir
-                                , sNote=options.message, sToolName=sToolname, iVerbose=iVerbose)
+                                , sNote=options.message, sToolName=sToolname, iVerbose=iVerbose
+                                , status=options.set_status)
 
         else:
             sToolname = options.tool if options.tool else "Transkribus_uploader (docid)"
             doer.uploadDocumentTranscript(colid, docid, sColDSDir
-                                , sNote=options.message, sToolName=sToolname, iVerbose=iVerbose)
+                                , sNote=options.message, sToolName=sToolname, iVerbose=iVerbose
+                                , status=options.set_status)
         
     traceln('- DONE, all transcripts were uploaded. See in collection %s'%colid)
     
