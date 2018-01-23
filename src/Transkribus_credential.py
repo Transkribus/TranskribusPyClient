@@ -13,5 +13,5 @@ Created on 15 Nov 2016
 
 # Either you store your credentials here, or you use the --persist options
 
-login    = "herve.dejean@xrce.xerox.com"
-password = "my_password_was_here"
+login    = "herve.dejean@naverlabs.com"
+password = "courv"

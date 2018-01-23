@@ -28,12 +28,20 @@ Created on 15 Nov 2016
 
 @author: meunier    
 """
+
+from __future__ import absolute_import
+from __future__ import  print_function
+from __future__ import unicode_literals
+
 DEBUG = 0
+
 
 import sys, os, logging
 
 from optparse import OptionParser
-import json, codecs
+import json
+from io import open
+
 
 try: #to ease the use without proper Python installation
     import TranskribusPyClient_version
@@ -50,7 +58,7 @@ try:
     import xml_formats.PageXml as PageXml
 except ImportError:
     sys.path.append( os.path.join( os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(sys.argv[0]) ))))
-                                    , "TranskribusDU", "src" ))
+                                    , "TranskribusDU", "TranskribusDU" ))
     import xml_formats.PageXml as PageXml
     
     
@@ -128,7 +136,7 @@ class TranskribusDownloader(TranskribusClient):
 #         lsDocMaxTSFilename = sorted(glob.iglob(os.path.join(colDir, "*%s"%TranskribusClient._POSTFIX_MAX_TX)), reverse=True)  # *_max.ts files
         for docId in dFileListPerDoc.keys():
             if dFileListPerDoc[docId] is not None:
-                lFiles= map(lambda x:os.path.join(colDir,docId,x+".pxml"),dFileListPerDoc[docId] )
+                lFiles= list(map(lambda x:os.path.join(colDir,docId,x+".pxml"),dFileListPerDoc[docId] ))
                 docDir = os.path.join(colDir,docId)
                 traceln("\t- %s"%docDir)
                 
@@ -149,7 +157,7 @@ class TranskribusDownloader(TranskribusClient):
                 if DEBUG>1:
                     PageXml.MultiPageXml.splitMultiPageXml(doc, docDir, "debug_%d.xml", bIndent=True)
                 
-                doc.freeDoc()
+#                 doc.freeDoc()
                 traceln('\t- %s'%sXmlFilename)
 
         
@@ -165,7 +173,8 @@ class TranskribusDownloader(TranskribusClient):
         return doc
                 
     def writeDom(self, doc, filename, bIndent=False):
-        doc.saveFormatFileEnc(filename, "UTF-8", bIndent)
+        doc.write(filename,xml_declaration=True,encoding='utf-8',pretty_print=True)
+#         doc.saveFormatFileEnc(filename, "UTF-8", bIndent)
         
 #         if self.bZLib:
 #             #traceln("ZLIB WRITE")
@@ -220,14 +229,16 @@ if __name__ == '__main__':
     
     if options.trp:
         traceln("- Loading trp data from %s" % options.trp)
-        trp = json.load(codecs.open(options.trp, "rb",'utf-8'))
+#         trp = json.load(open(options.trp, "rb",encoding='utf-8'))
+        trp = json.load(open(options.trp, "rt",encoding='utf-8'))
+
         traceln("- Downloading collection %s to folder %s, as specified by trp data"%(colid, os.path.abspath(destDir)))
         if not options.docid:
             options.docid = trp["md"]["docId"]
             traceln(" read docId from TRP: docId = %s"%options.docid) 
         logging.basicConfig(level=logging.INFO)
         col_ts, docFolder, lFileList = trnkbs2ds.download_document_by_trp(colid, options.docid, destDir, trp, bOverwrite=options.bForce, bNoImage=options.bNoImage)
-        traceln(map(lambda x: x.encode('utf-8'), lFileList))
+        traceln(list(map(lambda x: x.encode('utf-8'), lFileList)))
         colFolder = docFolder #inaccurate, but fine for rest of code 
     else:
         traceln("- Downloading collection %s to folder %s"%(colid, os.path.abspath(destDir)))

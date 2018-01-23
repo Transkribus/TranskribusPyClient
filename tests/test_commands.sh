@@ -28,8 +28,8 @@
 # ------------------------------------------------------------------------------------------------------------------------
 
 #transkribus valid login
-login="jean-luc.meunier@xrce.xerox.com"
-passwd="my_password_here"
+login="herve.dejean@naverlabs.com"
+passwd="courv"
 
 #some existing collection with read access for you
 colId=3571
@@ -38,7 +38,7 @@ docId_A=7749
 docId_B=7750
 
 PYTHON=python
-#PYTHON=/c/Anaconda2/python.exe
+#PYTHON=/cygdrive/c/anaconda3/python.exe
 
 # ------------------------------------------------------------------------------------------------------------------------
 # ---  GENERIC STUF BELOW
@@ -104,6 +104,20 @@ echo "--- copying doc $docId_A from collection $colId to the new collection"
 $PYTHON $SRC/TranskribusCommands/do_duplicateDoc.py --persist $colId $tmp_col_id $docId_A  || error "collection copy error 1"
 echo "OK"
 
+#---------------------------------------------------
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
+echo
+echo "--- deleting it ( $tmp_col_id ) "
+tmp_col_id=`$PYTHON $SRC/TranskribusCommands/do_deleteCollec.py --persist $tmp_col_id` || error "collection deletion error"
+echo "OK"
+
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
+echo
+echo "--- display  trpdoc of the first page of $docId_A from collection $colId "
+$PYTHON $SRC/TranskribusCommands/do_getDocTrp.py --persist $colId $docId_A 1 || error "getDocTrp error 1"
+echo "OK"
+
+
 
 #---------------------------------------------------
 echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
@@ -115,11 +129,85 @@ echo "OK"
 #---------------------------------------------------
 echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
 echo
-echo "--- deleting it ($tmp_col_id)"
-tmp_col_id=`$PYTHON $SRC/TranskribusCommands/do_deleteCollec.py --persist $tmp_col_id` || error "collection deletion error"
+echo "--- Layout Analysis in collection $colId "
+$PYTHON $SRC/TranskribusCommands/do_analyzeLayoutNew.py $colId --docid=$docId_A/1  || error "layout analysis error"
 echo "OK"
+
+#---------------------------------------------------
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
+echo
+echo "--- delete last transcript $colid / $docid / 1 "
+$PYTHON $SRC/TranskribusCommands/do_transcript.py $colId  $docId_A 1 --last --rm || error " delete last transcript error"
+echo "OK"
+
+#---------------------------------------------------
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
+echo
+echo "--- list of locked pages for  $docId_A in  $colId "
+$PYTHON $SRC/TranskribusCommands/do_listPageLocks.py $colId $docId_A   || error "locked pages error"
+echo "OK"
+
+#---------------------------------------------------
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
+echo
+echo "--- list HTR models in collection $colId "
+$PYTHON $SRC/TranskribusCommands/do_listHtrRnn.py --colid=$colId   || error "list HTR models error"
+echo "OK"
+
+#---------------------------------------------------
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
+echo
+echo "--- list trpdoc for document  $docId_A in  $colId "
+$PYTHON $SRC/TranskribusCommands/do_transcript.py $colId  $docId_A || error " transcript list models error"
+echo "OK"
+
+
+#---------------------------------------------------
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
+echo
+echo "--- save trpdoc for document  $docId_A in test.trp "
+$PYTHON $SRC/TranskribusCommands/do_transcript.py $colId  $docId_A 2 --trp test.trp || error " transcript list models error"
+
+echo "OK"
+
+
+#---------------------------------------------------
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
+echo
+echo "--- delete trnskrbs_$colId if any ---"
+rm -rf trnskrbs_$colId 
+echo "--- download using test.trp "
+$PYTHON $SRC/TranskribusCommands/Transkribus_downloader.py $colId  --trp test.trp|| error " download error"
+echo "OK"
+echo "--- rm test.trp"
+rm test.trp
+#---------------------------------------------------
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
+echo
+echo "--- delete trnskrbs_$colId if any ---"
+rm -rf trnskrbs_$colId 
+echo "--- download document  $docId_A ($colId) "
+$PYTHON $SRC/TranskribusCommands/Transkribus_downloader.py $colId  --docid=$docId_A --noimage || error " download error"
+echo "OK"
+
+#---------------------------------------------------
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
+echo
+echo "--- upload  document  $docId_A ($colId ) "
+$PYTHON $SRC/TranskribusCommands/TranskribusDU_transcriptUploader.py trnskrbs_$colId  $colId  $docId_A --nodu || error " upload error"
+echo "OK"
+
+
+
+#---------------------------------------------------
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
+echo
+echo "--- test only --help"
+$PYTHON $SRC/TranskribusCommands/do_htrTrainRnn.py --help
 
 echo "==================================================================="
 echo "TESTs done"
+
+
 
 

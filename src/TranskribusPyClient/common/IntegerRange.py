@@ -26,7 +26,11 @@
     under grant agreement No 674943.
     
 """
-import types
+from __future__ import absolute_import
+from __future__ import  print_function
+from __future__ import unicode_literals
+
+from builtins import int
 
 class IntegerRange:
     """
@@ -75,7 +79,7 @@ class IntegerRange:
         parse a range specification of positive integers and return a list of pair of indices
         """
         ltAB = list()
-        prev_b = None
+        prev_b = -1
         for sRange in sSpec.split(","):
             if not sRange.split(): continue #empty spec!
             a,b = cls._getAB(sRange)
@@ -119,7 +123,7 @@ class IntegerRange:
         """
         checking things are in order
         """
-        prevB = None
+        prevB = -1
         for a,b in self._ltAB:
             if prevB >= a: return False
             prevB = b
@@ -156,8 +160,9 @@ class IntegerRange:
         return sum(b-a+1 for a,b in self._ltAB)
 
     def __contains__(self, item):
+        #All integers are long in python3 and call to covert is just int
         try:
-            item = long(item)
+            item = int(item)
         except TypeError:
             raise ValueError("A range contains numeric values not %s"%type(item))
         #if type(item) != types.IntType and type(item) != types.LongType: raise ValueError("A range contains integer values not %s"%type(item))

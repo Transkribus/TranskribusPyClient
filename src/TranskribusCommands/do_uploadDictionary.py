@@ -27,12 +27,13 @@
     under grant agreement No 674943.
 
 """
+from __future__ import absolute_import
+from __future__ import  print_function
 from __future__ import unicode_literals
-
 
 #optional: useful if you want to choose the logging level to something else than logging.WARN
 import sys, os, logging
-import codecs
+from io import open
 
 from optparse import OptionParser
 # import json
@@ -123,11 +124,11 @@ if __name__ == '__main__':
     try:
         sfullDict="" 
         for filename in options.ldict:
-            dictFile =codecs.open(filename,'r','utf-8').read()
+            dictFile = open(filename,'r',encoding='utf-8').read()
             dictFile = dictFile.replace('\t',',')
             sfullDict += dictFile #+ '\n'
             traceln( "loaded %s"%(filename))
-    except  IOError:print 'not possible to open file :%s'%(filename)
+    except  IOError:print ('not possible to open file :%s'%(filename))
     
 #     print sfullDict.encode("utf-8")
     # need to normalize the weights when build this different dictionaries???

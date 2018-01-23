@@ -27,6 +27,9 @@
     under grant agreement No 674943.
 
 """
+from __future__ import absolute_import
+from __future__ import  print_function
+from __future__ import unicode_literals
 
 #    TranskribusCommands/do_LAbatch.py 3571 3820 8251 8252
 
@@ -35,7 +38,7 @@
 import sys, os, logging
 from optparse import OptionParser
 import json
-import codecs
+from lxml import etree
 
 try: #to ease the use without proper Python installation
     import TranskribusPyClient_version
@@ -45,7 +48,7 @@ except ImportError:
 
 from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit
 from TranskribusPyClient.client import TranskribusClient
-from do_transcript import DoTranscript
+from TranskribusCommands.do_transcript import DoTranscript
 from TranskribusPyClient.common.IntegerRange import IntegerRange
 from TranskribusPyClient.TRP_FullDoc import TRP_FullDoc
 
@@ -144,41 +147,42 @@ class DoLAbatch(TranskribusClient):
             </documentSelectionDescriptors>
             
         """
-        import libxml2
+#         import libxml2
 #         s = '{"docId":17442,"pageList":{"pages":[{"pageId":400008,"tsId":1243509,"regionIds":[]}]}}'
 #         s ='{"pageList": {"pages": [{"tsId": "1305027", "regionIds": [], "pageId": "478362"}]}, "docId": "18975"}'
 # 
         jsonDesc=json.loads(jsonDesc)
     
-        xmldesc= libxml2.newDoc("1.0")
-        root =libxml2.newNode("documentSelectionDescriptors")
-        xmldesc.setRootElement(root)
-        root2 =libxml2.newNode("documentSelectionDescriptor")
-        root.addChild(root2)
+        root = etree.Element("documentSelectionDescriptors")
+        xmldesc= etree.ElementTree(root)
+        
+        root2 =etree.Element("documentSelectionDescriptor")
+        root.append(root2)
 
         # docId
-        node = libxml2.newNode("docId")
-        root2.addChild(node)
-        node.setContent(str(jsonDesc["docId"]))
+        node =  etree.Element("docId")
+        root2.append(node)
+        node.text = str(jsonDesc["docId"])
         
         #pageList
-        nodelp = libxml2.newNode("pageList")
-        root2.addChild(nodelp)
+        nodelp = etree.Element("pageList")
+        root2.append(nodelp)
                 
         for page in jsonDesc["pageList"]['pages']:
-            nodep = libxml2.newNode("pages")
-            nodelp.addChild(nodep)
-            pageId = libxml2.newNode("pageId")
-            pageId.setContent(str(page['pageId']))
-            tsId=libxml2.newNode("tsId")
-            tsId.setContent(str(page['tsId']))
-            regId=libxml2.newNode("regionIds")
-            regId.setContent('')
-            nodep.addChild(pageId)
-            nodep.addChild(tsId)
-            nodep.addChild(regId)
-        
-        return xmldesc.serialize('utf-8',True)    
+            nodep = etree.Element("pages")
+            nodelp.append(nodep)
+            pageId = etree.Element("pageId")
+            pageId.text = str(page['pageId'])
+            tsId=etree.Element("tsId")
+            tsId.text= str(page['tsId'])
+            regId=etree.Element("regionIds")
+            regId.text = ''
+            nodep.append(pageId)
+            nodep.append(tsId)
+            nodep.append(regId)
+
+        return etree.tostring(xmldesc, encoding='utf-8',pretty_print=True)    
+#         return xmldesc.serialize('utf-8',True)    
             
     def buildDescription(self,colId,docpage,trp=None):
         """
@@ -213,7 +217,8 @@ class DoLAbatch(TranskribusClient):
             jsonDesc["docId"]=page['docId']
             jsonDesc["pageList"]['pages'].append({"pageId":page['pageId'],"tsId":page['tsList']['transcripts'][0]['tsId'],"regionIds":[]})        
         
-        return jsonDesc["docId"], json.dumps(jsonDesc,encoding='utf-8')
+#         return jsonDesc["docId"], json.dumps(jsonDesc,encoding='utf-8')
+        return jsonDesc["docId"], json.dumps(jsonDesc)
 
     
     def run(self, colId, sDescription, sJobImpl,bBlockSeg=False,bCreateJobBatch=False):
@@ -227,36 +232,34 @@ def test_json2xml():
     
     s = '{"docId":17442,"pageList":{"pages":[{"pageId":400008,"tsId":1243509,"regionIds":[]}]}}'
     jsonDesc=json.loads(s)
-    print jsonDesc
-    import libxml2
+    print(jsonDesc)
     
-    xmldesc= libxml2.newDoc("1.0")
-    root =libxml2.newNode("documentSelectionDescriptor")
-    xmldesc.setRootElement(root)
-    
+    root = etree.Element("documentSelectionDescriptors")
+    xmldesc= etree.ElementTree(root)
+        
     # docId
-    node = libxml2.newNode("docId")
-    root.addChild(node)
-    node.setContent(str(jsonDesc["docId"]))
+    node = etree.Element("docId")
+    root.append(node)
+    node.text = str(jsonDesc["docId"])
     
     #pageList
-    nodelp = libxml2.newNode("pageList")
-    root.addChild(nodelp)
-    nodep = libxml2.newNode("pages")
-    nodelp.addChild(nodep)
+    nodelp = etree.Element("pageList")
+    root.append(nodelp)
+    nodep = etree.Element("pages")
+    nodelp.append(nodep)
             
     for page in jsonDesc["pageList"]['pages']:
-        pageId=libxml2.newNode("pageId")
-        pageId.setContent(str(page['pageId']))
-        tsId=libxml2.newNode("tsId")
-        tsId.setContent(str(page['tsId']))
-        regId=libxml2.newNode("regionIds")
-        regId.setContent('')
-        nodep.addChild(pageId)
-        nodep.addChild(tsId)
-        nodep.addChild(regId)
+        pageId=etree.Element("pageId")
+        pageId.text = str(page['pageId'])
+        tsId=etree.Element("tsId")
+        tsId.text = str(page['tsId'])
+        regId=etree.Element("regionIds")
+        regId.text =''
+        nodep.append(pageId)
+        nodep.append(tsId)
+        nodep.append(regId)
     
-    print xmldesc.serialize('utf-8',True)    
+    print(etree.tostring(xmldesc,pretty_print=True, encoding='utf-8'))    
     
     
 
@@ -293,7 +296,7 @@ if __name__ == '__main__':
     # --- 
     # do the job...
     if options.trp_doc:
-        trpdoc =  json.load(codecs.open(options.trp_doc, "rb",'utf-8'))
+        trpdoc =  json.load(open(options.trp_doc, "rb",encoding='utf-8'))
         docId,sPageDesc = doer.buildDescription(colId,options.docid,trpdoc)
     else:
         docId,sPageDesc = doer.buildDescription(colId,options.docid)    

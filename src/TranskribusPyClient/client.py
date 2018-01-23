@@ -26,17 +26,30 @@
     under grant agreement No 674943.
     
 """
+from __future__ import absolute_import
+from __future__ import  print_function
+from __future__ import unicode_literals
+
+
+from builtins import str
+from builtins import input
+
+import sys
 import os
 import logging
-import types
 import requests
-import codecs
+from io import open
+
 import json
 import shutil
-import cPickle
-from common.trace import trace,flush
 
-import libxml2
+import pickle 
+
+# from TranskribusDU.common.trace import trace,flush
+
+# import libxml2
+from lxml import  etree
+# should be import etree.ElementTree as ET
 
 utf8="utf-8"
 
@@ -49,7 +62,9 @@ def getStoredCredentials(bAsk=False):
     except ImportError:
         logging.warn("No Transkribus credentials. Consider having a 'Transkribus_credential.py' Python module or use a persistent session using --persist.")
         if bAsk:
-            login, pwd = raw_input("Enter your Transkribus login: "), raw_input("Enter your Transkribus password: ")
+            # PY2 PY3
+            login, pwd = input("Enter your Transkribus login: "), input("Enter your Transkribus password: ")
+
     if login == None or pwd == None:
         raise ValueError("Missing Transkribus credentials!")
     return login, pwd
@@ -502,11 +517,14 @@ class TranskribusClient():
 
         if not os.path.exists(collDir): os.mkdir(collDir)
         
-        coll_max_ts = None
+        coll_max_ts = -1
         #list collection content
         lDocInfo = self.listDocsByCollectionId(colId)
         # store collections metadata 
-        with codecs.open(collDir+os.sep+"trp.json", "wb",'utf-8') as fd: json.dump(lDocInfo, fd, indent=2)
+        if sys.version_info > (3,0):
+            with open(collDir+os.sep+"trp.json", "wt",encoding='utf-8') as fd: json.dump(lDocInfo, fd, indent=2)
+        else:
+            with open(collDir+os.sep+"trp.json", "wb",) as fd: json.dump(lDocInfo, fd, indent=2)
         ldocID = []
         dLFileList= {}
         for docInfo in lDocInfo:
@@ -522,10 +540,10 @@ class TranskribusClient():
                 #Maybe we already have this version of the document??
                 stored_doc_ts_file = docDir+self._POSTFIX_MAX_TX
                 if os.path.exists(stored_doc_ts_file): 
-                    with open(stored_doc_ts_file, 'r') as fd: stored_doc_ts = fd.read()
+                    with open(stored_doc_ts_file, 'r',encoding='utf-8') as fd: stored_doc_ts = fd.read()
                     stored_doc_ts = int(stored_doc_ts)
                 else:
-                    stored_doc_ts = None    
+                    stored_doc_ts = -1    
                 doc_max_ts, lfileList = self.download_document(colId, docId, docDir, min_ts=stored_doc_ts, bForce=bForce, bOverwrite=False, bNoImage=bNoImage)
                 dLFileList[str(docId)]=lfileList
                 assert doc_max_ts >= stored_doc_ts, "Server side data older than disk data???"
@@ -533,7 +551,7 @@ class TranskribusClient():
                     #NOTE: we did not check each page!!
                     logging.info("\tcollection %s, document %s, data on disk is UP-TO-DATE - I do nothing else."%(colId, docId))
                 else:
-                    with open(stored_doc_ts_file, "w") as fd: fd.write("%s"%doc_max_ts) 
+                    with open(stored_doc_ts_file, "w",encoding='utf-8') as fd: fd.write("%s"%doc_max_ts) 
                 
                 coll_max_ts = max(coll_max_ts, doc_max_ts)
                 logging.info("- DONE (downloaded doc %s)"%(docId)) 
@@ -543,7 +561,7 @@ class TranskribusClient():
         return coll_max_ts, ldocID, dLFileList
         
 
-    def download_document(self, colId, docId, docDir, min_ts=None, bForce=False, bOverwrite=False, bNoImage=False, trp_spec=None):        
+    def download_document(self, colId, docId, docDir, min_ts=-1, bForce=False, bOverwrite=False, bNoImage=False, trp_spec=None):        
         """
         Convenience method, not provided directly by the Transkribus API.
         
@@ -601,7 +619,11 @@ class TranskribusClient():
 
         if not trp_spec:
             # store document metadata, if not provided 
-            with codecs.open(docDir+os.sep+"trp.json", "wb",'utf-8') as fd: json.dump(trp, fd, sort_keys=True, indent=2, separators=(',', ': '))
+            if sys.version_info > (3,0):
+                with open(docDir+os.sep+"trp.json", "wt",encoding='utf-8') as fd: json.dump(trp, fd, sort_keys=True, indent=2, separators=(',', ': '))
+            else:
+                with open(docDir+os.sep+"trp.json", "wb") as fd: json.dump(trp, fd, sort_keys=True, indent=2, separators=(',', ': '))
+
         
         lFileList= []
         for page in pageList['pages']:
@@ -626,11 +648,11 @@ class TranskribusClient():
             destXmlFilename = docDir + os.sep + sBaseName + ".pxml"
             logging.info("\t\t\t%s"%destXmlFilename)
             resp = self._GET(urlXml)
-            savefile=codecs.open(destXmlFilename,'wb','utf-8')
+            savefile=open(destXmlFilename,'wt',encoding='utf-8')
             savefile.write(resp.text)  
             savefile.close()  
-            trace('.')
-            flush()
+#             trace('.')
+#             flush()
         with open(docDir+os.sep+"max.ts", "w") as fd: fd.write("%s"%doc_max_ts) 
 
         logging.info("- DONE (downloaded collection %s, document %s into folder %s    (bForce=%s))"%(colId, docId, docDir, bForce))
@@ -785,7 +807,6 @@ class TranskribusClient():
         self._assertLoggedIn()
         myReq = self.sREQ_recognition_htr
         params = self._buidlParamsDic(collId=colId, modelName=sHtrModelName, id=docId, pages=sPages)
-        print params
         resp = self._POST(myReq, params=params)
         resp.raise_for_status()
         return resp.text
@@ -888,6 +909,7 @@ class TranskribusClient():
         else:
             params = self._buidlParamsDic(id=docId,dict=sDictName)
         postparams= sPagesDesc #'{"docId":17442,"pageList":{"pages":[{"pageId":400008,"tsId":1243590,"regionIds":[]}]}}'
+#         postparams= '{"docId":17442,"pageList":{"pages":[{"pageId":400008,"tsId":1243590,"regionIds":[]}]}}'
 
         resp = self._POST(myReq, params=params,data=postparams ,  sContentType = "application/json")
         resp.raise_for_status()
@@ -911,13 +933,12 @@ doBaselineToPolygon=false
 doBlockSeg=false
 </jobData><resumable>false</resumable><jobImpl>CITlabAdvancedLaJob</jobImpl><created>2017-11-28T11:17:16.714+01:00</created><pageid>971875</pageid><tsid>1594101</tsid><regionids></regionids><colId>8828</colId></trpJobStatus></trpJobStatuses>
         """
-        doc = self._xmlParseDoc(xmlString)
-        ctxt = doc.xpathNewContext()    
-        ctxt.setContextNode(doc.getRootElement())
-        lN= ctxt.xpathEval("*//jobId")
-        ctxt.xpathFreeContext()       
+        docroot = self._xmlParseDoc(xmlString)
+        lN= docroot.xpath("*//jobId")
         if lN != []:
-            return map(lambda x:x.getContent().decode('utf-8'),lN)
+#             return list(map(lambda x:x.text().decode('utf-8'),lN))
+            return list(map(lambda x:x.text,lN))
+
         else:
             return []
         
@@ -996,7 +1017,7 @@ doBlockSeg=false
         """
         sSessionFilename = os.path.join(self._sSESSION_FOLDER, self._sSESSION_FILENAME)
         with open(sSessionFilename, "rb") as fd:
-            sSessionId = cPickle.load(fd)
+            sSessionId = pickle.load(fd)
         self.setSessionId(sSessionId)
         return True
     
@@ -1014,7 +1035,7 @@ doBlockSeg=false
                 raise Exception(sMsg)
         else:
             os.mkdir(self._sSESSION_FOLDER)
-        os.chmod(self._sSESSION_FOLDER, 0700)
+        os.chmod(self._sSESSION_FOLDER, 0o700)
     
         #the file
         sSessionFilename = os.path.join(self._sSESSION_FOLDER, self._sSESSION_FILENAME)
@@ -1026,8 +1047,8 @@ doBlockSeg=false
                 raise Exception(sMsg)
     
         with open(sSessionFilename, "wb") as fd:
-            cPickle.dump(self.getSessionId(), fd)
-        os.chmod(sSessionFilename, 0600)    
+            pickle.dump(self.getSessionId(), fd, protocol=2)
+        os.chmod(sSessionFilename, 0o600)    
     
         return True
 
@@ -1123,33 +1144,43 @@ doBlockSeg=false
         """
         Parse a serialized XML and return a DOM, which the caller must free later on!
         """
-        return libxml2.parseDoc(sXml.encode(utf8))
+#         return libxml2.parseDoc(sXml.encode(utf8))
+        return etree.XML(sXml.encode(utf8))
     
     def _xmlFreeDoc(self, doc):
-        return doc.freeDoc()
+        return
+        #return doc.freeDoc()
     
     def _xpathEval(self, domDoc, sXpathExpr, dNS=None):
         """
         run some XPATH expression on the dom
         """
-        ctxt = domDoc.xpathNewContext()
         if dNS:
-            for ns, nsurl in dNS.items(): ctxt.xpathRegisterNs(ns, nsurl)
-        ret = ctxt.xpathEval(sXpathExpr)
-        ctxt.xpathFreeContext()
-        return ret
+            return domDoc.xpath(sXpathExpr)
+        else:
+            return domDoc.xpath(sXpathExpr,namespaces=dNS)
+        
+#         ctxt = domDoc.xpathNewContext()
+#         if dNS:
+#             for ns, nsurl in dNS.items(): ctxt.xpathRegisterNs(ns, nsurl)
+#         ret = ctxt.xpathEval(sXpathExpr)
+#         ctxt.xpathFreeContext()
+#         return ret
 
     def _xmlParse__xpathEval_getContent(self, sXml, sXpathExpr):
         """
         run some XPATH expression on the response payload, considered as a serialized XML
+        assume text() at the end
         """
-        domDoc = self._xmlParseDoc(sXml)
-        ctxt = domDoc.xpathNewContext()
-        lNd = ctxt.xpathEval(sXpathExpr)
-        ret = [nd.getContent() for nd in lNd]
-        ctxt.xpathFreeContext()
-        self._xmlFreeDoc(domDoc)
-        return ret
+        domDoc  = self._xmlParseDoc(sXml)
+        return domDoc.xpath(sXpathExpr)
+#         domDoc = self._xmlParseDoc(sXml)
+#         ctxt = domDoc.xpathNewContext()
+#         lNd = ctxt.xpathEval(sXpathExpr)
+#         ret = [nd.getContent() for nd in lNd]
+#         ctxt.xpathFreeContext()
+#         self._xmlFreeDoc(domDoc)
+#         return ret
 
     
     # --- Errors handling --- -------------------------------------------------------------------
@@ -1172,14 +1203,15 @@ doBlockSeg=false
             self._raiseError(Exception, "Not logged in!")
     
     def _assertDict(self, obj, sObjName=""):
-        if type(obj) != types.DictionaryType: 
-            return self._raiseError(TypeError, "%s must be a dictionary."%sObjName)
+        if type(obj) != type({}): return self._raiseError(TypeError, "%s must be a dictionary."%sObjName)
         
     def _assertString(self, obj, sObjName=""):
-        if type(obj) not in [types.StringType, types.UnicodeType]: 
-            return self._raiseError(TypeError, "%s must be a string or Unicode string. Got '%s'"%(sObjName,`obj`))
+        if not isinstance(obj,str): return self._raiseError(TypeError, "%s must be a string or Unicode string. Got '%s'"%(sObjName,repr(obj)))
+#         if type(obj) not in [types.StringType, types.UnicodeType]: 
+#             return self._raiseError(TypeError, "%s must be a string or Unicode string. Got '%s'"%(sObjName,`obj`))
 
     def _assertUnicode(self, obj, sObjName=""):
-        if type(obj) != types.UnicodeType: 
-            return self._raiseError(TypeError, "%s must be a Unicode string. Got '%s'"%(sObjName,`obj`))
+        if not isinstance(obj,str): return self._raiseError(TypeError, "%s must be a string or Unicode string. Got '%s'"%(sObjName,repr(obj)))
+#         if type(obj) != types.DictType: 
+#             return self._raiseError(TypeError, "%s must be a Unicode string. Got '%s'"%(sObjName,`obj`))
         

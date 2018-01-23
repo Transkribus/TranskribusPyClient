@@ -28,14 +28,17 @@ Created on 11 October 2017
 
 @author: meunier    
 """
+
+from __future__ import absolute_import
+from __future__ import  print_function
+from __future__ import unicode_literals
 DEBUG = 0
 
 import sys, os, logging
-import glob
 from optparse import OptionParser
-import json, codecs
+import json
+from io import open
 
-import libxml2
 
 try: #to ease the use without proper Python installation
     import TranskribusPyClient_version
@@ -43,16 +46,16 @@ except ImportError:
     sys.path.append( os.path.dirname(os.path.dirname( os.path.abspath(sys.argv[0]) )) )
     import TranskribusPyClient_version
 
-from TranskribusPyClient.common.trace import traceln, trace, flush
+from TranskribusPyClient.common.trace import traceln, trace 
 
-from TranskribusCommands import NS_PAGE_XML, sCOL, sMPXMLExtension, _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit
+from TranskribusCommands import  sCOL, _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit
 from TranskribusPyClient.client import TranskribusClient
 
 try:
     import xml_formats.PageXml as PageXml
 except ImportError:
     sys.path.append( os.path.join( os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(sys.argv[0]) ))))
-                                    , "TranskribusDU", "src" ))
+                                    , "TranskribusDU", "TranskribusDU" ))
     import xml_formats.PageXml as PageXml
 
 
@@ -78,7 +81,7 @@ class TranskribusTranscriptUploader(TranskribusClient):
         traceln(" - reading %s"%trpFilename)
         if not os.path.exists(trpFilename):
             raise Exception("File not found %s. \nData probably created in --trp mode, so upload must be done in --trp mode."%trpFilename)
-        trp = json.load(codecs.open(trpFilename, "rb",'utf-8'))
+        trp = json.load(open(trpFilename, "rb",encoding='utf-8'))
         
         for docid in [d["docId"] for d in trp]:
             self.uploadDocumentTranscript(colid, docid, sColDSDir, sNote=sNote, sToolName=sToolName, iVerbose=iVerbose, status=status)
@@ -96,7 +99,7 @@ class TranskribusTranscriptUploader(TranskribusClient):
         traceln(" - reading %s"%trpFilename)
         if not os.path.exists(trpFilename):
             raise Exception("File not found %s. \nData probably created in --trp mode, so upload must be done in --trp mode."%trpFilename)
-        trp = json.load(codecs.open(trpFilename, "rb",'utf-8'))
+        trp = json.load(open(trpFilename, "rb",encoding='utf-8'))
         self.uploadDocumentTranscript_by_trp(colid, docid, trp, sColDSDir, sNote=sNote, sToolName=sToolName, iVerbose=iVerbose, status=status)
         return
     
@@ -196,7 +199,7 @@ The page transcript from the single page PageXml files are uploaded. (The multi-
     __Trnskrbs_do_login_stuff(doer, options, trace=trace, traceln=traceln)
     
     if options.trp:
-        trp = json.load(codecs.open(options.trp, "rb",'utf-8'))
+        trp = json.load(open(options.trp, "rb",encoding='utf-8'))
         traceln("- Uploading to collection %s, as specified by trp data"%(colid))
         if not docid:
             docid = trp["md"]["docId"]

@@ -28,7 +28,9 @@
     under grant agreement No 674943.
 
 """
-
+from __future__ import absolute_import
+from __future__ import  print_function
+from __future__ import unicode_literals
 #    TranskribusCommands/do_ListPageLocks.py <COLID> <DOCID> <PAGENUM>
 
 
@@ -48,7 +50,7 @@ from TranskribusPyClient.common.trace import traceln, trace
 
 DEBUG = 0
 
-description = """delete a Transkribus collection.
+description = """list the locked pages.
 """ + _Trnskrbs_description
 
 usage = """%s <colId>  <docId>  <page> 
@@ -103,6 +105,6 @@ if __name__ == '__main__':
     try:
         resp = doer.getListofLockedPages(colid, docid, page)
     except Exception as e:  _exit("", 1, e)
-    print resp
+    traceln(resp)
     traceln("- Done")
     

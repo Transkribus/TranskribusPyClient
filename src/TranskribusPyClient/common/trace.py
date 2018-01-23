@@ -23,7 +23,8 @@ def trace(*msg):
 def traceln(*msg):
     global traceFD
     
-    apply(trace, msg)
+    trace(*msg)
+#     apply(trace, msg)
     trace("\n")
     traceFD.flush()
 

@@ -3,6 +3,9 @@
 #REMOVE THIS annoying warning saying:
 #  /usr/lib/python2.7/site-packages/requests-2.12.1-py2.7.egg/requests/packages/urllib3/connectionpool.py:843: InsecureRequestWarning: Unverified HTTPS request is being made. 
 #  Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings  InsecureRequestWarning)
+from __future__ import absolute_import
+from __future__ import  print_function
+from __future__ import unicode_literals
 
 import sys
 
@@ -10,7 +13,6 @@ import requests.packages.urllib3
 
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-
 DEBUG=0
 
 _Trnskrbs_default_url = "https://transkribus.eu/TrpServer"

@@ -29,6 +29,9 @@
     
     see https://transkribus.eu/wiki/index.php/HTR
 """
+from __future__ import absolute_import
+from __future__ import  print_function
+from __future__ import unicode_literals
 
 #    TranskribusCommands/do_htrTrainRnn model-name colId docid pages 
 
@@ -36,8 +39,8 @@
 #optional: useful if you want to choose the logging level to something else than logging.WARN
 import sys, os, logging
 from optparse import OptionParser
-# import json
 
+from lxml import etree 
 try: #to ease the use without proper Python installation
     import TranskribusPyClient_version
 except ImportError:
@@ -81,7 +84,7 @@ class DoHtrRnnTrain(TranskribusClient):
         ljobid=[]
         for i,(lr, epochs,batch) in enumerate(lcombinations):
             sDesc = options.description  
-            xmlconf =self.createXMLConf(sModelName, colID, lTrain, lTest, sDesc = sDesc, lang='German', numEpochs=epochs, learningRate=lr, noise='both', trainSizePerEpoch=batch)
+            xmlconf =self.createXMLConf(sModelName, colID, lTrain, lTest, sDesc = sDesc, lang='German', numEpochs=epochs, learningRate=lr, noise='preproc', trainSizePerEpoch=batch)
             jobid = self.htrTrainingCITlab(xmlconf)
             ljobid.append(jobid)
             traceln("job id: %s"% jobid)
@@ -151,74 +154,72 @@ class DoHtrRnnTrain(TranskribusClient):
         """
 #         print sModelName, colID, listDocID
         
-        import libxml2
-        confDoc= libxml2.newDoc("1.0")
-        rootNode = libxml2.newNode("citLabHtrTrainConfig")
-        confDoc.setRootElement(rootNode)
-        node  = libxml2.newNode('modelName')
-        node.setContent(sModelName)
-        rootNode.addChild(node)
-        node  = libxml2.newNode('description')
-        node.setContent(sDesc)
-        rootNode.addChild(node)
-        node  = libxml2.newNode('language')
-        node.setContent(lang)
-        rootNode.addChild(node)
-        node  = libxml2.newNode('colId')
-        node.setContent("%s"%colID)
-        rootNode.addChild(node)
-        node  = libxml2.newNode('numEpochs')
-        node.setContent('%s'%numEpochs)
-        rootNode.addChild(node)
-        node  = libxml2.newNode('learningRate')
-        node.setContent('%s'%learningRate)
-        rootNode.addChild(node)
-        node  = libxml2.newNode('noise')
-        node.setContent(noise)
-        rootNode.addChild(node)
-        node  = libxml2.newNode('trainSizePerEpoch')
-        node.setContent('%s'%trainSizePerEpoch)
-        rootNode.addChild(node)     
+        rootNode = etree.Element("citLabHtrTrainConfig")
+        confDoc= etree.ElementTree(rootNode)
+        node  = etree.Element('modelName')
+        node.text =sModelName
+        rootNode.append(node)
+        node  = etree.Element('description')
+        node.text =sDesc
+        rootNode.append(node)
+        node  = etree.Element('language')
+        node.text = lang
+        rootNode.append(node)
+        node  = etree.Element('colId')
+        node.text = "%s"%colID
+        rootNode.append(node)
+        node  = etree.Element('numEpochs')
+        node.text = '%s'%numEpochs
+        rootNode.append(node)
+        node  = etree.Element('learningRate')
+        node.text = '%s'%learningRate
+        rootNode.append(node)
+        node  = etree.Element('noise')
+        node.text = noise
+        rootNode.append(node)
+        node  = etree.Element('trainSizePerEpoch')
+        node.text = '%s'%trainSizePerEpoch
+        rootNode.append(node)     
         
-        trainListNode = libxml2.newNode('trainList')
-        rootNode.addChild(trainListNode)
-        testListNode = libxml2.newNode('testList')
-        rootNode.addChild(testListNode)     
+        trainListNode = etree.Element('trainList')
+        rootNode.append(trainListNode)
+        testListNode = etree.Element('testList')
+        rootNode.append(testListNode)     
         for docid,pageid,tsid in lTrain:
-            trainNode = libxml2.newNode('train')
-            trainListNode.addChild(trainNode)
-            docID= libxml2.newNode('docId')
-            trainNode.addChild(docID)
-            docID.setContent("%s"%docid)
-            pageList= libxml2.newNode('pageList')
-            trainNode.addChild(pageList)
+            trainNode = etree.Element('train')
+            trainListNode.append(trainNode)
+            docID= etree.Element('docId')
+            trainNode.append(docID)
+            docID.text =  "%s"%docid
+            pageList= etree.Element('pageList')
+            trainNode.append(pageList)
 #             for i in range(0,nbpages):
-            pages= libxml2.newNode('pages')
-            pageList.addChild(pages)
-            pageId=libxml2.newNode('pageId')
-            pageId.setContent('%s'%(pageid))
-            pages.addChild(pageId)
-            tsId=libxml2.newNode('tsId')
-            tsId.setContent('%s'% (tsid))
-            pages.addChild(tsId)      
+            pages= etree.Element('pages')
+            pageList.append(pages)
+            pageId=etree.Element('pageId')
+            pageId.text =  '%s'%(pageid)
+            pages.append(pageId)
+            tsId=etree.Element('tsId')
+            tsId.text = '%s'% (tsid)
+            pages.append(tsId)      
 
         for docid,pageid,tsid in lTest:
-            testNode = libxml2.newNode('test')
-            testListNode.addChild(testNode)
-            docID= libxml2.newNode('docId')
-            testNode.addChild(docID)
-            docID.setContent("%s"%docid)
-            pageList= libxml2.newNode('pageList')
-            testNode.addChild(pageList)
+            testNode = etree.Element('test')
+            testListNode.append(testNode)
+            docID= etree.Element('docId')
+            testNode.append(docID)
+            docID.text =  "%s"%docid
+            pageList= etree.Element('pageList')
+            testNode.append(pageList)
 #             for i in range(0,nbpages):
-            pages= libxml2.newNode('pages')
-            pageList.addChild(pages)
-            pageId=libxml2.newNode('pageId')
-            pageId.setContent('%s'%(pageid))
-            pages.addChild(pageId)
-            tsId=libxml2.newNode('tsId')
-            tsId.setContent('%s'% (tsid))
-            pages.addChild(tsId) 
+            pages= etree.Element('pages')
+            pageList.append(pages)
+            pageId=etree.Element('pageId')
+            pageId.text =  '%s'%(pageid)
+            pages.append(pageId)
+            tsId=etree.Element('tsId')
+            tsId.text =  '%s'% (tsid)
+            pages.append(tsId) 
         
 #         traceln('config:')
 #         traceln(confDoc.serialize('utf-8',True))  

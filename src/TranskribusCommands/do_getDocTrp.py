@@ -27,7 +27,9 @@
     under grant agreement No 674943.
 
 """
-
+from __future__ import absolute_import
+from __future__ import  print_function
+from __future__ import unicode_literals
 #    TranskribusCommands/do_LAbatch.py 3571 3820 8251 8252
 
 
@@ -109,7 +111,7 @@ if __name__ == '__main__':
         ldPagesInRange = [ dPage for dPage in ldPages if dPage["pageNr"] in oPageRange]
         resp["pageList"]["pages"] = ldPagesInRange
 
-    print json.dumps(resp, sort_keys=True, indent=4, separators=(',', ': '))
+    print (json.dumps(resp, sort_keys=True, indent=4, separators=(',', ': ')))
         
     traceln()      
     traceln("- Done")

@@ -27,16 +27,19 @@
     under grant agreement No 674943.
 
 """
+from __future__ import absolute_import
+from __future__ import  print_function
+from __future__ import unicode_literals
 
 #    TranskribusCommands/do_LAbatch.py 3571 3820 8251 8252
 
-from __future__ import print_function
 
 #optional: useful if you want to choose the logging level to something else than logging.WARN
 import sys, os, logging
 from optparse import OptionParser
 import json
-import codecs
+from io import open
+
 
 try: #to ease the use without proper Python installation
     import TranskribusPyClient_version
@@ -387,8 +390,15 @@ if __name__ == '__main__':
     if options.trp:
         #dump the Trp on stdout and list on stderr
         traceln(" - storing TRP data in %s"%options.trp)
-        with codecs.open(options.trp, "wb",'utf-8') as fd: json.dump(trp.getTRP(), fd, sort_keys=True, indent=2, separators=(',', ': '))
-    
+#         with open(options.trp, "wb",encoding='utf-8') as fd: json.dump(trp.getTRP(), fd, sort_keys=True, indent=2, separators=(',', ': '))
+        #sys.version_info(major=2, minor=7, micro=13, releaselevel='final', serial=0)
+        if sys.version_info > (3,0):
+            with open(options.trp, "wt",encoding='utf-8') as fd: 
+                json.dump(trp.getTRP(), fd, sort_keys=True, indent=2, separators=(',', ': '))
+        else:
+            with open(options.trp, "wb") as fd: 
+                json.dump(trp.getTRP(), fd, sort_keys=True, indent=2, separators=(',', ': '))
+                
     traceln()
     
     if options.op_rm == True:

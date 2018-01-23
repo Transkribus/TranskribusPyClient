@@ -28,6 +28,9 @@
     under grant agreement No 674943.
 
 """
+from __future__ import absolute_import
+from __future__ import  print_function
+from __future__ import unicode_literals
 
 #optional: useful if you want to choose the logging level to something else than logging.WARN
 import sys, os, logging

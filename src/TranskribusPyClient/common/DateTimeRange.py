@@ -28,11 +28,27 @@
     under grant agreement No 674943.
     
 """
-import types
+from __future__ import absolute_import
+from __future__ import  print_function
+from __future__ import unicode_literals
+
+
+from builtins import str
+from builtins import int
 import time
 import datetime
 import dateutil.parser
 
+ZERO = datetime.timedelta(0)
+
+class UTC(datetime.tzinfo):
+    def utcoffset(self, dt):
+        return ZERO
+    def tzname(self, dt):
+        return "UTC"
+    def dst(self, dt):
+        return ZERO
+    
 from TranskribusPyClient.common.IntegerRangeHalfBounded import IntegerRangeHalfBounded
 
 
@@ -45,8 +61,9 @@ class DateTimeRange(IntegerRangeHalfBounded):
     - the object is a container that supports:
         - contains test (if n in o: ...)
     """
-#     dt0 = datetime.datetime(1970, 1, 1)
-    dt0 = dateutil.parser.parse("1970/01/01T00:00:00+0000")
+    #     dt0 = datetime.datetime(1970, 1, 1)
+    # PY2 PY3 : need ignoretz=True) otheriwise PY3 :TypeError: can't subtract offset-naive and offset-aware datetimes
+    dt0 = dateutil.parser.parse("1970/01/01T00:00:00+0000",ignoretz=True)
     ts0 = 0
     
     bUTC = False
@@ -93,8 +110,8 @@ class DateTimeRange(IntegerRangeHalfBounded):
             o+0 #numerical value?
             return cls.ts2dt(o)
         except TypeError:
-            if type(o) == types.StringType: return cls.txt2dt(o)  #the timezone should be indicated in the string...
-        raise ValueError("Cannot convert to datetime the object '%s'"%`o`)
+            if isinstance(o,str): return cls.txt2dt(o)  #the timezone should be indicated in the string...
+        raise ValueError("Cannot convert to datetime the object '%s'"%repr(o))
 
     @classmethod
     def o2ts(cls, o):
@@ -106,12 +123,12 @@ class DateTimeRange(IntegerRangeHalfBounded):
             return o
         except TypeError:
             if isinstance(o, datetime.datetime): return cls.dt2ts(o)
-            if type(o) == types.StringType:      
+            if  isinstance(o,str):      
                 try:
                     return cls.txt2ts(o)
                 except ValueError:
                     return cls.dt2ts(cls.txt2dt(o))
-        raise ValueError("Cannot convert to timestamp the object '%s'"%`o`)      
+        raise ValueError("Cannot convert to timestamp the object '%s'"%repr(o))      
       
     # -------------------------------------------------------------------------------
     @classmethod
@@ -136,8 +153,9 @@ class DateTimeRange(IntegerRangeHalfBounded):
         return a DateTime object
         """
 #         if ts <= 0: raise ValueError("Negative timestamp")
-        if type(ts) == types.StringType:
-            ts = long(ts)
+        if  isinstance(ts,str):
+            #PY2 PY3 long
+            ts= int(ts)
         
         if cls.bUTC:
             dt = datetime.datetime.utcfromtimestamp(ts/1000.0)
@@ -148,7 +166,8 @@ class DateTimeRange(IntegerRangeHalfBounded):
     # -------------------------------------------------------------------------------
     @classmethod
     def txt2ts(cls, sTS):
-        return long(sTS)
+        #PY2 PY3 long
+        return int(sTS)
     
     @classmethod
     def dt2ts(cls, dt_or_s):
@@ -157,11 +176,13 @@ class DateTimeRange(IntegerRangeHalfBounded):
         
         return a timestamp  (number of milliseconds since Thu Jan 01 01:00:00 1970)
         """
-        if type(dt_or_s) == types.StringType:
+        if isinstance(dt_or_s,str):
             dt = cls.txt2dt(dt_or_s)
         else:
             dt = dt_or_s
-            
+        
+        # PY 3 TypeError: can't subtract offset-naive and offset-aware datetimes
+        
         ts = int((dt-cls.dt0).total_seconds() * 1000)
         #assert cls.format(cls.ts2dt(ts)).startswith(sDateTime)
 
@@ -357,19 +378,20 @@ def test_GMT0200():
 
 if __name__ == "__main__":
     t = DateTimeRange.ts2dt(1504512814466)
-    print t
+    print (t)
     u = DateTimeRange.dt2ts("2017-09-04T08:13:34.466000")
-    print u
-    print (u - 1504512814466) == 0
-    print t == "2017-09-04T08:13:34.466000"
+    print(u)
+    print (u - 1504512814466 == 0)
+    print (t == "2017-09-04T08:13:34.466000")
     
-    print datetime.datetime(1970, 1, 1, 0, 0, 0, 0)
-    print DateTimeRange.ts2dt(0)
-    print DateTimeRange.ts2dt(-10000)
+    print (datetime.datetime(1970, 1, 1, 0, 0, 0, 0))
+    """
+    PY3
+    I did some research and found that this exception only occurs when you provide a
+    number that is less than 86400 (which is 1 day after 1/1/1970). It will not happen if you provide bigger numbers.
+    """
+    print (DateTimeRange.ts2dt(86401 * 1000))
+#     print (DateTimeRange.ts2dt(-10000))
 #     print datetime.strptime("2017-09-04", "%Y-%m-%d")
 #     print datetime.strptime("2017-09-04T12:00:00", "%Y-%m-%dT%H:%M:%S")
 #     print datetime.strptime("2017-09-04T13", "%Y-%m-%dT%H:%M:%S")
-    
-    
-    
-      

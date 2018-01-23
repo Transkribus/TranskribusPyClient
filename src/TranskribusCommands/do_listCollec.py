@@ -28,6 +28,9 @@
     under grant agreement No 674943.
 
 """
+from __future__ import absolute_import
+from __future__ import  print_function
+from __future__ import unicode_literals
 
 #    TranskribusCommands/do_copyDocToCollec.py 3571 3820 8251 8252
 
@@ -99,13 +102,13 @@ class DoListCollec(TranskribusClient):
         data = self.listDocsByCollectionId(colId)
         if data:
             _d = data[0][u'collectionList'][u'colList'][-1]
-            print "Collection: %s  (%s)"%(_d[u'colName'], _d[u'colId'])
+            print( "Collection: %s  (%s)"%(_d[u'colName'], _d[u'colId']))
             
             while data:
                 dic = data.pop(0)
-                print ">> (%s) #p=%d  '%s' by %s  (status=%s)" % (dic[u'docId'], dic[u'nrOfPages'], dic[u'title'], dic[u'uploader'], dic[u'status'])
+                print (">> (%s) #p=%d  '%s' by %s  (status=%s)" % (dic[u'docId'], dic[u'nrOfPages'], dic[u'title'], dic[u'uploader'], dic[u'status']))
         else:
-            print ">> Collection is empty!"
+            print (">> Collection is empty!")
         
         
 

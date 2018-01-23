@@ -24,10 +24,13 @@
     under grant agreement No 674943.
     
 """
+from __future__ import absolute_import
+from __future__ import  print_function
+from __future__ import unicode_literals
 import copy
 
-from common.DateTimeRange import DateTimeRange as DateTimeRangeSpec
-from common.IntegerRange import IntegerRange
+from .common.DateTimeRange import DateTimeRange as DateTimeRangeSpec
+from .common.IntegerRange import IntegerRange
 
 class TRP_FullDoc:
     """
@@ -315,7 +318,8 @@ class TRP_FullDoc:
             lValue = [tr[slotName] for tr in lTr]
             lUniqueValue = list(set(lValue))
             lUniqueValue.sort()
-            ls.append("stat: %s : %d : %s"%(name, len(lUniqueValue), " ".join([str(s).encode("utf-8") for s in lUniqueValue])))
+#             ls.append("stat: %s : %d : %s"%(name, len(lUniqueValue), " ".join([str(s).encode("utf-8") for s in lUniqueValue])))
+            ls.append("stat: %s : %d : %s"%(name, len(lUniqueValue), " ".join([str(s) for s in lUniqueValue])))
     
         return "\n".join(ls)
     

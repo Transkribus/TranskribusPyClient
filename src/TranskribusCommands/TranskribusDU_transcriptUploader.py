@@ -28,15 +28,18 @@ Created on 9 Dec 2016
 
 @author: meunier    
 """
-DEBUG = 0
+
+from __future__ import absolute_import
+from __future__ import  print_function
+from __future__ import unicode_literals
 
 import sys, os, logging
 import glob
 from optparse import OptionParser
-import json, codecs
+import json
+from io import open
 
-import libxml2
-
+from lxml import etree
 try: #to ease the use without proper Python installation
     import TranskribusPyClient_version
 except ImportError:
@@ -52,9 +55,10 @@ try:
     import xml_formats.PageXml as PageXml
 except ImportError:
     sys.path.append( os.path.join( os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(sys.argv[0]) ))))
-                                    , "TranskribusDU", "src" ))
+                                    , "TranskribusDU", "TranskribusDU" ))
     import xml_formats.PageXml as PageXml
 
+DEBUG = 0
 
 sTRANSCRIPT_EXTENSION = "_du"+sMPXMLExtension   #e.g.   8551_du.mpxml
 
@@ -101,12 +105,12 @@ class TranskribusDUTranscriptUploader(TranskribusClient):
             traceln("- Uploading transcript of document %s from folder %s to collection %s "%(docid, sColDSDir, colid))
 
         sDocFilename = os.path.join(sColDSDir, str(docid)+sTranscripExt)
-        doc = libxml2.parseFile(sDocFilename)
+        doc = etree.parse(sDocFilename)
 
         #We will also try to set the parent-Id of each transcript, by parsing the trp.json
         trpFilename = os.path.join(sColDSDir, str(docid), "trp.json")
         try:
-            trp = json.load(codecs.open(trpFilename, "rb",'utf-8'))
+            trp = json.load(open(trpFilename, "rb",encoding='utf-8'))
             trpPageList = trp["pageList"]['pages']
         except:
             trpPageList = None
@@ -120,7 +124,7 @@ class TranskribusDUTranscriptUploader(TranskribusClient):
                 if pnum%10 == 0: trace(" %d "%pnum) 
                 else: trace(".")
                 flush()
-            sXMlTranscript = pageDoc.serialize("utf-8", True)
+            sXMlTranscript = etree.tostring(pageDoc,encoding="utf-8", pretty_print=True)
             
             if trpPageList:
                 trpPage = trpPageList[int(pnum)-1]
@@ -136,7 +140,7 @@ class TranskribusDUTranscriptUploader(TranskribusClient):
 
         if iVerbose > 1: traceln("")
         
-        doc.freeDoc()
+#         doc.freeDoc()
         
         if iVerbose:
             traceln("   Done (collection %s, document %s)"%(colid, docid))

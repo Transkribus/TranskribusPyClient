@@ -26,7 +26,11 @@
     under grant agreement No 674943.
     
 """
-from IntegerRange import IntegerRange
+from __future__ import absolute_import
+from __future__ import  print_function
+from __future__ import unicode_literals
+
+from .IntegerRange import IntegerRange
 
 class IntegerRangeHalfBounded(IntegerRange):
     """
@@ -117,7 +121,7 @@ def test_good_spec(capsys):
     o = IntegerRangeHalfBounded("1")
     if False:
         with capsys.disabled():
-            print "YOOOOOOOOOOOOOOOOOOOOOOOOOOO ", list(reversed(o))    
+            print( "YOOOOOOOOOOOOOOOOOOOOOOOOOOO ", list(reversed(o)))    
     container_test(o, [1])
     
     o = IntegerRangeHalfBounded("99")

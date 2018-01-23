@@ -27,16 +27,18 @@
     under grant agreement No 674943.
 
 """
-
+from __future__ import absolute_import
+from __future__ import  print_function
+from __future__ import unicode_literals
 #    TranskribusCommands/do_copyDocToCollec.py 3571 3820 8251 8252
 
 
 #optional: useful if you want to choose the logging level to something else than logging.WARN
 import sys, os, logging
 from optparse import OptionParser
+from io import open
 
 import json
-import codecs
 
 try: #to ease the use without proper Python installation
     import TranskribusPyClient_version
@@ -159,7 +161,7 @@ if __name__ == '__main__':
     if args:                    _exit(usage, 2, Exception("Extra arguments to the command"))
 
     if options.trp_doc:
-        trpdoc =  json.load(codecs.open(options.trp_doc, "rb",'utf-8'))
+        trpdoc =  json.load(open(options.trp_doc, "rb",encoding='utf-8'))
         docId,sPageDesc = doer.buildDescription(colId,options.docid,trpdoc)
     else:
         docId,sPageDesc = doer.buildDescription(colId,options.docid)
