@@ -4,7 +4,7 @@
 #
 # JL Meunier - Nov 29th 2016
 #
-# Copyright Xerox(C) 2016 H. Dï¿½jean, JL. Meunier
+# Copyright Xerox(C) 2016 H. Déjean, JL. Meunier
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
