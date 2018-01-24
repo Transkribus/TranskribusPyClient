@@ -37,8 +37,8 @@ colId=3571
 docId_A=7749
 docId_B=7750
 
-PYTHON=python
-#PYTHON=/cygdrive/c/anaconda3/python.exe
+#PYTHON=python
+PYTHON=/cygdrive/c/anaconda3/python.exe
 
 # ------------------------------------------------------------------------------------------------------------------------
 # ---  GENERIC STUF BELOW
