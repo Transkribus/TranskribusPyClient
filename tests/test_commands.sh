@@ -4,7 +4,7 @@
 #
 # JL Meunier - Nov 29th 2016
 #
-# Copyright Xerox(C) 2016 H. Déjean, JL. Meunier
+# Copyright Xerox(C) 2016 H. Dï¿½jean, JL. Meunier
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -174,7 +174,7 @@ echo "OK"
 #---------------------------------------------------
 echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
 echo
-echo "--- delete trnskrbs_$colId if any ---"
+echo "--- download as per trp ---"
 rm -rf trnskrbs_$colId 
 echo "--- download using test.trp "
 $PYTHON $SRC/TranskribusCommands/Transkribus_downloader.py $colId  --trp test.trp|| error " download error"
@@ -184,7 +184,7 @@ rm test.trp
 #---------------------------------------------------
 echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
 echo
-echo "--- delete trnskrbs_$colId if any ---"
+echo "--- download trnskrbs_$colId document $docId_A ---"
 rm -rf trnskrbs_$colId 
 echo "--- download document  $docId_A ($colId) "
 $PYTHON $SRC/TranskribusCommands/Transkribus_downloader.py $colId  --docid=$docId_A --noimage || error " download error"
