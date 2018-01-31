@@ -6,13 +6,11 @@ A Pythonic API and some command line tools to access the Transkribus server via 
 
 #### Python and Pip
 
-* Install the latest release of [Python] 2.7.x
+* Install the latest release of [Python] 2.7.x, 3.5.x or 3.6.x
 * Install [pip]
 
 ### Additional Libraries
 
-* libxml2
-   * For Windows: download from [LIBXML2] and do a "pip install libxml2_python-2.9.3‑cp27‑none‑win_amd64.whl"
 * python-dateutil
 
 ### TranskribusDU ###
