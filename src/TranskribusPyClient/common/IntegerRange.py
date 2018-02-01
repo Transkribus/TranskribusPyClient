@@ -123,9 +123,9 @@ class IntegerRange:
         """
         checking things are in order
         """
-        prevB = -1
+        prevB = -float('inf')
         for a,b in self._ltAB:
-            if prevB >= a: return False
+            if prevB > a: return False
             prevB = b
         return True
     
