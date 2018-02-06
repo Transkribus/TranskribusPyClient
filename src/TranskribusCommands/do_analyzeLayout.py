@@ -66,7 +66,7 @@ The syntax for specifying the page range is:
 
 """ + _Trnskrbs_description
 
-usage = """%s <colId> 
+usage = """%s <colId> <docid/pagerange>
 """%sys.argv[0]
 
 class DoLAbatch(TranskribusClient):
@@ -203,7 +203,8 @@ class DoLAbatch(TranskribusClient):
         jsonDesc = {}
         
         if trp is None:
-            docId,pageRange= docpage.split('/')
+            try: docId,pageRange= docpage.split('/')
+            except ValueError: docId=docpage; pageRange = ""
             jsonDesc["docId"]=docId
             oPageRange = IntegerRange(pageRange)                 
             trpObj = self._trpMng.filter(colId,docId,page_filter=oPageRange,bLast=True)
@@ -274,7 +275,7 @@ if __name__ == '__main__':
         
     parser.add_option("-r", "--region"  , dest='region', action="store", type="string", default=DoLAbatch.sDefaultServerUrl, help="apply Layout Analysis (textLine)")
     parser.add_option("--trp"  , dest='trp_doc', action="store", type="string",default=None, help="use trp doc file")
-    parser.add_option("--docid"  , dest='docid'   , action="store", type="string", default=None, help="document/pages to be analyzed")        
+#     parser.add_option("--docid"  , dest='docid'   , action="store", type="string", default=None, help="document/pages to be analyzed")        
     parser.add_option("--doRegionSeg"  , dest='doRegionSeg'   , action="store_true",  default=False, help="do Region detection")        
     parser.add_option("--batchjob"  , dest='doBatchJob'   , action="store_true",  default=False, help="do one job per page")        
 
@@ -291,15 +292,17 @@ if __name__ == '__main__':
     # --- 
     try:                        colId = int(args.pop(0))
     except Exception as e:      _exit(usage, 1, e)
+    try:                        docidpages = args.pop(0)
+    except Exception as e:      _exit(usage, 1, e)    
     if args:                    _exit(usage, 2, Exception("Extra arguments to the command"))
 
     # --- 
     # do the job...
     if options.trp_doc:
         trpdoc =  json.load(open(options.trp_doc, "rb",encoding='utf-8'))
-        docId,sPageDesc = doer.buildDescription(colId,options.docid,trpdoc)
+        docId,sPageDesc = doer.buildDescription(colId,docidpages,trpdoc)
     else:
-        docId,sPageDesc = doer.buildDescription(colId,options.docid)    
+        docId,sPageDesc = doer.buildDescription(colId,docidpages)    
 #     NcsrLaJob
 #     CITlabAdvancedLaJob
     sPageDesc = doer.jsonToXMLDescription(sPageDesc)
