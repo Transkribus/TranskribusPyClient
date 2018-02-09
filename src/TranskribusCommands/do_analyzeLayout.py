@@ -30,8 +30,7 @@
 from __future__ import absolute_import
 from __future__ import  print_function
 from __future__ import unicode_literals
-
-#    TranskribusCommands/do_LAbatch.py 3571 3820 8251 8252
+from io import open
 
 
 #optional: useful if you want to choose the logging level to something else than logging.WARN
@@ -299,7 +298,7 @@ if __name__ == '__main__':
     # --- 
     # do the job...
     if options.trp_doc:
-        trpdoc =  json.load(open(options.trp_doc, "rb",encoding='utf-8'))
+        trpdoc =  json.load(open(options.trp_doc, "r",encoding='utf-8'))
         docId,sPageDesc = doer.buildDescription(colId,docidpages,trpdoc)
     else:
         docId,sPageDesc = doer.buildDescription(colId,docidpages)    

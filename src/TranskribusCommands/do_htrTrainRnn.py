@@ -237,20 +237,11 @@ class DoHtrRnnTrain(TranskribusClient):
         lTrain=[]        
         for i,docpage in enumerate(ltrdoc):
             docId,pageRange= docpage.split('/')
-#             trpFile = os.path.join(sColDir,sCOL,str(docId),'trp.json')
-#             if not( os.path.exists(trpFile)):
-#                 raise ValueError("Non-existing trp.json file %s" % trpFile)
-#             with codecs.open(trpFile, "rb",'utf-8') as fd: jTrp = json.load(fd)
 #             
             oPageRange = IntegerRange(pageRange) 
             trp = self._trpMng.filter(colId,docId,page_filter=oPageRange,bLast=True)
             for page in trp.getPageList():
                 lTrain.append((docId,page['pageId'],page['tsList']['transcripts'][0]['tsId']))
-#                 print page['pageId'], page['tsList']['transcripts'][0]['tsId']
-#             
-#             shuffle(lAlltsId)
-#             lngTest=  int(round(len(lAlltsId) * self.percTest))
-#             lngTrain = len(lAlltsId) - lngTest
         
         lTest=[]
         for i,docpage in enumerate(ltestdocId):

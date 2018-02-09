@@ -161,7 +161,7 @@ if __name__ == '__main__':
     if args:                    _exit(usage, 2, Exception("Extra arguments to the command"))
 
     if options.trp_doc:
-        trpdoc =  json.load(open(options.trp_doc, "rb",encoding='utf-8'))
+        trpdoc =  json.load(open(options.trp_doc, "r",encoding='utf-8'))
         docId,sPageDesc = doer.buildDescription(colId,options.docid,trpdoc)
     else:
         docId,sPageDesc = doer.buildDescription(colId,options.docid)

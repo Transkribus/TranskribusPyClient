@@ -36,9 +36,10 @@ colId=3571
 #2 existing documents, forming a small range
 docId_A=7749
 docId_B=7750
+TRP=tst.trp
 
 #PYTHON=python
-PYTHON=/cygdrive/c/anaconda3/python.exe
+PYTHON=/cygdrive/c/Anaconda/python.exe
 
 # ------------------------------------------------------------------------------------------------------------------------
 # ---  GENERIC STUF BELOW
@@ -130,7 +131,7 @@ echo "OK"
 echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
 echo
 echo "--- Layout Analysis in collection $colId "
-$PYTHON $SRC/TranskribusCommands/do_analyzeLayoutNew.py $colId --docid=$docId_A/1  || error "layout analysis error"
+$PYTHON $SRC/TranskribusCommands/do_analyzeLayout.py $colId $docId_A/1  || error "layout analysis error"
 echo "OK"
 
 #---------------------------------------------------
@@ -165,8 +166,8 @@ echo "OK"
 #---------------------------------------------------
 echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
 echo
-echo "--- save trpdoc for document  $docId_A in test.trp "
-$PYTHON $SRC/TranskribusCommands/do_transcript.py $colId  $docId_A 2 --trp test.trp || error " transcript list models error"
+echo "--- save trpdoc for document  $docId_A in $TRP "
+$PYTHON $SRC/TranskribusCommands/do_transcript.py $colId  $docId_A 2 --trp=$TRP || error " transcript list models error"
 
 echo "OK"
 
@@ -176,11 +177,9 @@ echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
 echo
 echo "--- download as per trp ---"
 rm -rf trnskrbs_$colId 
-echo "--- download using test.trp "
-$PYTHON $SRC/TranskribusCommands/Transkribus_downloader.py $colId  --trp test.trp|| error " download error"
+echo "--- download using $TRP "
+$PYTHON $SRC/TranskribusCommands/Transkribus_downloader.py $colId  --trp=$TRP || error " download error"
 echo "OK"
-echo "--- rm test.trp"
-rm test.trp
 #---------------------------------------------------
 echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
 echo
@@ -197,7 +196,14 @@ echo "--- upload  document  $docId_A ($colId ) "
 $PYTHON $SRC/TranskribusCommands/TranskribusDU_transcriptUploader.py trnskrbs_$colId  $colId  $docId_A --nodu || error " upload error"
 echo "OK"
 
-
+#---------------------------------------------------
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
+echo
+echo "--- upload as per trp $TRP "
+$PYTHON $SRC/TranskribusCommands/Transkribus_uploader.py trnskrbs_$colId  $colId  $docId_A --trp=$TRP || error " upload error"
+echo "OK"
+echo "--- rm $TRP"
+rm $TRP
 
 #---------------------------------------------------
 echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="

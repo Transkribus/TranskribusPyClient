@@ -110,7 +110,7 @@ class TranskribusDUTranscriptUploader(TranskribusClient):
         #We will also try to set the parent-Id of each transcript, by parsing the trp.json
         trpFilename = os.path.join(sColDSDir, str(docid), "trp.json")
         try:
-            trp = json.load(open(trpFilename, "rb",encoding='utf-8'))
+            trp = json.load(open(trpFilename, "r",encoding='utf-8'))
             trpPageList = trp["pageList"]['pages']
         except:
             trpPageList = None

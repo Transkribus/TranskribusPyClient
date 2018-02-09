@@ -81,7 +81,7 @@ class TranskribusTranscriptUploader(TranskribusClient):
         traceln(" - reading %s"%trpFilename)
         if not os.path.exists(trpFilename):
             raise Exception("File not found %s. \nData probably created in --trp mode, so upload must be done in --trp mode."%trpFilename)
-        trp = json.load(open(trpFilename, "rb",encoding='utf-8'))
+        trp = json.load(open(trpFilename, "r",encoding='utf-8'))
         
         for docid in [d["docId"] for d in trp]:
             self.uploadDocumentTranscript(colid, docid, sColDSDir, sNote=sNote, sToolName=sToolName, iVerbose=iVerbose, status=status)
@@ -99,7 +99,7 @@ class TranskribusTranscriptUploader(TranskribusClient):
         traceln(" - reading %s"%trpFilename)
         if not os.path.exists(trpFilename):
             raise Exception("File not found %s. \nData probably created in --trp mode, so upload must be done in --trp mode."%trpFilename)
-        trp = json.load(open(trpFilename, "rb",encoding='utf-8'))
+        trp = json.load(open(trpFilename, "r",encoding='utf-8'))
         self.uploadDocumentTranscript_by_trp(colid, docid, trp, sColDSDir, sNote=sNote, sToolName=sToolName, iVerbose=iVerbose, status=status)
         return
     
@@ -140,10 +140,10 @@ class TranskribusTranscriptUploader(TranskribusClient):
             xmlFilename = docDir + os.sep + sBaseName + ".pxml"
             logging.info("\t\t\t%s"%xmlFilename)
             assert os.path.exists(xmlFilename)
-            with open(xmlFilename, "rb") as fd: sXMlTranscript = fd.read()
+            with open(xmlFilename, "r",encoding='utf-8') as fd: sXMlTranscript = fd.read()
             cur_status = _trpTranscript0["status"] if status == None else status
             traceln("page %5d : %s : %s : %s : %s : %s"%(pagenum, cur_status, sToolName, tsId, sNote, xmlFilename))
-            self.postPageTranscript(colid, docid, pagenum, sXMlTranscript, parentId=tsId, bEncoded=True, sNote=sNote, sToolName=sToolName, status=cur_status)
+            self.postPageTranscript(colid, docid, pagenum, sXMlTranscript, parentId=tsId, bEncoded=False, sNote=sNote, sToolName=sToolName, status=cur_status)
                 
             
         if iVerbose:
@@ -199,7 +199,7 @@ The page transcript from the single page PageXml files are uploaded. (The multi-
     __Trnskrbs_do_login_stuff(doer, options, trace=trace, traceln=traceln)
     
     if options.trp:
-        trp = json.load(open(options.trp, "rb",encoding='utf-8'))
+        trp = json.load(open(options.trp, "r",encoding='utf-8'))
         traceln("- Uploading to collection %s, as specified by trp data"%(colid))
         if not docid:
             docid = trp["md"]["docId"]
