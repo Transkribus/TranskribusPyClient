@@ -236,7 +236,8 @@ class DoHtrRnnTrain(TranskribusClient):
 
         lTrain=[]        
         for i,docpage in enumerate(ltrdoc):
-            docId,pageRange= docpage.split('/')
+            try: docId,pageRange= docpage.split('/')
+            except ValueError: docId=docpage; pageRange = ""
 #             
             oPageRange = IntegerRange(pageRange) 
             trp = self._trpMng.filter(colId,docId,page_filter=oPageRange,bLast=True)

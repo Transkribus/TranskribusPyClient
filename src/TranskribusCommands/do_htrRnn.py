@@ -104,7 +104,8 @@ class DoHtrRnn(TranskribusClient):
         jsonDesc = {}
         
         if trp is None:
-            docId,pageRange= docpage.split('/')
+            try: docId,pageRange= docpage.split('/')
+            except ValueError: docId=docpage; pageRange = ""
             jsonDesc["docId"]=docId
             oPageRange = IntegerRange(pageRange)                 
             trpObj = self._trpMng.filter(colId,docId,page_filter=oPageRange,bLast=True)
@@ -119,7 +120,8 @@ class DoHtrRnn(TranskribusClient):
             jsonDesc["pageList"]['pages'].append({"pageId":page['pageId'],"tsId":page['tsList']['transcripts'][0]['tsId'],"regionIds":[]})        
         
         
-        return jsonDesc["docId"], json.dumps(jsonDesc,encoding='utf-8')
+#         return jsonDesc["docId"], json.dumps(jsonDesc,encoding='utf-8')
+        return jsonDesc["docId"], json.dumps(jsonDesc)
     
 if __name__ == '__main__':
     version = "v.01"

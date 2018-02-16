@@ -272,9 +272,7 @@ if __name__ == '__main__':
     #"-s", "--server",  "-l", "--login" ,   "-p", "--pwd",   "--https_proxy"    OPTIONS
     __Trnskrbs_basic_options(parser, DoLAbatch.sDefaultServerUrl)
         
-    parser.add_option("-r", "--region"  , dest='region', action="store", type="string", default=DoLAbatch.sDefaultServerUrl, help="apply Layout Analysis (textLine)")
     parser.add_option("--trp"  , dest='trp_doc', action="store", type="string",default=None, help="use trp doc file")
-#     parser.add_option("--docid"  , dest='docid'   , action="store", type="string", default=None, help="document/pages to be analyzed")        
     parser.add_option("--doRegionSeg"  , dest='doRegionSeg'   , action="store_true",  default=False, help="do Region detection")        
     parser.add_option("--batchjob"  , dest='doBatchJob'   , action="store_true",  default=False, help="do one job per page")        
 
@@ -306,7 +304,7 @@ if __name__ == '__main__':
 #     CITlabAdvancedLaJob
     sPageDesc = doer.jsonToXMLDescription(sPageDesc)
     
-    status, jobid = doer.run(colId, sPageDesc,'CITlabAdvancedLaJob',options.doRegionSeg,bCreateJobBatch=options.doBatchJob)
+    status, jobid = doer.run(colId, sPageDesc,'CITlabAdvancedLaJob',bBlockSeg=options.doRegionSeg,bCreateJobBatch=options.doBatchJob)
     traceln("job status:")
     traceln(jobid)
         
