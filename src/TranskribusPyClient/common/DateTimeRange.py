@@ -63,7 +63,13 @@ class DateTimeRange(IntegerRangeHalfBounded):
     """
     #     dt0 = datetime.datetime(1970, 1, 1)
     # PY2 PY3 : need ignoretz=True) otheriwise PY3 :TypeError: can't subtract offset-naive and offset-aware datetimes
-    dt0 = dateutil.parser.parse("1970/01/01T00:00:00+0000",ignoretz=True)
+    #dt0 = dateutil.parser.parse("1970/01/01T00:00:00+0000",ignoretz=True)
+
+    # JL, 09/04/2018
+    # fixing a bug from Eva: see def test_Eva_09_04_2018()
+    # seems like we need a t0 datetime with TZ and without TZ
+    dt0_tz = dateutil.parser.parse("1970/01/01T00:00:00+0000")
+    dt0    = dateutil.parser.parse("1970/01/01T00:00:00+0000", ignoretz=True)
     ts0 = 0
     
     bUTC = False
@@ -123,12 +129,18 @@ class DateTimeRange(IntegerRangeHalfBounded):
             return o
         except TypeError:
             if isinstance(o, datetime.datetime): return cls.dt2ts(o)
-            if  isinstance(o,str):      
-                try:
-                    return cls.txt2ts(o)
-                except ValueError:
-                    return cls.dt2ts(cls.txt2dt(o))
-        raise ValueError("Cannot convert to timestamp the object '%s'"%repr(o))      
+            #Python27, some string might be unicode and this test fails!!
+#             if  isinstance(o,str):      
+#                 try:
+#                     return cls.txt2ts(o)
+#                 except ValueError:
+#                     return cls.dt2ts(cls.txt2dt(o))
+            try:
+                return cls.txt2ts(o)
+            except ValueError:
+                return cls.dt2ts(cls.txt2dt(o))                
+
+        raise ValueError("Cannot convert to timestamp the object %s  "%repr(o))      
       
     # -------------------------------------------------------------------------------
     @classmethod
@@ -161,6 +173,7 @@ class DateTimeRange(IntegerRangeHalfBounded):
             dt = datetime.datetime.utcfromtimestamp(ts/1000.0)
         else:
             dt = datetime.datetime.fromtimestamp(ts/1000.0) #showing local time
+            
         return dt
 
     # -------------------------------------------------------------------------------
@@ -183,7 +196,10 @@ class DateTimeRange(IntegerRangeHalfBounded):
         
         # PY 3 TypeError: can't subtract offset-naive and offset-aware datetimes
         
-        ts = int((dt-cls.dt0).total_seconds() * 1000)
+        if dt.tzinfo:
+            ts = int((dt-cls.dt0_tz).total_seconds() * 1000)
+        else:
+            ts = int((dt-cls.dt0).total_seconds() * 1000)
         #assert cls.format(cls.ts2dt(ts)).startswith(sDateTime)
 
         return ts
@@ -374,13 +390,27 @@ def test_GMT0200():
     assert DateTimeRange.dt2ts("2017-11-07T09:45:15.042Z") in dts
     assert DateTimeRange.dt2ts("2017-11-07T10:45:15.042+0100") in dts
     assert DateTimeRange.dt2ts("2017-11-07T10:45:15.042+0200") not in dts
-    
 
+
+def test_Eva_09_04_2018():
+    DateTimeRange.dt2ts("2017-09-04T18:30:20+0100")
+    DateTimeRange.dt2ts("2017-11-17T15:00:09.408+0100")
+    DateTimeRange.dt2ts("2017-09-04T18:30:20")
+    
 if __name__ == "__main__":
+    def jl(s):
+        dt = dateutil.parser.parse(s)
+        print(s, dt.tzinfo)
+    jl("2017-09-04T18:30:20+0100")
+    jl("2017-09-04T18:30:20")
+
     t = DateTimeRange.ts2dt(1504512814466)
     print (t)
     u = DateTimeRange.dt2ts("2017-09-04T08:13:34.466000")
     print(u)
+
+    print(DateTimeRange.o2ts("2017-11-17T15:00:09.408+0100"))
+          
     print (u - 1504512814466 == 0)
     print (t == "2017-09-04T08:13:34.466000")
     
@@ -395,3 +425,9 @@ if __name__ == "__main__":
 #     print datetime.strptime("2017-09-04", "%Y-%m-%d")
 #     print datetime.strptime("2017-09-04T12:00:00", "%Y-%m-%dT%H:%M:%S")
 #     print datetime.strptime("2017-09-04T13", "%Y-%m-%dT%H:%M:%S")
+
+
+    print("A", DateTimeRange.dt2ts("2017-09-04T18:30:20"))
+    print("AA", DateTimeRange.dt2ts("2017-09-04T18:30:20+0100"))
+    print("B", DateTimeRange.dt2ts("2017-11-17T15:00:09+0100"))
+    print("C", DateTimeRange.dt2ts("2017-11-17T15:00:09.408+0100"))
