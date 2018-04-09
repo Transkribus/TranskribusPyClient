@@ -153,7 +153,7 @@ class DateTimeRange(IntegerRangeHalfBounded):
         #first try looking at it as a timestamp
         try:    return cls.ts2dt(sDateTime)
         except: pass
-        if len(sDateTime) < 13: raise ValueError("The date and the hour must at least be specified")
+        if len(sDateTime.split('-')) < 3: raise ValueError("The date must at least be specified")
         return dateutil.parser.parse(sDateTime)
 
     @classmethod
@@ -342,7 +342,8 @@ def test_simple():
     assert DateTimeRange.dt2ts("2017-09-04T12:00:00.000Z") in dts
     assert DateTimeRange.dt2ts("2017-09-04T18:30:20.000Z") in dts
     assert DateTimeRange.dt2ts("2017-09-04T23:00:00.000Z") in dts
-    with pytest.raises(ValueError): DateTimeRange.o2ts("2019-09-01")
+    #with pytest.raises(ValueError): DateTimeRange.o2ts("2019-09-01")
+    assert DateTimeRange.o2ts("2019-09-01") == DateTimeRange.dt2ts(datetime.datetime(2019,9,1,0,0,0))
     with pytest.raises(ValueError): DateTimeRange.o2ts("2010-09") 
     assert DateTimeRange.o2ts("2019-09-01T12Z") not in dts
     
@@ -352,7 +353,7 @@ def test_simple():
     
     def test_1():
         assert DateTimeRange.dt2ts("2019-09-01T00:00Z") in dts
-        assert DateTimeRange.dt2ts("2010-01T00:00Z") not in dts
+        with pytest.raises(ValueError): DateTimeRange.dt2ts("2010-01T00:00Z")
         assert DateTimeRange.dt2ts("2017-12-31T23:59:59Z") not in dts
     test_1()
 
@@ -393,9 +394,14 @@ def test_GMT0200():
 
 
 def test_Eva_09_04_2018():
+    import pytest
     DateTimeRange.dt2ts("2017-09-04T18:30:20+0100")
     DateTimeRange.dt2ts("2017-11-17T15:00:09.408+0100")
     DateTimeRange.dt2ts("2017-09-04T18:30:20")
+
+    with pytest.raises(ValueError): DateTimeRange.txt2dt("2022-1")
+    assert DateTimeRange.txt2dt("2022-1-1") == datetime.datetime(2022,1,1,0,0,0)
+    
     
 if __name__ == "__main__":
     def jl(s):
