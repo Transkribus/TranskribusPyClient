@@ -95,8 +95,7 @@ Date takes the form:
         YYYY-MM-DDThh:mm:ss+HHMM  like 2017-09-04T18:30:20+0100 
         YYYY-MM-DDThh:mm:ss-HHMM  like 2017-09-04T18:30:20-0100 
         YYYY-MM-DDThh:mm:ssZ  like 2017-09-04T18:30:20Z 
-    Incomplete dates are converted into the first millisecond of the given period. For instance 2017 is 
-    equivalent to 2017-01-01T00:00:00
+        If you omit the time, than it is the first millisecond of the day (of the guessed timezone)
 Alternatively, it can be a timestamp (number of milliseconds since 1970-01-01)
 --utc option will show UTC times
 
