@@ -733,7 +733,7 @@ class TranskribusClient():
                                     , doCreateJobBatch=bCreateJobBatch
                                     , jobImpl=sJobImpl)
         
-#         print myReq, params, sDescription
+        print (myReq, params, sDescription)
         resp = self._POST(myReq, params=params, data=sDescription,sContentType="application/xml")
 #         print resp.text
         resp.raise_for_status()

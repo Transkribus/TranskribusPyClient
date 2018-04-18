@@ -305,9 +305,6 @@ if __name__ == '__main__':
     sPageDesc = doer.jsonToXMLDescription(sPageDesc)
     
     status, jobid = doer.run(colId, sPageDesc,'CITlabAdvancedLaJob',bBlockSeg=options.doRegionSeg,bCreateJobBatch=options.doBatchJob)
-    traceln("job status:")
-    traceln(jobid)
-        
-    traceln()      
+    traceln("job ID:",jobid)
     traceln("- Done")
     

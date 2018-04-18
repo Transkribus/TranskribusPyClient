@@ -223,7 +223,8 @@ class DoHtrRnnTrain(TranskribusClient):
         
 #         traceln('config:')
 #         traceln(confDoc.serialize('utf-8',True))  
-        return   confDoc.serialize('utf-8',True)        
+#         return   confDoc.serialize('utf-8',True)    
+        return etree.tostring(confDoc, encoding='utf-8',pretty_print=True)      
     
     
     def createTrainTest(self,colId, ltrdoc,ltestdocId):
