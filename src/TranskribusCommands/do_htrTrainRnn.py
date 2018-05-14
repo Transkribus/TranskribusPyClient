@@ -84,7 +84,7 @@ class DoHtrRnnTrain(TranskribusClient):
         ljobid=[]
         for i,(lr, epochs,batch) in enumerate(lcombinations):
             sDesc = options.description  
-            xmlconf =self.createXMLConf(sModelName, colID, lTrain, lTest, sDesc = sDesc, lang='German', numEpochs=epochs, learningRate=lr, noise='preproc', trainSizePerEpoch=batch)
+            xmlconf =self.createXMLConf(sModelName, colID, lTrain, lTest, sDesc = sDesc, lang=options.lang, numEpochs=epochs, learningRate=lr, noise=options.noise, trainSizePerEpoch=batch)
             jobid = self.htrTrainingCITlab(xmlconf)
             ljobid.append(jobid)
             traceln("job id: %s"% jobid)
@@ -276,6 +276,8 @@ if __name__ == '__main__':
     parser.add_option("--lr"  , dest='learningrate'   , action="store", type="string", default="2e-3", help="learning rate", metavar='F[,F]')
     parser.add_option("--batch"  , dest='batchsize'   , action="store", type="string", default=1000, help="batch size",metavar='N[,NF]')
     parser.add_option("--description"  , dest='description' , action="store", type="string", default="no description", help="model description")
+    parser.add_option("--noise"  , dest='noise' , action="store", type="string", default="no", help="noise (no, preproc, net ,both)")
+    parser.add_option("--language"  , dest='lang' , action="store", type="string", default="unknown", help="language")
 
     # ---   
     #parse the command line
