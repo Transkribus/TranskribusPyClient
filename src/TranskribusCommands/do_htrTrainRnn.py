@@ -84,7 +84,7 @@ class DoHtrRnnTrain(TranskribusClient):
         ljobid=[]
         for i,(lr, epochs,batch) in enumerate(lcombinations):
             sDesc = options.description  
-            xmlconf =self.createXMLConf(sModelName, colID, lTrain, lTest, sDesc = sDesc, lang=options.lang, numEpochs=epochs, learningRate=lr, noise=options.noise, trainSizePerEpoch=batch)
+            xmlconf =self.createXMLConf(sModelName, colID, lTrain, lTest, sDesc = sDesc, lang=options.lang, numEpochs=epochs, learningRate=lr, noise=options.noise, trainSizePerEpoch=batch, baseModelId=options.baseID)
             jobid = self.htrTrainingCITlab(xmlconf)
             ljobid.append(jobid)
             traceln("job id: %s"% jobid)
@@ -103,7 +103,8 @@ class DoHtrRnnTrain(TranskribusClient):
         return [( lr, epochs,batch ) for batch in lBatchsize for lr in lLearningrate for epochs in lEpochs]
         
     
-    def createXMLConf(self,sModelName,colID,lTrain,lTest,sDesc='A description',lang='language shold be mentioned',numEpochs=200,learningRate=2e-3,noise='both',trainSizePerEpoch=1000):
+    def createXMLConf(self,sModelName,colID,lTrain,lTest,sDesc='A description',lang='language should be mentioned',numEpochs=200,learningRate=2e-3,noise='both',trainSizePerEpoch=1000,baseModelId=''):
+        
         """
             create the XML configuration file
             see https://transkribus.eu/wiki/index.php/HTR
@@ -119,6 +120,7 @@ class DoHtrRnnTrain(TranskribusClient):
             <learningRate>2e-3</learningRate>
             <noise>both</noise>
             <trainSizePerEpoch>1000</trainSizePerEpoch>
+###         <baseModelId></baseModelId>
             <trainList>
                 <train>
                     <docId>1</docId>
@@ -179,6 +181,9 @@ class DoHtrRnnTrain(TranskribusClient):
         rootNode.append(node)
         node  = etree.Element('trainSizePerEpoch')
         node.text = '%s'%trainSizePerEpoch
+        rootNode.append(node)     
+        node  = etree.Element('baseModelId')
+        node.text = '%s'%baseModelId
         rootNode.append(node)     
         
         trainListNode = etree.Element('trainList')
@@ -278,6 +283,7 @@ if __name__ == '__main__':
     parser.add_option("--description"  , dest='description' , action="store", type="string", default="no description", help="model description")
     parser.add_option("--noise"  , dest='noise' , action="store", type="string", default="no", help="noise (no, preproc, net ,both)")
     parser.add_option("--language"  , dest='lang' , action="store", type="string", default="unknown", help="language")
+    parser.add_option("--baseModelID" , dest='baseID' , action="store", type="string", default=None, help="ID of base model")
 
     # ---   
     #parse the command line
