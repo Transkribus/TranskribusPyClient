@@ -106,12 +106,16 @@ class DoHtrRnnTrain(TranskribusClient):
     def createXMLConf(self,sModelName,colID,lTrain,lTest,sDesc='A description',lang='language should be mentioned',numEpochs=200,learningRate=2e-3,noise='both',trainSizePerEpoch=1000,baseModelId=''):
         
         """
+        
+        HTR+: add <provider>CITlabPlus</provider>
+        
             create the XML configuration file
             see https://transkribus.eu/wiki/index.php/HTR
 
             
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <citLabHtrTrainConfig>
+            <provider>CITlabPlus</provider> 
             <modelName>Test Model</modelName>
             <description>A description</description>
             <language>German</language>
@@ -160,6 +164,10 @@ class DoHtrRnnTrain(TranskribusClient):
         confDoc= etree.ElementTree(rootNode)
         node  = etree.Element('modelName')
         node.text =sModelName
+        rootNode.append(node)
+        #htr +  <provider>CITlabPlus</provider>
+        node  = etree.Element('provider')
+        node.text = "CITlabPlus"
         rootNode.append(node)
         node  = etree.Element('description')
         node.text =sDesc
