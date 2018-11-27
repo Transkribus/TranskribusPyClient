@@ -75,7 +75,6 @@ class DoTableTemplate(DoLAbatch):
     
     def run(self, templateID, colId, sDescription, sJobImpl):
         ret = self.tableMatching(templateID, colId, sDescription,  sJobImpl)
-        print (ret)
         jobid= self.getJobIDsFromXMLStatuses(ret)
         return ret,jobid
     
@@ -246,7 +245,6 @@ if __name__ == '__main__':
 #     NcsrLaJob
 #     CITlabAdvancedLaJob
     sPageDesc = doer.jsonToXMLDescription(sPageDesc)
-    print (sPageDesc)
     """
         do_tableTemplate.py --temp 6078228 23017 87023/14
     """
