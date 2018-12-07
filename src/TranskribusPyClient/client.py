@@ -145,6 +145,8 @@ class TranskribusClient():
 #         
         self.sREQ_LA_batch          = sServerUrl + '/rest/LA/batch'
         self.sREQ_LA_analyze        = sServerUrl + '/rest/LA/analyze'
+        self.sREQ_LA                = sServerUrl + '/rest/LA'
+#         self.sREQ_LA                = sServerUrl + '/rest/LA/analyzeLayout'
 #     
 #         self.sREQ_LALines           = sServerUrl + '/rest/LA/lines'
 #         self.sREQ_LABaseLines       = sServerUrl + '/rest/LA/baselines'
@@ -651,7 +653,7 @@ class TranskribusClient():
             savefile=open(destXmlFilename,'wt',encoding='utf-8')
             savefile.write(resp.text)  
             savefile.close()  
-#             trace('.')
+            print('.',end=''); sys.stdout.flush()
 #             flush()
         with open(docDir+os.sep+"max.ts", "w") as fd: fd.write("%s"%doc_max_ts) 
 
@@ -672,6 +674,43 @@ class TranskribusClient():
         
     # -------LAYOUT ANALYSIS ------------------------------------------------------------------------------------------
 
+    def tableMatching(self,templateID,colId, sDescription,params,sJobImpl="CvlTableJob"):
+        """
+            apply a template to a transcript
+            templateID= transcript ID
+            
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<jobParameters>
+    <docList>
+        <docs>
+            <docId>1</docId>
+            <pageList>
+                <pages>
+                    <pageId>2</pageId>
+                    <tsId>3</tsId>
+                </pages>
+            </pageList>
+        </docs>
+    </docList>
+    <params>
+        <entry>
+            <key>templateId</key>
+            <value>1543</value>
+        </entry>
+    </params>
+</jobParameters>            
+            
+        """
+        
+        self._assertLoggedIn()
+        myReq = self.sREQ_LA #self.sREQ_LA_analyze
+        params = self._buidlParamsDic(collId=colId
+                                    , jobImpl=sJobImpl)
+#         print (myReq, params, sDescription)
+        resp = self._POST(myReq, params=params, data=sDescription,sContentType="application/xml")
+        resp.raise_for_status()
+        return resp.text         
+        
     def analyzeLayoutNew(self, colId, sDescription, sJobImpl="CITlabAdvancedLaJob"
                     ,  sPars=""
                     , bBlockSeg = False
@@ -733,7 +772,7 @@ class TranskribusClient():
                                     , doCreateJobBatch=bCreateJobBatch
                                     , jobImpl=sJobImpl)
         
-        print (myReq, params, sDescription)
+#         print (myReq, params, sDescription)
         resp = self._POST(myReq, params=params, data=sDescription,sContentType="application/xml")
 #         print resp.text
         resp.raise_for_status()
