@@ -940,12 +940,11 @@ class TranskribusClient():
         the processed lines in the new PAGE XML.
         
         """
-        
         self._assertLoggedIn()
         myReq = self.sREQ_recognition_htrRnn % (colId,sRnnModelID)
         if bDictTemp:
             params = self._buidlParamsDic(id=docId,tempDict=sDictName)
-        elif sDictName:
+        elif sDictName != "None":
             params = self._buidlParamsDic(id=docId,dict=sDictName)
         else: 
             params = self._buidlParamsDic(id=docId)
