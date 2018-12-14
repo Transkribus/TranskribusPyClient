@@ -945,8 +945,10 @@ class TranskribusClient():
         myReq = self.sREQ_recognition_htrRnn % (colId,sRnnModelID)
         if bDictTemp:
             params = self._buidlParamsDic(id=docId,tempDict=sDictName)
-        else:
+        elif sDictName:
             params = self._buidlParamsDic(id=docId,dict=sDictName)
+        else: 
+            params = self._buidlParamsDic(id=docId)
         postparams= sPagesDesc #'{"docId":17442,"pageList":{"pages":[{"pageId":400008,"tsId":1243590,"regionIds":[]}]}}'
 #         postparams= '{"docId":17442,"pageList":{"pages":[{"pageId":400008,"tsId":1243590,"regionIds":[]}]}}'
 
