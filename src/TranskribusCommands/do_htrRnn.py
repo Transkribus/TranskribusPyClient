@@ -66,7 +66,7 @@ The syntax for specifying the page range is:
 - Examples: 1   1,3,5   1-3    1,3,5-99,100
 """ + _Trnskrbs_description
 
-usage = """%s <modelID> <dictionary-name> <colId> [--trp] [--docid]
+usage = """%s <modelID>  (<dictionary-name> | None)  <colId>  (--trp TRP_FILE | --docid DOCID)
 """%sys.argv[0]
 
 class DoHtrRnn(TranskribusClient):
