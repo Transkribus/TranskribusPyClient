@@ -13,9 +13,6 @@ A Pythonic API and some command line tools to access the Transkribus server via 
 
 * python-dateutil
 
-### TranskribusDU ###
-
-Install(clone) [TranskribusDU] in the same folder (TranskribusDU and TranskribusPyClient must be in the same folder. Do not change their names)
 
 ### Commands ###
 
