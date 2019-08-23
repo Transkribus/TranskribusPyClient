@@ -66,7 +66,7 @@ class DoListCollec(TranskribusClient):
     def __init__(self, trnkbsServerUrl, sHttpProxy=None, loggingLevel=logging.WARN):
         TranskribusClient.__init__(self, sServerUrl=self.sDefaultServerUrl, proxies=sHttpProxy, loggingLevel=loggingLevel)
         
-    def run(self, colId):
+    def run(self, colId, bRaw=False):
         """
 
 [{u'collectionList': {u'colList': [{u'colId': 3571,
@@ -100,15 +100,20 @@ class DoListCollec(TranskribusClient):
   
   """        
         data = self.listDocsByCollectionId(colId)
-        if data:
-            _d = data[0][u'collectionList'][u'colList'][-1]
-            print( "Collection: %s  (%s)"%(_d[u'colName'], _d[u'colId']))
-            
+        if bRaw:
             while data:
                 dic = data.pop(0)
-                print (">> (%s) #p=%d  '%s' by %s  (status=%s)" % (dic[u'docId'], dic[u'nrOfPages'], dic[u'title'], dic[u'uploader'], dic[u'status']))
+                print (dic[u'docId'])
         else:
-            print (">> Collection is empty!")
+            if data:
+                _d = data[0][u'collectionList'][u'colList'][-1]
+                print( "Collection: %s  (%s)"%(_d[u'colName'], _d[u'colId']))
+                
+                while data:
+                    dic = data.pop(0)
+                    print (">> (%s) #p=%d  '%s' by %s  (status=%s)" % (dic[u'docId'], dic[u'nrOfPages'], dic[u'title'], dic[u'uploader'], dic[u'status']))
+            else:
+                print (">> Collection is empty!")
         
         
 
@@ -121,6 +126,8 @@ if __name__ == '__main__':
     
     #"-s", "--server",  "-l", "--login" ,   "-p", "--pwd",   "--https_proxy"    OPTIONS
     __Trnskrbs_basic_options(parser, DoListCollec.sDefaultServerUrl)
+
+    parser.add_option("--raw", dest='bRaw', action="store_true", default=False, help="Raw output, one docid per line")    
         
     # ---   
     #parse the command line
@@ -142,12 +149,12 @@ if __name__ == '__main__':
     # do the job...
     for colId in lColId:
         try:
-            doer.run(colId)
+            doer.run(colId, options.bRaw)
         except Exception as e:
             traceln()
             traceln("ERROR: could not list collection '%d' "%colId)
             _exit("", 1, e)
-        
-    traceln()      
-    traceln("- Done for %d collection(s)"%len(lColId))
+    if not options.bRaw:    
+        traceln()      
+        traceln("- Done for %d collection(s)"%len(lColId))
     
