@@ -54,7 +54,7 @@ description = """Copy (duplicate) one or several documents stored in a Transkrib
 Document(s) and collections are specified by their unique identifier (a number).
 """ + _Trnskrbs_description
 
-usage = """%s <from_colId>  <to_colId> [ <docId> | <docIdFrom>-<docIdTo> ]+
+usage = """%s <from_colId>  <to_colId> ( <docId> | <docIdFrom>-<docIdTo> )+
 Documents are specified by a space-separated list of numbers, or number ranges, e.g. 3-36.
 """%sys.argv[0]
 
