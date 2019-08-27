@@ -67,7 +67,7 @@ The syntax for specifying the page range is:
 """ + _Trnskrbs_description
 
 
-usage = """%s <colId> <docid/pagerange> 
+usage = """%s --templateID <> <colId> <docid/pagerange> 
 """%sys.argv[0]
 
 class DoTableTemplate(DoLAbatch):

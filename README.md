@@ -4,18 +4,14 @@ A Pythonic API and some command line tools to access the Transkribus server via 
 
 ### Requirements, installation & testing
 
-#### Python and Pip
+#### Python
 
 * Install the latest release of [Python] 2.7.x, 3.5.x or 3.6.x
-* Install [pip]
 
 ### Additional Libraries
 
 * python-dateutil
 
-### TranskribusDU ###
-
-Install(clone) [TranskribusDU] in the same folder (TranskribusDU and TranskribusPyClient must be in the same folder. Do not change their names)
 
 ### Commands ###
 
@@ -30,6 +26,7 @@ Install(clone) [TranskribusDU] in the same folder (TranskribusDU and Transkribus
 * do_Transcript.py
 
 * do_analyzeLayout.py
+* do_tableTemplate.py
 * do_htrHmm.py
 * do_htrRnn.py
 * do_listHtrHmm.py

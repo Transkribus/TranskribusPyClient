@@ -4,12 +4,8 @@
 #
 # JL Meunier - Nov 29th 2016
 #
-# Copyright Xerox(C) 2016 H. Déjean, JL. Meunier
+# Copyright Xerox(C) 2016 H. DÃ©jean, JL. Meunier
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -20,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Developed  for the EU project READ. The READ project has received funding 
-# from the European Union?s Horizon 2020 research and innovation programme 
+# from the European Union's Horizon 2020 research and innovation programme 
 # under grant agreement No 674943.
 
 # ------------------------------------------------------------------------------------------------------------------------
@@ -29,7 +25,7 @@
 
 #transkribus valid login
 login="herve.dejean@naverlabs.com"
-passwd="courv"
+passwd=""
 
 #some existing collection with read access for you
 colId=3571
@@ -39,7 +35,7 @@ docId_B=7750
 TRP=tst.trp
 
 #PYTHON=python
-PYTHON=/cygdrive/c/Anaconda/python.exe
+PYTHON=/drives/c/Local/anaconda3/envs/py36/python.exe
 
 # ------------------------------------------------------------------------------------------------------------------------
 # ---  GENERIC STUF BELOW
@@ -193,14 +189,14 @@ echo "OK"
 echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
 echo
 echo "--- upload  document  $docId_A ($colId ) "
-$PYTHON $SRC/TranskribusCommands/TranskribusDU_transcriptUploader.py trnskrbs_$colId  $colId  $docId_A --nodu || error " upload error"
+$PYTHON $SRC/TranskribusCommands/TranskribusDU_transcriptUploader.py trnskrbs_$colId  $colId  $docId_A --nodu || error "  TranskribusDU_transcriptUploaderupload error"
 echo "OK"
 
 #---------------------------------------------------
 echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ="
 echo
 echo "--- upload as per trp $TRP "
-$PYTHON $SRC/TranskribusCommands/Transkribus_uploader.py trnskrbs_$colId  $colId  $docId_A --trp=$TRP || error " upload error"
+$PYTHON $SRC/TranskribusCommands/Transkribus_uploader.py trnskrbs_$colId  $colId  $docId_A --trp=$TRP || error " Transkribus_uploader upload error"
 echo "OK"
 echo "--- rm $TRP"
 rm $TRP
