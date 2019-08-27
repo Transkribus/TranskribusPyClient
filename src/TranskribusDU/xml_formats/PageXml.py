@@ -139,7 +139,9 @@ class PageXml:
         #So, I simply add a 'Z' 
         ndLastChange.text = datetime.datetime.utcnow().isoformat()+"Z" 
         if Comments != None:
-            if not ndComments: #we need to add one!
+            ## if not ndComments: #we need to add one!
+            ## FutureWarning: The behavior of this method will change in future versions. Use specific 'len(elem)' or 'elem is not None' test instead.   
+            if ndComments is None : #we need to add one!
                 ndComments = etree.SubElement(ndMetadata, cls.sCOMMENTS_ELT)
             ndComments.text = Comments
         return ndMetadata
