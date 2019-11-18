@@ -34,6 +34,7 @@ from __future__ import unicode_literals
 
 #    TranskribusCommands/do_copyDocToCollec.py 3571 3820 8251 8252
 
+import json 
 
 #optional: useful if you want to choose the logging level to something else than logging.WARN
 import sys, os, logging
@@ -66,7 +67,7 @@ class DoListCollec(TranskribusClient):
     def __init__(self, trnkbsServerUrl, sHttpProxy=None, loggingLevel=logging.WARN):
         TranskribusClient.__init__(self, sServerUrl=self.sDefaultServerUrl, proxies=sHttpProxy, loggingLevel=loggingLevel)
         
-    def run(self, colId, bRaw=False):
+    def run(self, colId, options):
         """
 
 [{u'collectionList': {u'colList': [{u'colId': 3571,
@@ -99,7 +100,10 @@ class DoListCollec(TranskribusClient):
   u'uploaderId': 275}]
   
   """        
+        bRaw=options.bRaw
         data = self.listDocsByCollectionId(colId)
+        if options.trp:
+            with open(options.trp, "wt",) as fd: json.dump(data, fd, indent=2)
         if bRaw:
             while data:
                 dic = data.pop(0)
@@ -128,6 +132,7 @@ if __name__ == '__main__':
     __Trnskrbs_basic_options(parser, DoListCollec.sDefaultServerUrl)
 
     parser.add_option("--raw", dest='bRaw', action="store_true", default=False, help="Raw output, one docid per line")    
+    parser.add_option("--trp"   , dest='trp'     , action="store", type="string", default=None, help="Store the TRP data reflecting the documents in the given file.")
         
     # ---   
     #parse the command line
@@ -144,12 +149,12 @@ if __name__ == '__main__':
     # --- 
     doer = DoListCollec(options.server, proxies, loggingLevel=logging.INFO)
     __Trnskrbs_do_login_stuff(doer, options, trace=trace, traceln=traceln)
-    
     # --- 
     # do the job...
     for colId in lColId:
+        doer.run(colId, options)
         try:
-            doer.run(colId, options.bRaw)
+            doer.run(colId, options)
         except Exception as e:
             traceln()
             traceln("ERROR: could not list collection '%d' "%colId)
