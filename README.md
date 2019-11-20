@@ -12,6 +12,8 @@ A Pythonic API and some command line tools to access the Transkribus server via 
 
 * python-dateutil
 
+### Wiki documentation 
+https://github.com/Transkribus/TranskribusPyClient/wiki#apply_an_HTR_RNN_Model
 
 ### Commands ###
 
