@@ -175,11 +175,17 @@ class DoLAbatch(TranskribusClient):
             tsId=etree.Element("tsId")
             tsId.text= str(page['tsId'])
             nodep.append(pageId)
-            nodep.append(tsId)            
-            for regid in (page['regionIds']):
+            nodep.append(tsId)     
+            # mandatory?
+            if page['regionIds'] == []:
                 regId=etree.Element("regionIds")
-                regId.text = str(regid)
+                regId.text = ''
                 nodep.append(regId)
+            else:
+                for regid in (page['regionIds']):
+                    regId=etree.Element("regionIds")
+                    regId.text = str(regid)
+                    nodep.append(regId)
             
 
         return etree.tostring(xmldesc, encoding='utf-8',pretty_print=True)    
@@ -219,7 +225,7 @@ class DoLAbatch(TranskribusClient):
             jsonDesc["docId"]=page['docId']
             jsonDesc["pageList"]['pages'].append({"pageId":page['pageId'],"tsId":page['tsList']['transcripts'][0]['tsId'],"regionIds":[]})
             #test for region 1949  319340/1 
-            #jsonDesc["pageList"]['pages'].append({"pageId":page['pageId'],"tsId":page['tsList']['transcripts'][0]['tsId'],"regionIds":['region_1606307892218_46','region_1606308952428_122','region_1606309259629_175']})        
+#             jsonDesc["pageList"]['pages'].append({"pageId":page['pageId'],"tsId":page['tsList']['transcripts'][0]['tsId'],"regionIds":['region_1606307892218_46','region_1606308952428_122','region_1606309259629_175']})        
         return jsonDesc["docId"], json.dumps(jsonDesc)
 
     
@@ -305,7 +311,6 @@ if __name__ == '__main__':
 #     NcsrLaJob
 #     CITlabAdvancedLaJob
     sPageDesc = doer.jsonToXMLDescription(sPageDesc)
-    
     
     status, jobid = doer.run(colId, sPageDesc,'CITlabAdvancedLaJob',bBlockSeg=options.doRegionSeg,bCreateJobBatch=options.doBatchJob)
     traceln("job ID:",jobid)
