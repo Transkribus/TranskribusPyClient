@@ -174,11 +174,13 @@ class DoLAbatch(TranskribusClient):
             pageId.text = str(page['pageId'])
             tsId=etree.Element("tsId")
             tsId.text= str(page['tsId'])
-            regId=etree.Element("regionIds")
-            regId.text = ''
             nodep.append(pageId)
-            nodep.append(tsId)
-            nodep.append(regId)
+            nodep.append(tsId)            
+            for regid in (page['regionIds']):
+                regId=etree.Element("regionIds")
+                regId.text = str(regid)
+                nodep.append(regId)
+            
 
         return etree.tostring(xmldesc, encoding='utf-8',pretty_print=True)    
 #         return xmldesc.serialize('utf-8',True)    
@@ -215,9 +217,9 @@ class DoLAbatch(TranskribusClient):
         for page in trpObj.getPageList():
             docId = page['docId']
             jsonDesc["docId"]=page['docId']
-            jsonDesc["pageList"]['pages'].append({"pageId":page['pageId'],"tsId":page['tsList']['transcripts'][0]['tsId'],"regionIds":[]})        
-        
-#         return jsonDesc["docId"], json.dumps(jsonDesc,encoding='utf-8')
+            jsonDesc["pageList"]['pages'].append({"pageId":page['pageId'],"tsId":page['tsList']['transcripts'][0]['tsId'],"regionIds":[]})
+            #test for region 1949  319340/1 
+            #jsonDesc["pageList"]['pages'].append({"pageId":page['pageId'],"tsId":page['tsList']['transcripts'][0]['tsId'],"regionIds":['region_1606307892218_46','region_1606308952428_122','region_1606309259629_175']})        
         return jsonDesc["docId"], json.dumps(jsonDesc)
 
     
@@ -299,10 +301,11 @@ if __name__ == '__main__':
         trpdoc =  json.load(open(options.trp_doc, "r",encoding='utf-8'))
         docId,sPageDesc = doer.buildDescription(colId,docidpages,trpdoc)
     else:
-        docId,sPageDesc = doer.buildDescription(colId,docidpages)    
+        docId,sPageDesc = doer.buildDescription(colId,docidpages)
 #     NcsrLaJob
 #     CITlabAdvancedLaJob
     sPageDesc = doer.jsonToXMLDescription(sPageDesc)
+    
     
     status, jobid = doer.run(colId, sPageDesc,'CITlabAdvancedLaJob',bBlockSeg=options.doRegionSeg,bCreateJobBatch=options.doBatchJob)
     traceln("job ID:",jobid)
