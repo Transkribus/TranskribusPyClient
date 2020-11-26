@@ -191,7 +191,7 @@ class DoLAbatch(TranskribusClient):
         return etree.tostring(xmldesc, encoding='utf-8',pretty_print=True)    
 #         return xmldesc.serialize('utf-8',True)    
             
-    def buildDescription(self,colId,docpage,trp=None):
+    def buildDescription(self,colId,docpage,options,trp=None):
         """
             '{"docId":17442,"pageList":{"pages":[{"pageId":400008,"tsId":1243509,"regionIds":[]}]}}'
             or
@@ -223,14 +223,17 @@ class DoLAbatch(TranskribusClient):
         for page in trpObj.getPageList():
             docId = page['docId']
             jsonDesc["docId"]=page['docId']
-            jsonDesc["pageList"]['pages'].append({"pageId":page['pageId'],"tsId":page['tsList']['transcripts'][0]['tsId'],"regionIds":[]})
+            lRegIds = []
+            if options.regids != "":
+                lRegIds=options.regids.split(',')
+            jsonDesc["pageList"]['pages'].append({"pageId":page['pageId'],"tsId":page['tsList']['transcripts'][0]['tsId'],"regionIds":lRegIds})
             #test for region 1949  319340/1 
 #             jsonDesc["pageList"]['pages'].append({"pageId":page['pageId'],"tsId":page['tsList']['transcripts'][0]['tsId'],"regionIds":['region_1606307892218_46','region_1606308952428_122','region_1606309259629_175']})        
         return jsonDesc["docId"], json.dumps(jsonDesc)
 
     
-    def run(self, colId, sDescription, sJobImpl,bBlockSeg=False,bCreateJobBatch=False):
-        ret = self.analyzeLayoutNew(colId, sDescription,sJobImpl,"",bBlockSeg,bLineSeg=True,bCreateJobBatch=bCreateJobBatch)
+    def run(self, colId, sDescription, sJobImpl,bBlockSeg=False,bLineSeg=True,bCreateJobBatch=False):
+        ret = self.analyzeLayoutNew(colId, sDescription,sJobImpl,"",bBlockSeg,bLineSeg,bCreateJobBatch=bCreateJobBatch)
         jobid= self.getJobIDsFromXMLStatuses(ret)
         return ret,jobid
 
@@ -282,7 +285,9 @@ if __name__ == '__main__':
         
     parser.add_option("--trp"  , dest='trp_doc', action="store", type="string",default=None, help="use trp doc file")
     parser.add_option("--doRegionSeg"  , dest='doRegionSeg'   , action="store_true",  default=False, help="do Region detection")        
+    parser.add_option("--doLineSeg"  , dest='doLineSeg'   , action="store_true",  default=True, help="do Line detection")        
     parser.add_option("--batchjob"  , dest='doBatchJob'   , action="store_true",  default=False, help="do one job per page")        
+    parser.add_option("--regions"  , dest='regids'   , action="store",  default='', help="process only listed regions  N,N,N")        
 
     # ---   
     #parse the command line
@@ -305,14 +310,14 @@ if __name__ == '__main__':
     # do the job...
     if options.trp_doc:
         trpdoc =  json.load(open(options.trp_doc, "r",encoding='utf-8'))
-        docId,sPageDesc = doer.buildDescription(colId,docidpages,trpdoc)
+        docId,sPageDesc = doer.buildDescription(colId,docidpages,options,trpdoc)
     else:
-        docId,sPageDesc = doer.buildDescription(colId,docidpages)
+        docId,sPageDesc = doer.buildDescription(colId,docidpages,options)
 #     NcsrLaJob
 #     CITlabAdvancedLaJob
     sPageDesc = doer.jsonToXMLDescription(sPageDesc)
     
-    status, jobid = doer.run(colId, sPageDesc,'CITlabAdvancedLaJob',bBlockSeg=options.doRegionSeg,bCreateJobBatch=options.doBatchJob)
+    status, jobid = doer.run(colId, sPageDesc,'CITlabAdvancedLaJob',bBlockSeg=options.doRegionSeg,bLineSeg=options.doLineSeg,bCreateJobBatch=options.doBatchJob)
     traceln("job ID:",jobid)
     traceln("- Done")
     
