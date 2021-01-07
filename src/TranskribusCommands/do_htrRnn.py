@@ -93,8 +93,8 @@ class DoHtrRnn(TranskribusClient):
         
         self._trpMng = DoTranscript(self.sDefaultServerUrl, sHttpProxy=sHttpProxy, loggingLevel=loggingLevel)
 
-    def run(self, sModelID, sDictName, colId, docId, sDescPages,bDictTemp):
-        ret = self.htrRnnDecode(colId, sModelID, sDictName, docId, sDescPages,bDictTemp)
+    def run(self, sModelID, sDictName, colId, docId, sDescPages,bPyLaia,bDictTemp):
+        ret = self.htrRnnDecode(colId, sModelID, sDictName, docId, sDescPages,bPyLaia,bDictTemp)
         return ret
 
     def buildDescription(self,colId,docpage,trp=None):
@@ -137,6 +137,8 @@ if __name__ == '__main__':
     parser.add_option("--trp"  , dest='trp_doc', action="store", type="string",default=None, help="use trp doc file")
     parser.add_option("--docid"  , dest='docid'   , action="store", type="string", default=None, help="document/pages to be htr'd")
     parser.add_option("--tempdict"  , dest='dictTemp' , action="store_true", default=False, help="use tempDict folder")
+    parser.add_option("--pylaia"  , dest='bPylaia' , action="store_true", default=False, help="use PyLaia model")
+
 # ---   
     #parse the command line
     (options, args) = parser.parse_args()
@@ -169,7 +171,7 @@ if __name__ == '__main__':
         docId,sPageDesc = doer.buildDescription(colId,options.docid)
 
     # do the job...
-    jobid = doer.run(sModelID, sDictName, colId, docId, sPageDesc,options.dictTemp)
+    jobid = doer.run(sModelID, sDictName, colId, docId, sPageDesc,options.bPylaia,options.dictTemp)
     traceln(jobid)
         
     traceln()      

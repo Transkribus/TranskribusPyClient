@@ -163,7 +163,10 @@ class TranskribusClient():
         
         self.sREQ_recognition                       = sServerUrl + '/rest/recognition'
         self.sREQ_recognition_htrModels             = sServerUrl + '/rest/recognition/htrModels'
+        
         self.sREQ_recognition_htr                   = sServerUrl + '/rest/recognition/htr'
+        self.sREQ_recognition_pylaia                = sServerUrl + '/rest/pylaia/%s/%s/recognition'
+
         self.sREQ_recognition_htrRnnModels          = sServerUrl + '/rest/recognition/nets' #htrModels' #/rest/recognition/nets'
         self.sREQ_recognition_htrRnnModels          = sServerUrl + '/rest/recognition/htrModels'
         self.sREQ_recognition_listHtr               = sServerUrl + '/rest/recognition/%s/list'      
@@ -915,7 +918,7 @@ class TranskribusClient():
         return resp.text
 
         
-    def htrRnnDecode(self, colId, sRnnModelID, sDictName, docId, sPagesDesc, bDictTemp=True):
+    def htrRnnDecode(self, colId, sRnnModelID, sDictName, docId, sPagesDesc, bPyLaia= False,bDictTemp=True):
         """
         Do the HTR using the given RNN model and dictionary.
         - Maybe you can set sPages to None, or both docId and sPage to None ?? 
@@ -937,7 +940,10 @@ class TranskribusClient():
         
         """
         self._assertLoggedIn()
-        myReq = self.sREQ_recognition_htrRnn % (colId,sRnnModelID)
+        if bPyLaia:
+            myReq = self.sREQ_recognition_pylaia % (colId,sRnnModelID)
+        else:
+            myReq = self.sREQ_recognition_htrRnn % (colId,sRnnModelID)
         if bDictTemp:
             params = self._buidlParamsDic(id=docId,tempDict=sDictName)
         elif sDictName != "None":
