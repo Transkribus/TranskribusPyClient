@@ -152,6 +152,7 @@ class TranskribusClient():
         self.sREQ_collection_createCollection       = sServerUrl + '/rest/collections/createCollection'
         self.sREQ_collection_createDocument         = sServerUrl + '/rest/collections/%s/upload'
 
+        self.sREQ_collection_export                 = sServerUrl + '/rest/collections/%s/%s/export'
         self.sREQ_collection_fulldoc                = sServerUrl + '/rest/collections/%s/%s/fulldoc'
         self.sREQ_collection_fulldoc_xml            = sServerUrl + '/rest/collections/%s/%s/fulldoc.xml'
         self.sREQ_collections_postPageTranscript    = sServerUrl + '/rest/collections/%s/%s/%s/text'
@@ -342,6 +343,20 @@ class TranskribusClient():
             return self._xmlParseDoc(resp.text)
         else:     
             return resp.text
+
+
+    def exportCollection(self,colId,docId,sparams):
+        """
+            export document 
+        """
+        self._assertLoggedIn()
+        myReq = self.sREQ_collection_export % (colId,docId)
+
+        sjson=json.loads(sparams)
+        resp = self._POST(myReq, json=sjson,sContentType = "application/json")
+        resp.raise_for_status()
+        return resp.text
+
 
 #     def postPageTranscript(self, colId, docId, pnum, sStatus, sXMlTranscript
 #     the status parameter when saving a transcript is becoming obsolete anyway (updating the status should be done with a separate call in the future: updatePageStatus).
@@ -1151,18 +1166,17 @@ doBlockSeg=false
             logging.info("- %s proxy set to : '%s'"%(sProtocol, sUrl))
         return True
         
-    def _POST(self, sRequest, params={}, data={}, sContentType = "application/xml"):
+    def _POST(self, sRequest, json={},params={}, data={}, sContentType = "application/xml"):
         """
         if you set sContentType to None or "", nothing is specified in the request header
         """
         dHeader = {'Cookie':'JSESSIONID=%s'%self._sessionID}
         if sContentType: dHeader['Content-Type'] = sContentType
-            
-        return requests.post(sRequest, params=params, headers=dHeader
+        return requests.post(sRequest, json=json,params=params, headers=dHeader
                              , proxies=self._dProxies, data=data, verify=False)        
 
     def _DELETE(self, sRequest, params={}, data={}):
-        return requests.delete(sRequest, params=params, headers={'Cookie':'JSESSIONID=%s'%self._sessionID}
+        return requests.delete(sRequest,  params=params, headers={'Cookie':'JSESSIONID=%s'%self._sessionID}
                                , proxies=self._dProxies, data=data, verify=False)        
         
     def _GET(self, sRequest, params={}, stream=None, accept="application/xml"):
