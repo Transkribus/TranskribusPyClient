@@ -661,21 +661,25 @@ class MultiPageXml(PageXml):
                 newNode = deepcopy(node)
                 newRootNd.append(newNode)
             #Remove the prefix on the "id" attributes
-            sPagePrefix = "p%d_"%pnum
-            _ = cls.rmPrefix(sPagePrefix, newNode, "id")
+            #sPagePrefix = "p%d_"%pnum
+            #_ = cls.rmPrefix(sPagePrefix, newNode, "id")
             
             ###??? with lxml
 #             newRootNd.reconciliateNs(newDoc)
             
-            yield pnum, newDoc
-
+            #yield pnum, newDoc
+            try:
+                yield pnum,newDoc
+            except StopIteration:
+                return
+ 
             lDocToBeFreed.append(newDoc)
 #             newDoc.freeDoc()
             
 #         ctxt.xpathFreeContext()
 #         for doc in lDocToBeFreed: doc.freeDoc()
            
-        raise StopIteration
+        #raise StopIteration
     _iter_splitMultiPageXml = classmethod(_iter_splitMultiPageXml)
 
 # ---  Metadata of PageXml  --------------------------------            
