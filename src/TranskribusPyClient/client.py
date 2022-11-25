@@ -935,7 +935,7 @@ class TranskribusClient():
         return resp.text
 
         
-    def htrRnnDecode(self, colId, sRnnModelID, sDictName, docId, sPagesDesc, bPyLaia= False,bDictTemp=True):
+    def htrRnnDecode(self, colId, sRnnModelID,  docId, sPagesDesc, bPyLaia= True,bDictTemp=False):
         """
         Do the HTR using the given RNN model and dictionary.
         - Maybe you can set sPages to None, or both docId and sPage to None ?? 
@@ -958,15 +958,15 @@ class TranskribusClient():
         """
         self._assertLoggedIn()
         if bPyLaia:
-            myReq = self.sREQ_recognition_pylaia % (colId,sRnnModelID)
+            myReq = self.sREQ_recognition_pylaia % (colId,str(sRnnModelID))
         else:
             myReq = self.sREQ_recognition_htrRnn % (colId,sRnnModelID)
-        if bDictTemp:
-            params = self._buidlParamsDic(id=docId,tempDict=sDictName)
-        elif sDictName != "None":
-            params = self._buidlParamsDic(id=docId,dict=sDictName, doLinePolygonSimplification=False,keepOriginalLinePolygons=True)
-        else: 
-            params = self._buidlParamsDic(id=docId,doLinePolygonSimplification=False,keepOriginalLinePolygons=True)
+        #if bDictTemp:
+        #    params = self._buidlParamsDic(id=docId,tempDict=sDictName)
+        #elif sDictName != "None":
+        #    params = self._buidlParamsDic(id=docId,dict=sDictName, doLinePolygonSimplification=False,keepOriginalLinePolygons=True)
+        #else: 
+        params = self._buidlParamsDic(id=docId,doLinePolygonSimplification=False,keepOriginalLinePolygons=True)
         postparams= sPagesDesc #'{"docId":17442,"pageList":{"pages":[{"pageId":400008,"tsId":1243590,"regionIds":[]}]}}'
 #         postparams= '{"docId":17442,"pageList":{"pages":[{"pageId":400008,"tsId":1243590,"regionIds":[]}]}}'
 

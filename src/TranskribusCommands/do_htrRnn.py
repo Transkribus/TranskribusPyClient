@@ -45,7 +45,6 @@ try: #to ease the use without proper Python installation
 except ImportError:
     sys.path.append( os.path.dirname(os.path.dirname( os.path.abspath(sys.argv[0]) )) )
     import TranskribusPyClient_version
-
 from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit
 from TranskribusPyClient.client import TranskribusClient
 
@@ -66,7 +65,7 @@ The syntax for specifying the page range is:
 - Examples: 1   1,3,5   1-3    1,3,5-99,100
 """ + _Trnskrbs_description
 
-usage = """%s <modelID>  (<dictionary-name> | None)  <colId>  (--trp TRP_FILE | --docid DOCID)
+usage = """%s <modelID>   <colId>  (--trp TRP_FILE | --docid DOCID)
 """%sys.argv[0]
 
 class DoHtrRnn(TranskribusClient):
@@ -93,8 +92,8 @@ class DoHtrRnn(TranskribusClient):
         
         self._trpMng = DoTranscript(self.sDefaultServerUrl, sHttpProxy=sHttpProxy, loggingLevel=loggingLevel)
 
-    def run(self, sModelID, sDictName, colId, docId, sDescPages,bPyLaia,bDictTemp):
-        ret = self.htrRnnDecode(colId, sModelID, sDictName, docId, sDescPages,bPyLaia,bDictTemp)
+    def run(self, sModelID,  colId, docId, sDescPages,bPyLaia):
+        ret = self.htrRnnDecode(colId, sModelID,  docId, sDescPages,bPyLaia)
         return ret
 
     def buildDescription(self,colId,docpage,trp=None):
@@ -137,7 +136,7 @@ if __name__ == '__main__':
     parser.add_option("--trp"  , dest='trp_doc', action="store", type="string",default=None, help="use trp doc file")
     parser.add_option("--docid"  , dest='docid'   , action="store", type="string", default=None, help="document/pages to be htr'd")
     parser.add_option("--tempdict"  , dest='dictTemp' , action="store_true", default=False, help="use tempDict folder")
-    parser.add_option("--pylaia"  , dest='bPylaia' , action="store_true", default=False, help="use PyLaia model")
+    parser.add_option("--pylaia"  , dest='bPylaia' , action="store_true", default=True, help="use PyLaia model")
 
 # ---   
     #parse the command line
@@ -153,8 +152,8 @@ if __name__ == '__main__':
     
     try:                        sModelID = args.pop(0)
     except Exception as e:      _exit(usage, 1, e)
-    try:                        sDictName = args.pop(0)
-    except Exception as e:      _exit(usage, 1, e)
+    #try:                        sDictName = args.pop(0)
+    #except Exception as e:      _exit(usage, 1, e)
     try:                        colId = int(args.pop(0))
     except Exception as e:      _exit(usage, 1, e)
 #     try:                        docId   = int(args.pop(0))
@@ -171,7 +170,8 @@ if __name__ == '__main__':
         docId,sPageDesc = doer.buildDescription(colId,options.docid)
 
     # do the job...
-    jobid = doer.run(sModelID, sDictName, colId, docId, sPageDesc,options.bPylaia,options.dictTemp)
+    #jobid = doer.run(sModelID, sDictName, colId, docId, sPageDesc,options.bPylaia,options.dictTemp)
+    jobid = doer.run(sModelID, colId, docId, sPageDesc,options.bPylaia)
     traceln(jobid)
         
     traceln()      

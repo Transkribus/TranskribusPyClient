@@ -74,8 +74,10 @@ class DoListHtrRnn(TranskribusClient):
         if colid is not None:
             sColModels = self.listRnns(colid)
             for models in sColModels:
+                #print(models.keys())
                 #some old? models do not have params field
-                try: traceln("%s\t%s\t%s\ndescription:%s" % (models['htrId'],models['name'].strip(),models['params'].strip(),models['description'].strip()))
+                #try: traceln("%s\t%s\t%s\ndescription:%s" % (models['htrId'],models['name'].strip(),models['params'].strip(),models['description'].strip()))
+                try: traceln("%s\t%s\t%s\ndescription:%s" % (models['htrId'],models['name'].strip(),models['provider'].strip(),models['description'].strip()))
                 except KeyError: traceln("%s\t%s\tno params" % (models['htrId'],models['name']))             
                 traceln()
         else:
