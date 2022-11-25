@@ -48,7 +48,7 @@ except ImportError:
     import TranskribusPyClient_version
 
 from TranskribusCommands import _Trnskrbs_default_url, __Trnskrbs_basic_options, _Trnskrbs_description, __Trnskrbs_do_login_stuff, _exit
-from do_transcript import DoTranscript
+from TranskribusCommands.do_transcript import DoTranscript
 
 from TranskribusPyClient.common.IntegerRange import IntegerRange
 
