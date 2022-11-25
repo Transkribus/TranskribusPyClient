@@ -266,7 +266,7 @@ class TranskribusClient():
         """
         self._assertLoggedIn()
         myReq = self.sREQ_collection_createCollection
-        resp = self._POST(myReq, {'collName':sName }, sContentType=None)
+        resp = self._POST(myReq, params={'collName':sName }, sContentType='application/x-www-form-urlencoded')
         resp.raise_for_status()
         return resp.text
         
@@ -873,7 +873,8 @@ class TranskribusClient():
         """
         self._assertLoggedIn()
         myReq = self.sREQ_recognition_listHtr % (colid)
-        params = self._buidlParamsDic(prov='CITlab')
+        #params = self._buidlParamsDic(prov='CITlab')
+        params={}
         resp = self._GET(myReq, params=params, accept="application/json")
         resp.raise_for_status()
         return json.loads(resp.text)
